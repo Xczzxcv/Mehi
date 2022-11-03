@@ -58,6 +58,6 @@ public class BattleManager
 
     public List<BattleMechManager.BattleUnitInfo> GetPlayerUnitInfos()
     {
-        return _mechManager.GetPlayerUnitInfos();
+        return _mechManager.GetUnitInfos();
     }
 }

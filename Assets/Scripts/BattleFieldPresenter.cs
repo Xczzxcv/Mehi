@@ -9,11 +9,15 @@ public class BattleFieldPresenter : UIBehaviour
     [SerializeField] private ToggleGroup fieldToggleGroup;
     [SerializeField] private BattleFieldTilePresenter tilePrefab;
     [SerializeField] private SerializedDictionary<BattleFieldManager.TileType, Sprite> backgrounds;
+    [Space]
+    [SerializeField] private BattleUnitPresenter unitPrefab;
+    [SerializeField] private SerializedDictionary<BattleMechManager.ControlledBy, Color> unitControlColors;
 
     public struct ViewInfo
     {
         public int FieldSize;
         public BattleFieldManager.Tile[] Field;
+        public List<BattleMechManager.BattleUnitInfo> UnitInfos;
     }
 
     private readonly List<BattleFieldTilePresenter> _tiles = new();
@@ -28,6 +32,8 @@ public class BattleFieldPresenter : UIBehaviour
         
         AddTiles();
         SetupTiles();
+
+        SetupUnits();
     }
 
     private void AddTiles()
@@ -63,5 +69,24 @@ public class BattleFieldPresenter : UIBehaviour
         Debug.Assert(tileIndex >= 0 && tileIndex < _tiles.Count);
 
         return _tiles[tileIndex];
+    }
+
+    private void SetupUnits()
+    {
+        foreach (var unitInfo in _view.UnitInfos)
+        {
+            var unitPresenter = Instantiate(unitPrefab);
+            if (!unitControlColors.TryGetValue(unitInfo.ControlledBy, out var unitColor))
+            {
+                Debug.LogError($"Can't find unit color for unit control  {unitInfo.ControlledBy}");
+                unitColor = Color.magenta;
+            }
+            unitPresenter.Setup(unitInfo, unitColor);
+            
+            var unitPos = unitInfo.Position;
+            var tileIndex = BattleFieldManager.GetIndexFromPosition(unitPos, _view.FieldSize);
+            var tilePresenter = _tiles[tileIndex];
+            tilePresenter.SetupContent(unitPresenter.transform);
+        }
     }
 }

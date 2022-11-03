@@ -37,4 +37,7 @@ public struct MechComponent
 
 public struct PlayerControlComponent
 { }
+
+public struct AiControlComponent
+{ }
 }

@@ -485,7 +485,7 @@ MonoBehaviour:
     RightLegsAmount: 1
     LeftLegsAmount: 1
     Shield: 0
-    Position: {x: 0, y: 0}
+    Position: {x: 1, y: 1}
     RedStats: 0
     GreenStats: 0
     BlueStats: 0
@@ -497,7 +497,7 @@ MonoBehaviour:
     RightLegsAmount: 0
     LeftLegsAmount: 0
     Shield: 0
-    Position: {x: 0, y: 0}
+    Position: {x: 3, y: 3}
     RedStats: 0
     GreenStats: 0
     BlueStats: 0

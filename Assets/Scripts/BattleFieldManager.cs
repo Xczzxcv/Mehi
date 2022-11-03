@@ -91,9 +91,15 @@ public class BattleFieldManager
 
     public static Vector2Int GetPositionFromIndex(int fieldIndex, int fieldSize)
     {
+        Debug.Assert(fieldIndex >= 0 && fieldIndex < fieldSize * fieldSize);
         return new Vector2Int(
             fieldIndex % fieldSize,
             fieldIndex / fieldSize
         );
+    }
+
+    public static int GetIndexFromPosition(Vector2Int pos, int fieldSize)
+    {
+        return pos.y * fieldSize + pos.x;
     }
 }

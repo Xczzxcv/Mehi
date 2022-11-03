@@ -6,6 +6,7 @@ public class BattleFieldTilePresenter : MonoBehaviour
     [SerializeField] private Image backgroundImage;
     [SerializeField] private Image foregroundImage;
     [SerializeField] private Toggle toggle;
+    [SerializeField] private Transform contentParent;
 
     public void Init(ToggleGroup parentGroup)
     {
@@ -16,5 +17,10 @@ public class BattleFieldTilePresenter : MonoBehaviour
     {
         backgroundImage.sprite = background;
         foregroundImage.sprite = foreground;
+    }
+
+    public void SetupContent(Transform contentRoot)
+    {
+        contentRoot.SetParent(contentParent, false);
     }
 }

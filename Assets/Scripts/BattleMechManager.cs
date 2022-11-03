@@ -10,9 +10,17 @@ public class BattleMechManager
     {
         public EcsWorld World { get; set; }
     }
+
+    public enum ControlledBy
+    {
+        None,
+        Player,
+        AI,
+    }
     
     public struct BattleUnitInfo
     {
+        public ControlledBy ControlledBy;
         public int ActionPoints;
         public Vector2Int Position;
         public int MoveSpeed;
@@ -40,17 +48,16 @@ public class BattleMechManager
         _world = config.World;
     }
 
-    public List<BattleUnitInfo> GetPlayerUnitInfos()
+    public List<BattleUnitInfo> GetUnitInfos()
     {
         var resultList = new List<BattleUnitInfo>();
-        var playerControlledUnitsFilter = _world
+        var activeUnitsFilter = _world
             .Filter<ActiveCreatureComponent>()
-            .Inc<PlayerControlComponent>()
             .End();
-        foreach (var playerUnitEntity in playerControlledUnitsFilter)
+        foreach (var unitEntity in activeUnitsFilter)
         {
-            var playerUnitInfo = GetUnitInfo(playerUnitEntity);
-            resultList.Add(playerUnitInfo);
+            var unitInfo = GetUnitInfo(unitEntity);
+            resultList.Add(unitInfo);
         }
 
         return resultList;
@@ -60,6 +67,7 @@ public class BattleMechManager
     {
         return new BattleUnitInfo
         {
+            ControlledBy = GetUnitControl(unitEntity),
             Shield = GetUnitShield(unitEntity),
             MoveSpeed = GetUnitMoveSpeed(unitEntity),
             Position = GetUnitPosition(unitEntity),
@@ -73,6 +81,23 @@ public class BattleMechManager
                 }
             },
         };
+    }
+
+    private ControlledBy GetUnitControl(int unitEntity)
+    {
+        var playerControlPool = _world.GetPool<PlayerControlComponent>();
+        if (playerControlPool.Has(unitEntity))
+        {
+            return ControlledBy.Player;
+        }
+
+        var aiControlPool = _world.GetPool<PlayerControlComponent>();
+        if (aiControlPool.Has(unitEntity))
+        {
+            return ControlledBy.AI;
+        }
+
+        return ControlledBy.None;
     }
 
     private int GetUnitShield(int unitEntity)

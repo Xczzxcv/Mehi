@@ -17,7 +17,8 @@ internal class BattleFieldController : MonoBehaviour
         battleFieldPresenter.Setup(new BattleFieldPresenter.ViewInfo
         {
             FieldSize = config.BattleFieldSize,
-            Field = battleManager.GetField()
+            Field = battleManager.GetField(),
+            UnitInfos = battleManager.GetPlayerUnitInfos(),
         });
     }
 }
