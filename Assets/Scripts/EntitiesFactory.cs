@@ -16,7 +16,7 @@ public static class EntitiesFactory
         public int RightLegsAmount;
         public int LeftLegsAmount;
         public int Shield;
-        public Vector2 Position;
+        public Vector2Int Position;
         public int RedStats;
         public int GreenStats;
         public int BlueStats;
@@ -105,6 +105,7 @@ public static class EntitiesFactory
 
         ref var healthComp = ref world.AddComponent<HealthComponent>(newMechRoomEntity);
         healthComp.Health = config.Health;
+        healthComp.MaxHealth = config.Health;
 
         return world.PackEntity(newMechRoomEntity);
     }

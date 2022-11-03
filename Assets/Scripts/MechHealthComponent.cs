@@ -11,7 +11,7 @@ public struct MechHealthComponent
 
 public struct PositionComponent
 {
-    public Vector2 Pos;
+    public Vector2Int Pos;
 }
 
 public struct StatsComponent
@@ -34,4 +34,7 @@ public struct MechComponent
     public int RightLegsAmount;
     public int LeftLegsAmount;
 }
+
+public struct PlayerControlComponent
+{ }
 }
