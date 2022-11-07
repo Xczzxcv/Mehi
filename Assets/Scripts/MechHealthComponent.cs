@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ecs.Components
 {
 public struct MechHealthComponent
 {
+    public int Health;
     public int Shield;
 }
 
@@ -24,11 +26,13 @@ public struct StatsComponent
 public struct ActiveCreatureComponent
 {
     public int ActionPoints;
+    public int MaxActionPoints;
     public int MoveSpeed;
 }
 
 public struct MechComponent
 {
+    public List<string> WeaponIds;
     public int RightHandsAmount;
     public int LeftHandsAmount;
     public int RightLegsAmount;

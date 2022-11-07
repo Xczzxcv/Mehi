@@ -28,14 +28,14 @@ public class BattleFieldManager
         public Tile[] TileConfigs;
     }
 
-    private readonly int _fieldSize;
+    public readonly int FieldSize;
     private readonly Tile[] _tileConfigs;
     private readonly Tile[] _tiles;
 
     public BattleFieldManager(Config config)
     {
-        _fieldSize = config.Size;
-        _tiles = new Tile[_fieldSize * _fieldSize];
+        FieldSize = config.Size;
+        _tiles = new Tile[FieldSize * FieldSize];
         _tileConfigs = config.TileConfigs;
 
         ReadConfig(config.FieldConfig);
@@ -78,7 +78,7 @@ public class BattleFieldManager
 
     public Tile GetTile(int x, int y)
     {
-        var index = y * _fieldSize + x;
+        var index = y * FieldSize + x;
         Debug.Assert(index >= 0 && index < _tiles.Length);
 
         return _tiles[index];

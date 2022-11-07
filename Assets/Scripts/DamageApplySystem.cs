@@ -24,29 +24,60 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
     private void ProcessDamageEvent(MechDamageEvent mechDamageEvent, 
         ref MechHealthComponent mechHealthComp, int entity)
     {
-        HealthComponent healthComp = default;
-        if (!TryGetRoomHealth(mechDamageEvent.DamageTargetRoom, ref healthComp))
+        RoomDamageApply(mechDamageEvent);
+        MechDamageApply(mechDamageEvent, ref mechHealthComp);
+    }
+
+    private void MechDamageApply(MechDamageEvent mechDmgEvent, ref MechHealthComponent mechHpComp)
+    {
+        var dmgShieldAbsorb = Math.Min(mechDmgEvent.DamageAmount, mechHpComp.Shield);
+        mechHpComp.Shield -= dmgShieldAbsorb;
+        mechDmgEvent.DamageAmount -= dmgShieldAbsorb;
+
+        mechHpComp.Health -= mechDmgEvent.DamageAmount;
+        mechDmgEvent.DamageAmount = 0;
+    }
+
+    private void RoomDamageApply(MechDamageEvent mechDamageEvent)
+    {
+        HealthComponent roomHpComp = default;
+        if (TryGetRoomHealth(mechDamageEvent.DamageTargetRoom, ref roomHpComp))
+        {
+            roomHpComp.Health = Math.Max(roomHpComp.Health - mechDamageEvent.DamageAmount, 0);
+        }
+        else
         {
             Debug.LogError("Has no room already");
-            return;
         }
-
-        var dmgShieldAbsorb = Math.Min(mechDamageEvent.DamageAmount, mechHealthComp.Shield);
-        mechHealthComp.Shield -= dmgShieldAbsorb;
-        mechDamageEvent.DamageAmount -= dmgShieldAbsorb;
-
-        healthComp.Health -= mechDamageEvent.DamageAmount;
-        mechDamageEvent.DamageAmount = 0;
     }
 
     private bool TryGetRoomHealth(EcsPackedEntity damageTargetRoom, ref HealthComponent healthComp)
     {
-        if (!damageTargetRoom.Unpack(World, out var mechRoomEntity))
+        if (!damageTargetRoom.TryUnpack(World, out var mechRoomEntity))
         {
             return false;
         }
 
         healthComp = World.GetComponent<HealthComponent>(mechRoomEntity);
+        return true;
+    }
+
+    public static bool TryAddDamageEvent(MechDamageEvent damageEvent, EcsPackedEntity mechEntityPacked,
+        EcsWorld world)
+    {
+        if (!mechEntityPacked.TryUnpack(world, out var mechEntity))
+        {
+            return false;
+        }
+        
+        var dmgApplyComponentsPool = world.GetPool<MechDamageApplyComponent>();
+        if (!dmgApplyComponentsPool.Has(mechEntity))
+        {
+            return false;
+        }
+
+        var dmgApplyComp = dmgApplyComponentsPool.Get(mechEntity);
+        dmgApplyComp.Events.Add(damageEvent);
         return true;
     }
 }

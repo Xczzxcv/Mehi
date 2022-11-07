@@ -3,7 +3,7 @@ using Leopotam.EcsLite;
 
 namespace Ecs.Systems
 {
-public abstract class EcsRunSystemBaseInternal : IEcsRunSystem , IEcsInitSystem
+public abstract class EcsRunSystemBaseInternal : IEcsRunSystem, IEcsInitSystem
 {
     protected readonly EnvironmentServices Services;
     protected EcsWorld World

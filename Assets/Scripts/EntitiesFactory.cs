@@ -15,6 +15,7 @@ public static class EntitiesFactory
         public int LeftHandsAmount;
         public int RightLegsAmount;
         public int LeftLegsAmount;
+        public int Health;
         public int Shield;
         public Vector2Int Position;
         public int RedStats;
@@ -22,6 +23,7 @@ public static class EntitiesFactory
         public int BlueStats;
         public int ActionPoints;
         public int MoveSpeed;
+        public List<string> InitWeapons;
     }
     
     public static EcsPackedEntity BuildMechEntity(EcsWorld world, MechConfig config)
@@ -29,12 +31,14 @@ public static class EntitiesFactory
         var newMechEntity = world.NewEntity();
         
         ref var mechComp = ref world.AddComponent<MechComponent>(newMechEntity);
+        mechComp.WeaponIds = config.InitWeapons;
         mechComp.RightHandsAmount = config.RightHandsAmount;
         mechComp.LeftHandsAmount = config.LeftHandsAmount;
         mechComp.RightLegsAmount = config.RightLegsAmount;
         mechComp.LeftLegsAmount = config.LeftLegsAmount;
 
         ref var mechHealthComp = ref world.AddComponent<MechHealthComponent>(newMechEntity);
+        mechHealthComp.Health = config.Health;
         mechHealthComp.Shield = config.Shield;
         
         ref var positionComp = ref world.AddComponent<PositionComponent>(newMechEntity);
@@ -47,6 +51,7 @@ public static class EntitiesFactory
         
         ref var activeCreatureComp = ref world.AddComponent<ActiveCreatureComponent>(newMechEntity);
         activeCreatureComp.ActionPoints = config.ActionPoints;
+        activeCreatureComp.MaxActionPoints = config.ActionPoints;
         activeCreatureComp.MoveSpeed = config.MoveSpeed;
 
         var newMechEntityPacked = world.PackEntity(newMechEntity);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Leopotam.EcsLite;
+using UnityEngine;
 
 public class BattleManager
 {
@@ -16,6 +17,10 @@ public class BattleManager
     
     public int TurnIndex { get; private set; }
     public TurnPhase Phase { get; private set; }
+    public int FieldSize => _fieldManager.FieldSize;
+
+    public const TurnPhase INIT_PHASE = TurnPhase.PlayerMove; 
+    public const TurnPhase END_PHASE = TurnPhase.AIMove; 
 
     public enum TurnPhase
     {
@@ -37,17 +42,21 @@ public class BattleManager
         });
     }
 
-    public void Next()
+    public void NextTurn()
     {
-        switch (Phase)
+        TurnIndex++;
+        Phase = INIT_PHASE;
+    }
+
+    public void NextPhase()
+    {
+        if (Phase == INIT_PHASE)
         {
-            case TurnPhase.PlayerMove:
-                Phase = TurnPhase.AIMove;
-                break;
-            case TurnPhase.AIMove:
-                Phase = TurnPhase.PlayerMove;
-                TurnIndex++;
-                break;
+            Phase = END_PHASE;
+        }
+        else
+        {
+            Debug.LogError("Wrong time, FOOL!");
         }
     }
 

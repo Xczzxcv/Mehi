@@ -133,7 +133,7 @@ public class BattleMechManager
         foreach (var roomEntity in roomFilter)
         {
             var roomComp = roomsPool.Get(roomEntity);
-            if (!roomComp.MechEntity.Unpack(_world, out var roomMechEntity))
+            if (!roomComp.MechEntity.TryUnpack(_world, out var roomMechEntity))
             {
                 continue;
             }

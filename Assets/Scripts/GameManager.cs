@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     [Serializable]
-    public struct GameConfig
+    public class GameConfig
     {
         public int BattleFieldSize;
         [TextArea] public string BattleFieldConfig;
@@ -18,11 +18,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameConfig gameConfig;
     [SerializeField] private List<EntitiesFactory.MechConfig> mechConfigs;
 
-    private BattleManager _battleManager;
+    public BattleManager BattleManager { get; private set; }
+    public GameConfig Config => gameConfig;
 
     private void Start()
     {
-        _battleManager = new BattleManager(new BattleManager.Config
+        BattleManager = new BattleManager(new BattleManager.Config
         {
             World = ecsManager.World,
             FieldSize = gameConfig.BattleFieldSize,
@@ -34,6 +35,6 @@ public class GameManager : MonoBehaviour
             EntitiesFactory.BuildMechEntity(ecsManager.World, mechConfig);
         }
         
-        uiManager.Init(gameConfig, _battleManager);
+        uiManager.Init(gameConfig, BattleManager);
     }
 }

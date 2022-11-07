@@ -3,15 +3,21 @@ using UnityEngine.Profiling;
 
 namespace Ecs.Systems
 {
+public abstract class EcsRunSystemBase : EcsRunSystemBaseInternal
+{
+    protected EcsRunSystemBase(EnvironmentServices services) : base(services)
+    { }
+}
+
 public abstract class EcsRunSystemBase<TComponent> : EcsRunSystemBaseInternal
-    where TComponent : struct 
+    where TComponent : struct
 {
     private EcsPool<TComponent> _components;
-    
-    protected EcsRunSystemBase(EnvironmentServices services) 
+
+    protected EcsRunSystemBase(EnvironmentServices services)
         : base(services)
     { }
-    
+
     public override void Init(IEcsSystems systems)
     {
         Filter = World.Filter<TComponent>().End();
@@ -34,6 +40,6 @@ public abstract class EcsRunSystemBase<TComponent> : EcsRunSystemBaseInternal
         }
     }
 
-    protected abstract void ProcessComponent(ref TComponent component, int entity);
+    protected abstract void ProcessComponent(ref TComponent creatureComp, int entity);
 }
 }
