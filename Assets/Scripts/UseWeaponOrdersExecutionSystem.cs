@@ -14,14 +14,6 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
     protected override void ProcessComponent(ref UseWeaponOrderComponent useWeaponOrder,
         ref ActiveCreatureComponent activeCreature, int entity)
     {
-        // var mechsPool = World.GetPool<MechComponent>();
-        // var mechs = World.Filter<MechComponent>().End();
-        // foreach (var mechWeaponEntity in mechs)
-        // {
-        //     var mechComp = mechsPool.Get(mechWeaponEntity);
-        //     mechComp.WeaponIds;
-        // }
-
         if (!useWeaponOrder.WeaponEntity.TryUnpack(World, out var weaponEntity))
         {
             return;
@@ -33,7 +25,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
 
         activeCreature.ActionPoints = 0;
 
-        // *    оружие — сущность с компонентом WeaponComponent и возможно другими компонентами
+        // *    оружие — сущность с компонентом WeaponMainComponent и возможно другими компонентами
         // (например PushComponent, DealDamageComponent).
         // *    для использования оружия, на сущность оружия добавляется компонент ActiveWeaponComponent,
         // в котором обозначается цель оружия
@@ -74,7 +66,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
                 continue;
             }
 
-            var mechRoomComp = mechRoomCompPool.Get(targetMechRoomEntity);
+            ref var mechRoomComp = ref mechRoomCompPool.Get(targetMechRoomEntity);
             if (!mechRoomComp.MechEntity.TryUnpack(World, out var mechEntity))
             {
                 continue;
@@ -82,7 +74,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
 
             resultWeaponTarget.TargetMechEntities.Add(mechRoomComp.MechEntity);
 
-            var positionComp = positionPool.Get(mechEntity);
+            ref var positionComp = ref positionPool.Get(mechEntity);
             resultWeaponTarget.TargetTiles.Add(positionComp.Pos);
         }
     }
@@ -135,7 +127,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         TargetMechRoomEntities.Clear();
         foreach (var roomEntity in rooms)
         {
-            var roomComp = roomPool.Get(roomEntity);
+            ref var roomComp = ref roomPool.Get(roomEntity);
             if (!roomComp.MechEntity.TryUnpack(World, out var roomMechEntity))
             {
                 continue;
@@ -153,59 +145,22 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         weaponTarget.TargetMechRooms.Add(randomRoomEntityPacked);
     }
 
-    public static bool TryGetWeaponEntity(string weaponId, EcsWorld world, 
-        out EcsPackedEntity weaponEntPacked)
+    public static bool TryGetWeaponEntity(string weaponId, EcsWorld world, out int resultWeaponEntity)
     {
-        var weapons = world.Filter<WeaponComponent>().End();
-        var weaponsPool = world.GetPool<WeaponComponent>();
+        var weapons = world.Filter<WeaponMainComponent>().End();
+        var weaponsPool = world.GetPool<WeaponMainComponent>();
         foreach (var weaponEntity in weapons)
         {
-            var weapon = weaponsPool.Get(weaponEntity);
+            ref var weapon = ref weaponsPool.Get(weaponEntity);
             if (weapon.WeaponId == weaponId)
             {
-                weaponEntPacked = world.PackEntity(weaponEntity);
+                resultWeaponEntity = weaponEntity;
                 return true;
             }
         }
 
-        weaponEntPacked = default;
+        resultWeaponEntity = default;
         return false;
     }
-}
-}
-
-namespace Ecs.Components
-{
-public struct WeaponComponent
-{
-    public string WeaponId;
-}
-
-public struct ActiveWeaponComponent
-{
-    public EcsPackedEntity WeaponUser;
-    public WeaponTarget WeaponTarget;
-}
-
-public struct InputWeaponTarget
-{
-    public WeaponTargetType TargetType;
-    public List<EcsPackedEntity> TargetMechRooms;
-    public List<EcsPackedEntity> TargetMechEntities;
-    public List<Vector2Int> TargetTiles;
-}
-
-public struct WeaponTarget
-{
-    public WeaponTargetType TargetType;
-    public List<EcsPackedEntity> TargetMechRooms;
-    public List<EcsPackedEntity> TargetMechEntities;
-    public List<Vector2Int> TargetTiles;
-}
-
-public struct UseWeaponOrderComponent
-{
-    public EcsPackedEntity WeaponEntity;
-    public InputWeaponTarget WeaponTarget;
 }
 }

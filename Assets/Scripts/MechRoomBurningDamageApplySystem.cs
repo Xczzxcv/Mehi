@@ -2,7 +2,8 @@
 
 namespace Ecs.Systems
 {
-public class MechRoomBurningDamageApplySystem : EcsRunSystemBase3<MechRoomComponent, HealthComponent, BurningComponent>
+public class MechRoomBurningDamageApplySystem : EcsRunSystemBase3<MechRoomComponent, HealthComponent, 
+    BurningComponent>
 {
     public const int BURNING_DAMAGE = 1;
     

@@ -76,7 +76,7 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
             return false;
         }
 
-        var dmgApplyComp = dmgApplyComponentsPool.Get(mechEntity);
+        ref var dmgApplyComp = ref dmgApplyComponentsPool.Get(mechEntity);
         dmgApplyComp.Events.Add(damageEvent);
         return true;
     }

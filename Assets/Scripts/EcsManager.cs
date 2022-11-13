@@ -1,5 +1,6 @@
 using Ecs.Components;
 using Ecs.Systems;
+using Ecs.Systems.Weapon;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.ExtendedSystems;
 using Leopotam.EcsLite.UnityEditor;
@@ -19,6 +20,10 @@ public class EcsManager : MonoBehaviour
     private void Awake()
     {
         World = new EcsWorld();
+    }
+
+    public void Setup()
+    {
         _environmentServices = new EnvironmentServices(World, gameManager.BattleManager, gameManager.Config);
         SetupTurnSystems();
         SetupSystems();
@@ -57,6 +62,8 @@ public class EcsManager : MonoBehaviour
         _weaponSystems = new EcsSystems(World);
         _weaponSystems
             .Add(new DamageWeaponSystem(_environmentServices))
+            .Add(new PushWeaponSystem(_environmentServices))
+            .Add(new StunWeaponSystem(_environmentServices))
             .DelHere<ActiveWeaponComponent>()
             .Add(new DamageApplySystem(_environmentServices))
 #if UNITY_EDITOR

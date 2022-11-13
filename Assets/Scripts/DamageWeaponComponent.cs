@@ -1,6 +1,6 @@
-﻿namespace Ecs.Components
+﻿namespace Ecs.Components.Weapon
 {
-public struct DamageWeaponComponent
+public struct DamageWeaponComponent : IWeaponComponent
 {
     public int DamageAmount;
 }

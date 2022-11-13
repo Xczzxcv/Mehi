@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     [Space]
     [SerializeField] private GameConfig gameConfig;
     [SerializeField] private List<EntitiesFactory.MechConfig> mechConfigs;
+    [SerializeField] private List<WeaponConfig> weaponConfigs;
 
     public BattleManager BattleManager { get; private set; }
     public GameConfig Config => gameConfig;
@@ -30,6 +31,13 @@ public class GameManager : MonoBehaviour
             FieldConfig = gameConfig.BattleFieldConfig,
             TileConfigs = gameConfig.TileConfigs,
         });
+        
+        ecsManager.Setup();
+        foreach (var weaponConfig in weaponConfigs)
+        {
+            EntitiesFactory.BuildWeapon(ecsManager.World, weaponConfig);
+        }
+
         foreach (var mechConfig in mechConfigs)
         {
             EntitiesFactory.BuildMechEntity(ecsManager.World, mechConfig);

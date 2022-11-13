@@ -1,7 +1,8 @@
 ﻿using Ecs.Components;
+using Ecs.Components.Weapon;
 using Ext.LeoEcs;
 
-namespace Ecs.Systems
+namespace Ecs.Systems.Weapon
 {
 public class DamageWeaponSystem : WeaponSystemBase<DamageWeaponComponent>
 {
@@ -26,7 +27,7 @@ public class DamageWeaponSystem : WeaponSystemBase<DamageWeaponComponent>
                 continue;
             }
 
-            var targetRoom = roomPool.Get(targetRoomEntity);
+            ref var targetRoom = ref roomPool.Get(targetRoomEntity);
 
             var newDmgEvent = MechDamageEvent.BuildFromRoom(activeWeapon.WeaponUser, targetRoomEntity,
                 damageComp.DamageAmount, World);

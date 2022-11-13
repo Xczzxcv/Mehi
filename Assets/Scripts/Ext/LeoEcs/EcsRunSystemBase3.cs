@@ -19,7 +19,7 @@ public abstract class EcsRunSystemBase3<TComponent1, TComponent2, TComponent3> :
     public override void Init(IEcsSystems systems)
     {
         base.Init(systems);
-        Filter = World.Filter<TComponent1>().Inc<TComponent2>().End();
+        Filter = World.Filter<TComponent1>().Inc<TComponent2>().Inc<TComponent3>().End();
         _components1 = World.GetPool<TComponent1>();
         _components2 = World.GetPool<TComponent2>();
         _components3 = World.GetPool<TComponent3>();

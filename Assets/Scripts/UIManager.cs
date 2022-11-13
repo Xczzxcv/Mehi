@@ -7,7 +7,7 @@ public class UIManager : MonoBehaviour
 
     public void Init(GameManager.GameConfig config, BattleManager battleManager)
     {
-        battleField.Init(uiRoot);
-        battleField.Setup(config, battleManager);
+        battleField.Init(uiRoot, battleManager);
+        battleField.Setup(config);
     }
 }

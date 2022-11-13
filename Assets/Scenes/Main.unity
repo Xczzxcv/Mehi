@@ -466,43 +466,53 @@ MonoBehaviour:
   mechConfigs:
   - Rooms:
     - SystemConfig:
-        Type: 0
-        Level: 0
-        IsActive: 0
-      Health: 0
+        Type: 1
+        Level: 1
+        IsActive: 1
+      Health: 3
     - SystemConfig:
-        Type: 0
-        Level: 0
+        Type: 2
+        Level: 2
         IsActive: 0
-      Health: 0
-    - SystemConfig:
-        Type: 0
-        Level: 0
-        IsActive: 0
-      Health: 0
+      Health: 4
     RightHandsAmount: 1
     LeftHandsAmount: 1
     RightLegsAmount: 1
     LeftLegsAmount: 1
-    Shield: 0
+    Health: 5
+    Shield: 2
     Position: {x: 1, y: 1}
-    RedStats: 0
-    GreenStats: 0
-    BlueStats: 0
-    ActionPoints: 0
-    MoveSpeed: 0
-  - Rooms: []
-    RightHandsAmount: 0
-    LeftHandsAmount: 0
-    RightLegsAmount: 0
-    LeftLegsAmount: 0
-    Shield: 0
-    Position: {x: 3, y: 3}
-    RedStats: 0
-    GreenStats: 0
-    BlueStats: 0
-    ActionPoints: 0
-    MoveSpeed: 0
+    RedStats: 1
+    GreenStats: 2
+    BlueStats: 3
+    ActionPoints: 2
+    MoveSpeed: 4
+    InitWeapons:
+    - weapon1
+    - weapon2
+  weaponConfigs:
+  - WeaponId: weapon1
+    WeaponComponents:
+    - rid: 9092259981470728192
+    - rid: 9092259981470728193
+  - WeaponId: weapon2
+    WeaponComponents:
+    - rid: 9092259981470728194
+  references:
+    version: 2
+    RefIds:
+    - rid: 9092259981470728192
+      type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+      data:
+        DamageAmount: 2
+    - rid: 9092259981470728193
+      type: {class: PushWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+      data:
+        PushDistance: 3
+    - rid: 9092259981470728194
+      type: {class: PushWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+      data:
+        PushDistance: 1
 --- !u!4 &547186784
 Transform:
   m_ObjectHideFlags: 0
@@ -617,6 +627,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2198243b50a6864da62769e280adbfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameManager: {fileID: 547186783}
 --- !u!4 &1176894223
 Transform:
   m_ObjectHideFlags: 0
@@ -661,7 +672,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 185b561d361a4c4eaa89c0d91c3ac6f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fieldPrefab: {fileID: 8171776283821279886, guid: 008a4c6af9493fa4a9b6e707846f8eaf, type: 3}
+  fieldPrefab: {fileID: 284897760435771370, guid: 1a4e57557bcf100438bb7c5f1d2b983a, type: 3}
 --- !u!4 &1328740986
 Transform:
   m_ObjectHideFlags: 0

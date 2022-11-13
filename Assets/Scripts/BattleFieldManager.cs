@@ -18,7 +18,6 @@ public class BattleFieldManager
         public TileType Type;
         public bool Walkable;
         public bool CanShootThrough;
-        public EcsPackedEntity Creature;
     }
 
     public struct Config
@@ -44,9 +43,9 @@ public class BattleFieldManager
     private void ReadConfig(string fieldConfig)
     {
         var tileIndex = 0;
-        foreach (var currTile in fieldConfig)
+        foreach (var currTileConfig in fieldConfig)
         {
-            if (!TryGetTile(currTile, out var tile))
+            if (!TryGetTile(currTileConfig, out var tile))
             {
                 continue;
             }

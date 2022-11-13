@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using Ecs.Components;
+using Ecs.Components.Weapon;
+using Ecs.Systems;
 using Ext.LeoEcs;
 using Leopotam.EcsLite;
 using UnityEngine;
@@ -21,9 +23,12 @@ public class BattleMechManager
     public struct BattleUnitInfo
     {
         public ControlledBy ControlledBy;
+        public int MaxActionPoints;
         public int ActionPoints;
         public Vector2Int Position;
         public int MoveSpeed;
+        public int MaxHealth;
+        public int Health;
         public int Shield;
         public List<RoomInfo> Rooms;
         public List<WeaponInfo> Weapons;
@@ -31,7 +36,10 @@ public class BattleMechManager
 
     public struct WeaponInfo
     {
-        public int Damage;
+        public string WeaponId;
+        public int? Damage;
+        public int? PushDistance;
+        public int? StunDuration;
     }
 
     public struct RoomInfo
@@ -63,23 +71,20 @@ public class BattleMechManager
         return resultList;
     }
 
-    private BattleUnitInfo GetUnitInfo(int unitEntity)
+    public BattleUnitInfo GetUnitInfo(int unitEntity)
     {
         return new BattleUnitInfo
         {
             ControlledBy = GetUnitControl(unitEntity),
-            Shield = GetUnitShield(unitEntity),
+            MaxHealth = GetUnitHealth(unitEntity).MaxHealth,
+            Health = GetUnitHealth(unitEntity).Health,
+            Shield = GetUnitHealth(unitEntity).Shield,
             MoveSpeed = GetUnitMoveSpeed(unitEntity),
             Position = GetUnitPosition(unitEntity),
+            MaxActionPoints = GetUnitMaxActionPoints(unitEntity),
             ActionPoints = GetUnitActionPoints(unitEntity),
             Rooms = GetUnitRoomInfos(unitEntity),
-            Weapons = new List<WeaponInfo>
-            {
-                new WeaponInfo
-                {
-                    Damage = 1
-                }
-            },
+            Weapons = GetUnitWeapons(unitEntity),
         };
     }
 
@@ -100,10 +105,10 @@ public class BattleMechManager
         return ControlledBy.None;
     }
 
-    private int GetUnitShield(int unitEntity)
+    private MechHealthComponent GetUnitHealth(int unitEntity)
     {
         var mechHealthComp = _world.GetComponent<MechHealthComponent>(unitEntity);
-        return mechHealthComp.Shield;
+        return mechHealthComp;
     }
 
     private int GetUnitMoveSpeed(int unitEntity)
@@ -116,6 +121,12 @@ public class BattleMechManager
     {
         var positionComp = _world.GetComponent<PositionComponent>(unitEntity);
         return positionComp.Pos;
+    }
+
+    private int GetUnitMaxActionPoints(int unitEntity)
+    {
+        var activeCreatureComp = _world.GetComponent<ActiveCreatureComponent>(unitEntity);
+        return activeCreatureComp.MaxActionPoints;
     }
 
     private int GetUnitActionPoints(int unitEntity)
@@ -132,7 +143,7 @@ public class BattleMechManager
         var healthsPool = _world.GetPool<HealthComponent>();
         foreach (var roomEntity in roomFilter)
         {
-            var roomComp = roomsPool.Get(roomEntity);
+            ref var roomComp = ref roomsPool.Get(roomEntity);
             if (!roomComp.MechEntity.TryUnpack(_world, out var roomMechEntity))
             {
                 continue;
@@ -143,7 +154,7 @@ public class BattleMechManager
                 continue;
             }
 
-            var roomHealthComp = healthsPool.Get(roomEntity);
+            ref var roomHealthComp = ref healthsPool.Get(roomEntity);
 
             var roomInfo = new RoomInfo
             {
@@ -154,5 +165,83 @@ public class BattleMechManager
         }
 
         return roomInfos;
+    }
+
+    private List<WeaponInfo> GetUnitWeapons(int unitEntity)
+    {
+        var weapons = new List<WeaponInfo>();
+        
+        var mechPool = _world.GetPool<MechComponent>();
+        if (!mechPool.Has(unitEntity))
+        {
+            return weapons;
+        }
+
+        var unitMechComp = mechPool.Get(unitEntity);
+
+        foreach (var weaponId in unitMechComp.WeaponIds)
+        {
+            if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(weaponId, _world, 
+                    out var weaponEntity))
+            {
+                Debug.LogError($"Unit {unitEntity} has no weapon {weaponId}");
+                continue;
+            }
+
+            var weaponInfo = new WeaponInfo
+            {
+                WeaponId = weaponId
+            };
+            AddDamageInfo(ref weaponInfo, weaponEntity);
+            AddPushInfo(ref weaponInfo, weaponEntity);
+            AddStunInfo(ref weaponInfo, weaponEntity);
+            
+            weapons.Add(weaponInfo);
+        }
+
+        return weapons;
+    }
+
+    private void AddDamageInfo(ref WeaponInfo weaponInfo, int weaponEntity)
+    {
+        var damageWeaponPool = _world.GetPool<DamageWeaponComponent>();
+        weaponInfo.Damage = damageWeaponPool.Has(weaponEntity)
+            ? damageWeaponPool.Get(weaponEntity).DamageAmount
+            : null;
+    }
+
+    private void AddPushInfo(ref WeaponInfo weaponInfo, int weaponEntity)
+    {
+        var pushWeaponPool = _world.GetPool<PushWeaponComponent>();
+        weaponInfo.PushDistance = pushWeaponPool.Has(weaponEntity)
+            ? pushWeaponPool.Get(weaponEntity).PushDistance
+            : null;
+    }
+
+    private void AddStunInfo(ref WeaponInfo weaponInfo, int weaponEntity)
+    {
+        var stunWeaponPool = _world.GetPool<StunWeaponComponent>();
+        weaponInfo.StunDuration = stunWeaponPool.Has(weaponEntity)
+            ? stunWeaponPool.Get(weaponEntity).StunDuration
+            : null;
+    }
+
+    public bool TryGetUnitInPos(int x, int y, out int unitEntity)
+    {
+        var posToCheck = new Vector2Int(x, y);
+        var positionPool = _world.GetPool<PositionComponent>();
+        var positionEntities = _world.Filter<PositionComponent>().End();
+        foreach (var positionCompEntity in positionEntities)
+        {
+            var positionComp = positionPool.Get(positionCompEntity);
+            if (positionComp.Pos == posToCheck)
+            {
+                unitEntity = positionCompEntity;
+                return true;
+            }
+        }
+
+        unitEntity = default;
+        return false;
     }
 }

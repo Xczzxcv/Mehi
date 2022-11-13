@@ -38,6 +38,7 @@ public static class EntitiesFactory
         mechComp.LeftLegsAmount = config.LeftLegsAmount;
 
         ref var mechHealthComp = ref world.AddComponent<MechHealthComponent>(newMechEntity);
+        mechHealthComp.MaxHealth = config.Health;
         mechHealthComp.Health = config.Health;
         mechHealthComp.Shield = config.Shield;
         
@@ -113,5 +114,28 @@ public static class EntitiesFactory
         healthComp.MaxHealth = config.Health;
 
         return world.PackEntity(newMechRoomEntity);
+    }
+
+    public static EcsPackedEntity BuildWeapon(EcsWorld world, WeaponConfig weaponConfig)
+    {
+        var newWeaponEntity = world.NewEntity();
+        
+        var weaponPool = world.GetPool<WeaponMainComponent>();
+        ref var weaponMainComp = ref weaponPool.Add(newWeaponEntity);
+        weaponMainComp.WeaponId = weaponConfig.WeaponId;
+
+        foreach (var weaponComponent in weaponConfig.WeaponComponents)
+        {
+            var weaponComponentPool = world.GetPoolByType(weaponComponent.GetType());
+            if (weaponComponentPool == null)
+            {
+                Debug.LogError($"Can't get pool for type {weaponComponent}");
+                continue;
+            }
+            
+            weaponComponentPool.AddRaw(newWeaponEntity, weaponComponent);
+        }
+
+        return world.PackEntity(newWeaponEntity);
     }
 }
