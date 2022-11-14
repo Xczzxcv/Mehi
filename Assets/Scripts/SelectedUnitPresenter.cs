@@ -62,7 +62,7 @@ public class SelectedUnitPresenter : UIBehaviour
 
     private void UpdateActionPointsView()
     {
-        var actionPointsInfo = $"{_viewInfo.CurrentActionPoints} / {_viewInfo.MaxActionPoints}";
+        var actionPointsInfo = $"Act. pts: {_viewInfo.CurrentActionPoints} / {_viewInfo.MaxActionPoints}";
         actionPointsText.text = actionPointsInfo;
     }
 

@@ -75,9 +75,9 @@ public class BattleManager
         return _mechManager.GetUnitInfos();
     }
 
-    public BattleFieldManager.Tile GetFieldTile(int x, int y)
+    public BattleFieldManager.Tile GetFieldTile(Vector2Int tilePos)
     {
-        return _fieldManager.GetTile(x, y);
+        return _fieldManager.GetTile(tilePos);
     }
 
     public BattleMechManager.BattleUnitInfo GetBattleUnitInfo(int unitEntity)
@@ -88,5 +88,10 @@ public class BattleManager
     public bool TryGetUnitInPos(int x, int y, out int unitEntity)
     {
         return _mechManager.TryGetUnitInPos(x, y, out unitEntity);
+    }
+
+    public bool TryGetPath(Vector2Int src, Vector2Int dest, out Graph.Path path)
+    {
+        return _fieldManager.TryGetPath(src, dest, out path);
     }
 }

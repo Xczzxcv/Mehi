@@ -424,17 +424,17 @@ MonoBehaviour:
   uiManager: {fileID: 105207176}
   gameConfig:
     BattleFieldSize: 15
-    BattleFieldConfig: '000000110011100
+    BattleFieldConfig: '000000120011100
 
-      000000110011100
+      000000120011100
 
-      000000110011100
+      000000120011100
 
-      000000110011100
+      000000120011100
 
-      000000110011100
+      000000120011100
 
-      000000110011100
+      000000120011100
 
       000000110011100
 
@@ -498,6 +498,10 @@ MonoBehaviour:
   - WeaponId: weapon2
     WeaponComponents:
     - rid: 9092259981470728194
+  - WeaponId: weapon3
+    WeaponComponents:
+    - rid: 9092259984142761984
+    - rid: 9092259984142761985
   references:
     version: 2
     RefIds:
@@ -513,6 +517,14 @@ MonoBehaviour:
       type: {class: PushWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:
         PushDistance: 1
+    - rid: 9092259984142761984
+      type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+      data:
+        DamageAmount: 4
+    - rid: 9092259984142761985
+      type: {class: PushWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+      data:
+        PushDistance: 2
 --- !u!4 &547186784
 Transform:
   m_ObjectHideFlags: 0

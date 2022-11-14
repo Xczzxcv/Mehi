@@ -12,8 +12,7 @@ public class MoveOrdersExecutionSystem : EcsRunSystemBase2<MoveOrderComponent, P
         ref PositionComponent posComp, int entity)
     {
         var resultPos = posComp.Pos + moveOrderComp.PositionShift;
-        Debug.Assert(0 <= resultPos.x && resultPos.x < Services.BattleManager.FieldSize
-                    && 0 <= resultPos.y && resultPos.y < Services.BattleManager.FieldSize);
+        Debug.Assert(BattleFieldManager.IsValidFieldPos(resultPos, Services.BattleManager.FieldSize));
         
         posComp.Pos = resultPos;
     }

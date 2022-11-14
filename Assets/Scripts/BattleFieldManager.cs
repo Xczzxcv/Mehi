@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Leopotam.EcsLite;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class BattleFieldManager
@@ -15,6 +15,7 @@ public class BattleFieldManager
     [Serializable]
     public struct Tile
     {
+        public int Id;
         public TileType Type;
         public bool Walkable;
         public bool CanShootThrough;
@@ -30,14 +31,22 @@ public class BattleFieldManager
     public readonly int FieldSize;
     private readonly Tile[] _tileConfigs;
     private readonly Tile[] _tiles;
+    private readonly BattleFieldGridGraphManager _graphManager;
+
+    private int _tileGlobalIndex;
 
     public BattleFieldManager(Config config)
     {
         FieldSize = config.Size;
         _tiles = new Tile[FieldSize * FieldSize];
         _tileConfigs = config.TileConfigs;
+        _graphManager = new BattleFieldGridGraphManager(new BattleFieldGridGraphManager.Config
+            {
+            },
+            this);
 
         ReadConfig(config.FieldConfig);
+        _graphManager.BuildGraph();
     }
 
     private void ReadConfig(string fieldConfig)
@@ -55,7 +64,7 @@ public class BattleFieldManager
         }
     }
 
-    private readonly List<char> _spaceChars = new List<char>{' ', '\t', '\n', '\r'};
+    private readonly List<char> _spaceChars = new() {' ', '\t', '\n', '\r'};
     private bool TryGetTile(char tileConfig, out Tile resultTile)
     {
         resultTile = default;
@@ -72,15 +81,16 @@ public class BattleFieldManager
         }
 
         resultTile = _tileConfigs[resultIndex];
+        resultTile.Id = _tileGlobalIndex++;
         return true;
     }
 
-    public Tile GetTile(int x, int y)
+    public Tile GetTile(Vector2Int tilePos)
     {
-        var index = y * FieldSize + x;
-        Debug.Assert(index >= 0 && index < _tiles.Length);
+        var tileIndex = GetIndexFromPosition(tilePos, FieldSize);
+        Debug.Assert(tileIndex >= 0 && tileIndex < _tiles.Length);
 
-        return _tiles[index];
+        return _tiles[tileIndex];
     }
     
     public Tile[] GetTiles()
@@ -88,6 +98,7 @@ public class BattleFieldManager
         return _tiles;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Vector2Int GetPositionFromIndex(int fieldIndex, int fieldSize)
     {
         Debug.Assert(fieldIndex >= 0 && fieldIndex < fieldSize * fieldSize);
@@ -97,8 +108,23 @@ public class BattleFieldManager
         );
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetIndexFromPosition(Vector2Int pos, int fieldSize)
     {
         return pos.y * fieldSize + pos.x;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsValidFieldPos(Vector2Int pos, int fieldSize)
+    {
+        return 0 <= pos.x && pos.x < fieldSize
+                && 0 <= pos.y && pos.y < fieldSize;
+    }
+
+    public bool TryGetPath(Vector2Int src, Vector2Int dest, out Graph.Path path)
+    {
+        var srcTile = GetTile(src);
+        var destTile = GetTile(dest);
+        return _graphManager.TryGetPath(srcTile.Id, destTile.Id, out path);
     }
 }
