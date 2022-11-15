@@ -5,20 +5,13 @@ using UnityEngine;
 
 public class Graph
 {
-    public struct Edge
-    {
-        public Node AdjacentNode;
-        public int Cost;
-    }
-
     public readonly struct Node : IEquatable<Node>
     {
         public readonly int Id;
         public readonly Vector3 Position;
-        public IReadOnlyCollection<Edge> Edges => _edges;
 
-        private readonly List<Edge> _edges;
-
+        public static readonly Node Default = new(-1, Vector3.zero);
+        
         public Node(
             int id,
             Vector3 position
@@ -26,15 +19,6 @@ public class Graph
         {
             Id = id;
             Position = position;
-            _edges = new List<Edge>();
-        }
-
-        public void AddEdge(Edge newEdge)
-        {
-            Debug.Assert(!Equals(newEdge.AdjacentNode));
-            
-            _edges.Add(newEdge);
-            _edges.Sort((edge, edge1) => edge.Cost - edge1.Cost);
         }
 
         public bool Equals(Node otherNode)
@@ -50,38 +34,44 @@ public class Graph
 
     public struct Path
     {
-        public Node StartNode;
-        public List<Edge> Edges;
-        
+        public struct Part
+        {
+            public Node Node;
+            public  int Cost;
+        }
+
+        public List<Part> Parts;
+
         public static Path Empty(Node startNode)
         {
             return new Path
             {
-                StartNode = startNode,
-                Edges = new List<Edge>(),
+                Parts = new List<Part>(),
             };
         }
     }
 
     private readonly struct PathSubject : IComparable<PathSubject>
     {
-        public Node Node => Edge.AdjacentNode;
-        public float GCost => _prevCost + Edge.Cost; // from start
+        public readonly Node Node;
+        public float GCost => _prevCost + CurrCost; // from start
         public readonly float HCost; // from end
         public float FCost => GCost + HCost;
         public readonly Node PrevNode;
 
-        public readonly Edge Edge;
+        public readonly int CurrCost;
         private readonly float _prevCost;
 
         public PathSubject(
-            Edge edge,
+            Node node,
+            int currCost,
             float prevCost,
             float hCost,
             Node prevNode
         )
         {
-            Edge = edge;
+            Node = node;
+            CurrCost = currCost;
             _prevCost = prevCost;
             HCost = hCost;
             PrevNode = prevNode;
@@ -105,7 +95,9 @@ public class Graph
         }
     }
     
-    private Node _head;
+    private readonly Dictionary<Node, HashSet<Node>> _adjacenсyMap = new();
+    private readonly Dictionary<(Node, Node), int> _costMap = new();
+    private readonly Dictionary<int, Node> _nodes = new();
     private readonly HashSet<Node> _alreadyChecked = new();
     private readonly Queue<Node> _queueToCheck = new();
 
@@ -135,14 +127,11 @@ public class Graph
         var closedPathSubjects = new Dictionary<Node, PathSubject>();
 
         var srcPathSubject = new PathSubject(
-            new Edge
-            {
-                AdjacentNode = srcNode,
-                Cost = 0
-            },
+            srcNode,
+            0,
             0,
             Vector3.Distance(targetNode.Position, srcNode.Position),
-            default
+            Node.Default
         );
         closedPathSubjects.Add(srcNode, srcPathSubject);
         AddAdjacentNodes(srcPathSubject, targetNode, openPathSubjects);
@@ -158,9 +147,14 @@ public class Graph
 
                 var pathSubjectToProcess = pathSubjectToCheck;
                 var pathNodes = new List<Node>();
-                while (!pathSubjectToProcess.PrevNode.Equals(default))
+                while (true)
                 {
                     pathNodes.Add(pathSubjectToProcess.Node);
+                    if (pathSubjectToProcess.PrevNode.Equals(Node.Default))
+                    {
+                        break;
+                    }
+
                     pathSubjectToProcess = closedPathSubjects[pathSubjectToProcess.PrevNode];
                 }
 
@@ -168,7 +162,12 @@ public class Graph
                 foreach (var pathNode in pathNodes)
                 {
                     var pathSubject = closedPathSubjects[pathNode];
-                    path.Edges.Add(pathSubject.Edge);
+                    var pathPart = new Path.Part
+                    {
+                        Node = pathSubject.Node,
+                        Cost = pathSubject.CurrCost,
+                    };
+                    path.Parts.Add(pathPart);
                 }
 
                 return true;
@@ -186,15 +185,18 @@ public class Graph
         return false;
     }
 
-    private static void AddAdjacentNodes(PathSubject pathSubject, Node targetNode, 
+    private void AddAdjacentNodes(PathSubject pathSubject, Node targetNode, 
         List<PathSubject> openPathSubjects)
     {
-        foreach (var edge in pathSubject.Node.Edges)
+        var adjacentNodes = _adjacenсyMap[pathSubject.Node];
+        foreach (var adjacentNode in adjacentNodes)
         {
+            var cost = _costMap[(adjacentNode, pathSubject.Node)];
             var nextToCheck = new PathSubject(
-                edge,
+                adjacentNode,
+                cost,
                 pathSubject.GCost,
-                Vector3.Distance(targetNode.Position, edge.AdjacentNode.Position),
+                Vector3.Distance(targetNode.Position, adjacentNode.Position),
                 pathSubject.Node
             );
             openPathSubjects.Add(nextToCheck);
@@ -205,60 +207,36 @@ public class Graph
 
     public bool TryGetNode(int id, out Node node)
     {
-        _alreadyChecked.Clear();
-        _queueToCheck.Clear();
-        
-        _queueToCheck.Enqueue(_head);
-
-        while (_queueToCheck.Any())
-        {
-            var nodeToCheck = _queueToCheck.Dequeue();
-            if (nodeToCheck.Id == id)
-            {
-                node = nodeToCheck;
-                return true;
-            }
-
-            if (_alreadyChecked.Contains(nodeToCheck))
-            {
-                continue;
-            }
-
-            _alreadyChecked.Add(nodeToCheck);
-            foreach (var edge in nodeToCheck.Edges)
-            {
-                _queueToCheck.Enqueue(edge.AdjacentNode);
-            }
-        }
-
-        node = default;
-        return false;
+        return _nodes.TryGetValue(id, out node);
     }
 
-    public bool TryAddNode(Node node, int parentNodeId, int cost)
+    public void AddNode(Node node)
     {
         Debug.Assert(!TryGetNode(node.Id, out _));
 
-        if (!TryGetNode(parentNodeId, out var parentNode))
+        _nodes[node.Id] = node;
+        _adjacenсyMap[node] = new HashSet<Node>();
+    }
+
+    public bool TryMarkAdjacentNode(Node node, int adjacentNodeId, int cost)
+    {
+        if (!TryGetNode(adjacentNodeId, out var adjacentNode))
         {
             return false;
         }
-        
-        parentNode.AddEdge(new Edge
-        {
-            AdjacentNode = node,
-            Cost = cost,
-        });
-        return true;
-    }
 
-    public void SetHead(Node newHead)
-    {
-        _head = newHead;
+        _adjacenсyMap[node].Add(adjacentNode);
+        _adjacenсyMap[adjacentNode].Add(node);
+        _costMap[(node, adjacentNode)] = cost;
+        _costMap[(adjacentNode, node)] = cost;
+
+        return true;
     }
 
     public void Reset()
     {
-        _head = new Node(0, Vector3.zero);
+        _nodes.Clear();
+        _adjacenсyMap.Clear();
+        _costMap.Clear();
     }
 }

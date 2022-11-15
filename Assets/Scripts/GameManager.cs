@@ -34,12 +34,12 @@ public class GameManager : MonoBehaviour
         });
 
         var hasPath = BattleManager.TryGetPath(
+            new Vector2Int(2, 2),
             new Vector2Int(0, 0),
-            new Vector2Int(4, 2),
             out var path
         );
         var pathString = hasPath
-            ? $"{path.StartNode.Position}, {string.Join(", ", path.Edges.Select(edge => edge.AdjacentNode.Position))}"
+            ? $"{string.Join(", ", path.Parts.Select(part => Vector2Int.RoundToInt(part.Node.Position)))}"
             : string.Empty;
         Debug.Log($"hasPath: {hasPath} path: {pathString}");
         ecsManager.Setup();

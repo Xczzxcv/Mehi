@@ -31,86 +31,101 @@ public class BattleFieldGridGraphManager
     public void BuildGraph()
     {
         _graph.Reset();
-        
-        var firstTileNodePos = BattleFieldManager.GetPositionFromIndex(0, _fieldManager.FieldSize);
-        var firstTileGraphPos = GetTileGraphPos(firstTileNodePos);
-        var firstTile = _fieldManager.GetTile(firstTileNodePos);
-        var firstTileGraphId = GetTileGraphId(in firstTile);
-        var firstGraphNode = new Graph.Node(firstTileGraphId, firstTileGraphPos);
-        _graph.SetHead(firstGraphNode);
+
+        for (var tileInd = 0; tileInd < _fieldManager.FieldSize * _fieldManager.FieldSize; tileInd++)
+        {
+            var tilePos = BattleFieldManager.GetPositionFromIndex(tileInd, _fieldManager.FieldSize);
+            var tile = _fieldManager.GetTile(tilePos);
+            var tileGraphId = GetTileGraphId(in tile);
+            var tileGraphNode = new Graph.Node(tileGraphId, GetTileGraphPos(tilePos));
+            _graph.AddNode(tileGraphNode);
+        }
 
         _positionsToProcess.Clear();
         _processedPositions.Clear();
 
-        AddAdjacentTilePositionsToProcessQueue(firstTileNodePos, firstTile);
-        
+
+        for (var tileInd = 0; tileInd < _fieldManager.FieldSize * _fieldManager.FieldSize; tileInd++)
+        {
+            var tilePos = BattleFieldManager.GetPositionFromIndex(tileInd, _fieldManager.FieldSize);
+            var tile = _fieldManager.GetTile(tilePos);
+            if (!tile.Walkable)
+            {
+                continue;
+            }
+
+            var tileGraphId = GetTileGraphId(in tile);
+            if (!_graph.TryGetNode(tileGraphId, out var tileGraphNode))
+            {
+                continue;
+            }
+
+            MarkAdjacentTiles(tilePos, in tileGraphNode);
+        }
+
+        /*
         while (_positionsToProcess.Any())
         {
-            var (parentTile, targetPos) = _positionsToProcess.Dequeue();
+            var (parentTile, adjacentPos) = _positionsToProcess.Dequeue();
 
-            var adjacentTile = _fieldManager.GetTile(targetPos);
+            var adjacentTile = _fieldManager.GetTile(adjacentPos);
             var adjacentTileGraphId = GetTileGraphId(in adjacentTile);
             if (!_graph.TryGetNode(adjacentTileGraphId, out var adjacentTileGraphNode))
             {
                 adjacentTileGraphNode = new Graph.Node(
                     adjacentTileGraphId,
-                    GetTileGraphPos(targetPos)
+                    GetTileGraphPos(adjacentPos)
                 );
                 _graph.TryAddNode(adjacentTileGraphNode, GetTileGraphId(in parentTile), 1);
             }
 
-            if (_processedPositions.Contains(targetPos))
+            if (_processedPositions.Contains(adjacentPos))
             {
                 continue;
             }
 
-            AddAdjacentTilePositionsToProcessQueue(targetPos, adjacentTile);
-            _processedPositions.Add(targetPos);
+            AddAdjacentTilePositionsToProcessQueue(adjacentPos, adjacentTile);
+            _processedPositions.Add(adjacentPos);
         }
+    */
+    }
 
-        void AddAdjacentTilePositionsToProcessQueue(Vector2Int tilePos, BattleFieldManager.Tile tile)
+    private void MarkAdjacentTiles(Vector2Int tilePos, in Graph.Node tileGraphNode)
+    {
+        foreach (var adjacentPositionShift in AdjacentPositionShifts)
         {
-            foreach (var adjacentPositionShift in AdjacentPositionShifts)
+            var adjacentPosition = tilePos + adjacentPositionShift;
+            if (!BattleFieldManager.IsValidFieldPos(adjacentPosition, _fieldManager.FieldSize))
             {
-                var adjacentPosition = tilePos + adjacentPositionShift;
-                if (!BattleFieldManager.IsValidFieldPos(adjacentPosition, _fieldManager.FieldSize))
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                _positionsToProcess.Enqueue((tile, adjacentPosition));
+            var adjacentTile = _fieldManager.GetTile(adjacentPosition);
+            if (!adjacentTile.Walkable)
+            {
+                continue;
+            }
+
+            var adjacentTileGraphId = GetTileGraphId(in adjacentTile);
+            if (!_graph.TryMarkAdjacentNode(tileGraphNode, adjacentTileGraphId, 1))
+            {
+                Debug.LogError($"Can't mark adjacent node {tilePos} and {adjacentPosition}");
             }
         }
+    }
 
-        /*for (var tileInd = 1; tileInd < _fieldManager.FieldSize * _fieldManager.FieldSize; tileInd++)
+    private void AddAdjacentTilePositionsToProcessQueue(Vector2Int tilePos, BattleFieldManager.Tile tile)
+    {
+        foreach (var adjacentPositionShift in AdjacentPositionShifts)
         {
-            var tileGraphNode = GetOrCreateGraphNode(tileInd, out var tilePos);
-            foreach (var adjacentPositionShift in AdjacentPositionShifts)
+            var adjacentPosition = tilePos + adjacentPositionShift;
+            if (!BattleFieldManager.IsValidFieldPos(adjacentPosition, _fieldManager.FieldSize))
             {
-                var adjacentPosition = tilePos + adjacentPositionShift;
-                if (!BattleFieldManager.IsValidFieldPos(adjacentPosition, _fieldManager.FieldSize))
-                {
-                    continue;
-                }
-
-                var adjacentTile = _fieldManager.GetTile(adjacentPosition);
-                var adjacentTileGraphId = GetTileGraphId(in adjacentTile);
-                if (!_graph.TryGetNode(adjacentTileGraphId, out var adjacentTileGraphNode))
-                {
-                    adjacentTileGraphNode = new Graph.Node(
-                        adjacentTileGraphId,
-                        GetTileGraphPos(adjacentPosition)
-                    );
-                    _graph.AddNode(adjacentTileGraphNode);
-                }
-
-                tileGraphNode.AddEdge(new Graph.Edge
-                {
-                    AdjacentNode = adjacentTileGraphNode,
-                    Cost = 1
-                });
+                continue;
             }
-        }*/
+
+            _positionsToProcess.Enqueue((tile, adjacentPosition));
+        }
     }
 
     private static int GetTileGraphId(in BattleFieldManager.Tile tile)
