@@ -2,12 +2,12 @@
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private BattleFieldController battleField;
+    [SerializeField] private BattleFieldScreenController battleFieldScreen;
     [SerializeField] private Transform uiRoot;
 
-    public void Init(GameManager.GameConfig config, BattleManager battleManager)
+    public void Init(BattleManager battleManager)
     {
-        battleField.Init(uiRoot, battleManager);
-        battleField.Setup(config);
+        battleFieldScreen.Init(uiRoot, battleManager);
+        battleFieldScreen.Setup();
     }
 }

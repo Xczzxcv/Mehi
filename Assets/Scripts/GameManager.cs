@@ -5,6 +5,14 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private EcsManager ecsManager;
+    [SerializeField] private BattleFieldController battleFieldController;
+    [SerializeField] private UIManager uiManager;
+    [Space]
+    [SerializeField] private GameConfig gameConfig;
+    [SerializeField] private List<EntitiesFactory.MechConfig> mechConfigs;
+    [SerializeField] private List<WeaponConfig> weaponConfigs;
+
     [Serializable]
     public class GameConfig
     {
@@ -12,13 +20,6 @@ public class GameManager : MonoBehaviour
         [TextArea] public string BattleFieldConfig;
         public BattleFieldManager.Tile[] TileConfigs;
     }
-    
-    [SerializeField] private EcsManager ecsManager;
-    [SerializeField] private UIManager uiManager;
-    [Space]
-    [SerializeField] private GameConfig gameConfig;
-    [SerializeField] private List<EntitiesFactory.MechConfig> mechConfigs;
-    [SerializeField] private List<WeaponConfig> weaponConfigs;
 
     public BattleManager BattleManager { get; private set; }
     public GameConfig Config => gameConfig;
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
             TileConfigs = gameConfig.TileConfigs,
         });
 
+        battleFieldController.Init();
         var hasPath = BattleManager.TryGetPath(
             new Vector2Int(2, 2),
             new Vector2Int(0, 0),
@@ -52,7 +54,14 @@ public class GameManager : MonoBehaviour
         {
             EntitiesFactory.BuildMechEntity(ecsManager.World, mechConfig);
         }
-        
-        uiManager.Init(gameConfig, BattleManager);
+
+        battleFieldController.Setup(new BattleFieldController.Config
+        {
+            FieldSize = gameConfig.BattleFieldSize,
+            Field = BattleManager.GetField(),
+            UnitInfos = BattleManager.GetPlayerUnitInfos(),
+        });
+
+        uiManager.Init(BattleManager);
     }
 }

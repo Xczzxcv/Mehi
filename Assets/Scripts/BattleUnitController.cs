@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
-public class BattleUnitPresenter : UIBehaviour
+public class BattleUnitController : MonoBehaviour
 {
-    [SerializeField] private Image img;
+    [SerializeField] private SpriteRenderer img;
 
     private BattleMechManager.BattleUnitInfo _unitInfo;
     

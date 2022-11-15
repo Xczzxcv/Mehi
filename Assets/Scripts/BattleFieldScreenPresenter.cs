@@ -2,27 +2,19 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class BattleFieldPresenter : UIBehaviour
+public class BattleFieldScreenPresenter : UIBehaviour
 {
-    [SerializeField] private BattleFieldGridPresenter fieldGridPresenter;
     [SerializeField] private SelectedUnitPresenter selectedUnitPresenter;
-
-    public struct ViewInfo
-    {
-        public BattleFieldGridPresenter.ViewInfo FieldGridView;
-        public SelectedUnitPresenter.ViewInfo SelectedUnitView;
-    }
 
     public event Action<BattleFieldManager.Tile, Vector2Int> FieldTileSelected;
     
     public void Init()
     {
-        fieldGridPresenter.TileSelected += OnFieldGridTileSelected;
+        GlobalEventManager.BattleFieldGridTileSelected.Event += OnFieldGridTileSelected;
     }
 
-    public void Setup(ViewInfo viewInfo)
+    public void Setup()
     {
-        fieldGridPresenter.Setup(viewInfo.FieldGridView);
         selectedUnitPresenter.Setup(SelectedUnitPresenter.ViewInfo.BuildEmpty());
     }
 

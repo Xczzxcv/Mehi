@@ -154,7 +154,7 @@ Transform:
   m_Children:
   - {fileID: 1328740986}
   m_Father: {fileID: 547186784}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &105207176
 MonoBehaviour:
@@ -168,8 +168,107 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2891530a13844ddd93dd79b62c5ea060, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  battleField: {fileID: 1328740985}
+  battleFieldScreen: {fileID: 1328740985}
   uiRoot: {fileID: 438243517}
+--- !u!1 &161237357
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 161237358}
+  m_Layer: 0
+  m_Name: Field Tiles
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &161237358
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161237357}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &185669368
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 185669369}
+  - component: {fileID: 185669370}
+  m_Layer: 0
+  m_Name: Battle Field
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &185669369
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185669368}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 547186784}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &185669370
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 185669368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1566669f8400f15439c75cc6435f16d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCam: {fileID: 519420031}
+  cameraScreenShareCoeff: 0.8
+  tilePrefab: {fileID: 51680167768998934, guid: cdf5e35a39e13d7499db2544b0e3fb7d, type: 3}
+  tilesParent: {fileID: 161237358}
+  tileSize: 2.56
+  backgrounds:
+    pairs:
+    - key: 0
+      value: {fileID: 21300000, guid: 2747bc9746eedbc4f870ce32e181c33a, type: 3}
+    - key: 1
+      value: {fileID: 21300000, guid: e7a7d567477ed2f478475d96f457f2f1, type: 3}
+    - key: 2
+      value: {fileID: 21300000, guid: bac03bdeb586bad4ebbb882cb82d662e, type: 3}
+    error: 0
+  unitPrefab: {fileID: -176855804242362831, guid: b796196429157fc4ebe2c91d59b9c0d9, type: 3}
+  unitControlColors:
+    pairs:
+    - key: 0
+      value: {r: 1, g: 0.83137256, b: 0.2784314, a: 1}
+    - key: 1
+      value: {r: 0.23137255, g: 0.20784314, b: 0.38039216, a: 1}
+    - key: 2
+      value: {r: 0.73333335, g: 0.26666668, b: 0.1882353, a: 1}
+    error: 0
 --- !u!1 &342844798
 GameObject:
   m_ObjectHideFlags: 0
@@ -343,7 +442,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
+  m_BackGroundColor: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -421,16 +520,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ecsManager: {fileID: 1176894222}
+  battleFieldController: {fileID: 185669370}
   uiManager: {fileID: 105207176}
   gameConfig:
     BattleFieldSize: 15
-    BattleFieldConfig: '000000120011100
+    BattleFieldConfig: '010000120011100
 
-      000000120011100
+      010000120011100
 
-      000000120011100
+      010000120011100
 
-      000000120011100
+      010000120011100
 
       000000120011100
 
@@ -454,13 +554,16 @@ MonoBehaviour:
 
       000000110011100'
     TileConfigs:
-    - Type: 0
+    - Id: 0
+      Type: 0
       Walkable: 1
       CanShootThrough: 1
-    - Type: 1
+    - Id: 0
+      Type: 1
       Walkable: 0
       CanShootThrough: 1
-    - Type: 2
+    - Id: 0
+      Type: 2
       Walkable: 0
       CanShootThrough: 0
   mechConfigs:
@@ -538,7 +641,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1176894223}
+  - {fileID: 185669369}
   - {fileID: 105207175}
+  - {fileID: 2009429797}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -666,7 +771,7 @@ GameObject:
   - component: {fileID: 1328740986}
   - component: {fileID: 1328740985}
   m_Layer: 0
-  m_Name: BattleField
+  m_Name: BattleField Screen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -684,7 +789,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 185b561d361a4c4eaa89c0d91c3ac6f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fieldPrefab: {fileID: 284897760435771370, guid: 1a4e57557bcf100438bb7c5f1d2b983a, type: 3}
+  fieldScreenPrefab: {fileID: 284897760435771370, guid: 1a4e57557bcf100438bb7c5f1d2b983a, type: 3}
 --- !u!4 &1328740986
 Transform:
   m_ObjectHideFlags: 0
@@ -700,3 +805,48 @@ Transform:
   m_Father: {fileID: 105207175}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2009429796
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2009429797}
+  - component: {fileID: 2009429798}
+  m_Layer: 0
+  m_Name: InputManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2009429797
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009429796}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 547186784}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2009429798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2009429796}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbae41c3e6b7db54f8f6e0e0343a7c52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCam: {fileID: 519420031}

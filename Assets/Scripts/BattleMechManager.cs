@@ -96,7 +96,7 @@ public class BattleMechManager
             return ControlledBy.Player;
         }
 
-        var aiControlPool = _world.GetPool<PlayerControlComponent>();
+        var aiControlPool = _world.GetPool<AiControlComponent>();
         if (aiControlPool.Has(unitEntity))
         {
             return ControlledBy.AI;

@@ -1,86 +1,137 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
-internal class BattleFieldController : MonoBehaviour
+public class BattleFieldController : MonoBehaviour
 {
-    [SerializeField] private BattleFieldPresenter fieldPrefab;
-    
-    private Transform _uiRoot;
-    private BattleManager _battleManager;
-    private BattleFieldPresenter _battleFieldPresenter;
+    [SerializeField] private Camera mainCam;
+    [SerializeField] private float cameraScreenShareCoeff;
+    [Space]
+    [SerializeField] private FieldTileController tilePrefab;
+    [SerializeField] private Transform tilesParent;
+    [SerializeField] private float tileSize;
+    [SerializeField] private SerializedDictionary<BattleFieldManager.TileType, Sprite> backgrounds;
+    [Space]
+    [SerializeField] private BattleUnitController unitPrefab;
+    [SerializeField] private SerializedDictionary<BattleMechManager.ControlledBy, Color> unitControlColors;
 
-    public void Init(Transform uiRoot, BattleManager battleManager)
+    public struct Config
     {
-        _uiRoot = uiRoot;
-        _battleManager = battleManager;
+        public int FieldSize;
+        public BattleFieldManager.Tile[] Field;
+        public List<BattleMechManager.BattleUnitInfo> UnitInfos;
     }
 
-    public void Setup(GameManager.GameConfig config)
+    private readonly Dictionary<Vector2Int, FieldTileController> _tiles = new();
+    private Config _config;
+
+    private FieldTileController _lastSelected;
+
+    public void Init()
     {
-        _battleFieldPresenter = Instantiate(fieldPrefab, _uiRoot);
-        _battleFieldPresenter.Init();
-        _battleFieldPresenter.Setup(new BattleFieldPresenter.ViewInfo
+        GlobalEventManager.BattleFieldGridTileSelected.Event += OnFieldGridTileSelected;
+    }
+
+    private void OnFieldGridTileSelected(BattleFieldManager.Tile tile, Vector2Int tilePos)
+    {
+        var selectedTile = GetTileController(tilePos);
+
+        if (_lastSelected)
         {
-            FieldGridView = new BattleFieldGridPresenter.ViewInfo
+            _lastSelected.SetSelected(false);
+        }
+
+        selectedTile.SetSelected(true);
+        _lastSelected = selectedTile;
+    }
+
+    public void Setup(Config config)
+    {
+        _config = config;
+
+        AddTiles();
+        SetupTiles();
+
+        SetupUnits();
+
+        SetupCamera();
+    }
+
+    private void AddTiles()
+    {
+        for (var tileIndex = 0; tileIndex < _config.Field.Length; tileIndex++)
+        {
+            var tilePos = BattleFieldManager.GetPositionFromIndex(tileIndex, _config.FieldSize);
+            var tileObjectPos = new Vector3(
+                tilePos.x * tileSize,
+                -tilePos.y * tileSize,
+                0
+            );
+            var tileController = Instantiate(
+                tilePrefab,
+                tileObjectPos,
+                Quaternion.identity,
+                tilesParent
+            );
+            _tiles.Add(tilePos, tileController);
+        }
+    }
+
+    private void SetupTiles()
+    {
+        for (var tileIndex = 0; tileIndex < _config.Field.Length; tileIndex++)
+        {
+            var currTile = _config.Field[tileIndex];
+            var tilePos = BattleFieldManager.GetPositionFromIndex(tileIndex, _config.FieldSize);
+            var currTileController = GetTileController(tilePos);
+            if (!backgrounds.TryGetValue(currTile.Type, out var backgroundSprite))
             {
-                FieldSize = config.BattleFieldSize,
-                Field = _battleManager.GetField(),
-                UnitInfos = _battleManager.GetPlayerUnitInfos(),
-            },
-            SelectedUnitView = new SelectedUnitPresenter.ViewInfo
-            {
-                
+                Debug.LogError($"Can't find background for tile {currTile.Type} ({tileIndex})");
+                continue;
             }
-        });
-        _battleFieldPresenter.FieldTileSelected += OnBattleFieldTileSelected;
-    }
 
-    private void OnBattleFieldTileSelected(BattleFieldManager.Tile selectedTile, Vector2Int tilePos)
-    {
-        SelectedUnitPresenter.ViewInfo selectedUnitViewInfo;
-        if (_battleManager.TryGetUnitInPos(tilePos.x, tilePos.y, out var unitEntity))
-        {
-            var battleUnitInfo = _battleManager.GetBattleUnitInfo(unitEntity);
-            selectedUnitViewInfo = new SelectedUnitPresenter.ViewInfo
+            currTileController.Setup(new FieldTileController.Config
             {
-                ControlledBy = battleUnitInfo.ControlledBy,
-                MaxHp = battleUnitInfo.MaxHealth,
-                CurrentHp = battleUnitInfo.Health,
-                ShieldAmount = battleUnitInfo.Shield,
-                MaxActionPoints = battleUnitInfo.MaxActionPoints,
-                CurrentActionPoints = battleUnitInfo.ActionPoints,
-                Weapons = GetUnitWeapons(battleUnitInfo),
-                Systems = GetUnitSystems(battleUnitInfo),
-            };
+                Tile = currTile,
+                TilePosition = tilePos,
+                Background = backgroundSprite,
+                TileSize = tileSize,
+            });
         }
-        else
-        {
-            selectedUnitViewInfo = SelectedUnitPresenter.ViewInfo.BuildEmpty();
-        }
-
-        _battleFieldPresenter.UpdateSelectedUnit(selectedUnitViewInfo);
     }
 
-    private List<WeaponPresenter.ViewInfo> GetUnitWeapons(BattleMechManager.BattleUnitInfo battleUnitInfo)
+    private FieldTileController GetTileController(Vector2Int tilePos)
     {
-        var unitWeaponViews = new List<WeaponPresenter.ViewInfo>();
-        foreach (var weaponInfo in battleUnitInfo.Weapons)
+        Debug.Assert(BattleFieldManager.IsValidFieldPos(tilePos, _config.FieldSize));
+
+        return _tiles[tilePos];
+    }
+
+    private void SetupUnits()
+    {
+        foreach (var unitInfo in _config.UnitInfos)
         {
-            var weaponView = new WeaponPresenter.ViewInfo
+            var unitController = Instantiate(unitPrefab);
+            if (!unitControlColors.TryGetValue(unitInfo.ControlledBy, out var unitColor))
             {
-                WeaponId = weaponInfo.WeaponId,
-                Damage = weaponInfo.Damage,
-                PushDistance = weaponInfo.PushDistance,
-                StunDuration = weaponInfo.StunDuration,
-            };
-            unitWeaponViews.Add(weaponView);
-        }
+                Debug.LogError($"Can't find unit color for unit control  {unitInfo.ControlledBy}");
+                unitColor = Color.magenta;
+            }
 
-        return unitWeaponViews;
+            unitController.Setup(unitInfo, unitColor);
+            
+            var unitPos = unitInfo.Position;
+            var unitTile = GetTileController(unitPos);
+            unitTile.SetupContent(unitController.transform);
+        }
     }
 
-    private List<SystemPresenter.ViewInfo> GetUnitSystems(BattleMechManager.BattleUnitInfo battleUnitInfo)
+    private void SetupCamera()
     {
-        return new List<SystemPresenter.ViewInfo>();
+        mainCam.transform.position = new Vector3(
+            (_config.FieldSize - 1) * tileSize / 2f,
+            -(_config.FieldSize - 1) * tileSize / 2f * (1 + cameraScreenShareCoeff - 0.5f),
+            mainCam.transform.position.z
+        );
+        mainCam.orthographicSize = _config.FieldSize * tileSize / 2f * (1 + cameraScreenShareCoeff - 0.5f);
     }
 }
