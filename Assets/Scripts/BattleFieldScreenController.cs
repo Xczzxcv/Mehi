@@ -8,25 +8,53 @@ internal class BattleFieldScreenController : MonoBehaviour
     private Transform _uiRoot;
     private BattleManager _battleManager;
     private BattleFieldScreenPresenter _battleFieldPresenter;
+    
+    private Vector2Int? _selectedTilePos;
 
     public void Init(Transform uiRoot, BattleManager battleManager)
     {
         _uiRoot = uiRoot;
         _battleManager = battleManager;
+        
+        GlobalEventManager.BattleField.GridTileSelected.Event += OnBattleFieldTileSelected;
+        GlobalEventManager.Turns.TurnUpdated.Event += OnTurnUpdated;
     }
 
     public void Setup()
     {
         _battleFieldPresenter = Instantiate(fieldScreenPrefab, _uiRoot);
         _battleFieldPresenter.Init();
-        _battleFieldPresenter.Setup();
-        _battleFieldPresenter.FieldTileSelected += OnBattleFieldTileSelected;
+        _battleFieldPresenter.Setup(new BattleFieldScreenPresenter.ViewInfo
+        {
+            TurnIndex = _battleManager.TurnIndex,
+            TurnPhase = _battleManager.TurnPhase,
+        });
+        
+        _battleFieldPresenter.NextTurnPhaseBtnClicked += OnPresenterNextTurnPhaseBtnClicked;
+    }
+
+    private void OnPresenterNextTurnPhaseBtnClicked()
+    {
+        _battleManager.NextPhase();
     }
 
     private void OnBattleFieldTileSelected(BattleFieldManager.Tile selectedTile, Vector2Int tilePos)
     {
+        _selectedTilePos = tilePos;
+        UpdateSelectedUnit();
+    }
+
+    private void UpdateSelectedUnit()
+    {
+        if (!_selectedTilePos.HasValue)
+        {
+            return;
+        }
+
+        var selectedPos = _selectedTilePos.Value;
+
         SelectedUnitPresenter.ViewInfo selectedUnitViewInfo;
-        if (_battleManager.TryGetUnitInPos(tilePos.x, tilePos.y, out var unitEntity))
+        if (_battleManager.TryGetUnitInPos(selectedPos, out var unitEntity))
         {
             var battleUnitInfo = _battleManager.GetBattleUnitInfo(unitEntity);
             selectedUnitViewInfo = new SelectedUnitPresenter.ViewInfo
@@ -37,6 +65,9 @@ internal class BattleFieldScreenController : MonoBehaviour
                 ShieldAmount = battleUnitInfo.Shield,
                 MaxActionPoints = battleUnitInfo.MaxActionPoints,
                 CurrentActionPoints = battleUnitInfo.ActionPoints,
+                CanMove = battleUnitInfo.CanMove,
+                CanUseWeapon = battleUnitInfo.CanUseWeapon,
+                UnitPosition = battleUnitInfo.Position,
                 Weapons = GetUnitWeapons(battleUnitInfo),
                 Systems = GetUnitSystems(battleUnitInfo),
             };
@@ -47,6 +78,12 @@ internal class BattleFieldScreenController : MonoBehaviour
         }
 
         _battleFieldPresenter.UpdateSelectedUnit(selectedUnitViewInfo);
+    }
+
+    private void OnTurnUpdated(int newTurnIndex, TurnsManager.TurnPhase turnPhase)
+    {
+        _battleFieldPresenter.UpdateTurnInfo(newTurnIndex, turnPhase);
+        UpdateSelectedUnit();
     }
 
     private List<WeaponPresenter.ViewInfo> GetUnitWeapons(BattleMechManager.BattleUnitInfo battleUnitInfo)

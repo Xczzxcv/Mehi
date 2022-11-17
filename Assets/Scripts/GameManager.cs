@@ -44,7 +44,20 @@ public class GameManager : MonoBehaviour
             ? $"{string.Join(", ", path.Parts.Select(part => Vector2Int.RoundToInt(part.Node.Position)))}"
             : string.Empty;
         Debug.Log($"hasPath: {hasPath} path: {pathString}");
+
         ecsManager.Setup();
+        BuildEcsEntities();
+
+        battleFieldController.Setup(new BattleFieldController.Config
+        {
+            BattleManager = BattleManager,
+        });
+
+        uiManager.Init(BattleManager);
+    }
+
+    private void BuildEcsEntities()
+    {
         foreach (var weaponConfig in weaponConfigs)
         {
             EntitiesFactory.BuildWeapon(ecsManager.World, weaponConfig);
@@ -54,14 +67,5 @@ public class GameManager : MonoBehaviour
         {
             EntitiesFactory.BuildMechEntity(ecsManager.World, mechConfig);
         }
-
-        battleFieldController.Setup(new BattleFieldController.Config
-        {
-            FieldSize = gameConfig.BattleFieldSize,
-            Field = BattleManager.GetField(),
-            UnitInfos = BattleManager.GetPlayerUnitInfos(),
-        });
-
-        uiManager.Init(BattleManager);
     }
 }

@@ -42,7 +42,7 @@ public class Graph
 
         public List<Part> Parts;
 
-        public static Path Empty(Node startNode)
+        public static Path Empty()
         {
             return new Path
             {
@@ -116,7 +116,7 @@ public class Graph
             return false;
         }
 
-        path = Path.Empty(srcNode);
+        path = Path.Empty();
 
         if (srcNode.Equals(targetNode))
         {

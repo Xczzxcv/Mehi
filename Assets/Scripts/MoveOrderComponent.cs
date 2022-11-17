@@ -1,9 +1,7 @@
-﻿using UnityEngine;
-
-namespace Ecs.Components
+﻿namespace Ecs.Components
 {
 public struct MoveOrderComponent
 {
-    public Vector2Int PositionShift;
+    public Graph.Path Path;
 }
 }

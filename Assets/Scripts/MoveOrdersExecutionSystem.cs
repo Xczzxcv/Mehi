@@ -1,20 +1,40 @@
-﻿using Ecs.Components;
+﻿using System.Linq;
+using Ecs.Components;
+using Ext;
 using UnityEngine;
 
 namespace Ecs.Systems
 {
-public class MoveOrdersExecutionSystem : EcsRunSystemBase2<MoveOrderComponent, PositionComponent>
+public class MoveOrdersExecutionSystem : EcsRunSystemBase4<MoveOrderComponent, MoveCreatureComponent, 
+    PositionComponent, ActiveCreatureComponent>
 {
     public MoveOrdersExecutionSystem(EnvironmentServices services) : base(services)
     { }
 
-    protected override void ProcessComponent(ref MoveOrderComponent moveOrderComp, 
-        ref PositionComponent posComp, int entity)
+    protected override void ProcessComponent(ref MoveOrderComponent moveOrderComp,
+        ref MoveCreatureComponent moveCreatureComp, ref PositionComponent posComp,
+        ref ActiveCreatureComponent activeCreatureComp, int entity)
     {
-        var resultPos = posComp.Pos + moveOrderComp.PositionShift;
-        Debug.Assert(BattleFieldManager.IsValidFieldPos(resultPos, Services.BattleManager.FieldSize));
+        Debug.Assert(posComp.Pos == moveOrderComp.Path.Parts.First().Node.Position.ToV2I());
+
+        if (!moveOrderComp.Path.Parts.Any())
+        {
+            return;
+        }
+
+        Debug.Assert(posComp.Pos == moveOrderComp.Path.Parts.First().Node.Position.ToV2I());
         
-        posComp.Pos = resultPos;
+        for (var i = 1; i < moveOrderComp.Path.Parts.Count; i++)
+        {
+            var pathPart = moveOrderComp.Path.Parts[i];
+            var moveCreaturePathPart = new MoveCreatureComponent.PathPart
+            {
+                DestPos = pathPart.Node.Position.ToV2I(),
+            };
+            moveCreatureComp.Path.Enqueue(moveCreaturePathPart);
+        }
+
+        activeCreatureComp.ActionPoints -= 1;
     }
 }
 }

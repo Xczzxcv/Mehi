@@ -90,7 +90,7 @@ public class PushWeaponSystem : WeaponSystemBase<PushWeaponComponent>
         for (var i = 1; i <= pushWeapon.PushDistance; i++)
         {
             var tileToCheckPos = targetMechPosition.Pos + pushDirection * i;
-            if (Services.BattleManager.TryGetUnitInPos(tileToCheckPos.x, tileToCheckPos.y, out _))
+            if (Services.BattleManager.TryGetUnitInPos(tileToCheckPos, out _))
             {
                 pushDistance = i - 1;
             }

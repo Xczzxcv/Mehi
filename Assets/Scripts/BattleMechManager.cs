@@ -10,7 +10,8 @@ public class BattleMechManager
 {
     public struct Config
     {
-        public EcsWorld World { get; set; }
+        public EcsWorld World;
+        public TurnsManager TurnsManager;
     }
 
     public enum ControlledBy
@@ -30,6 +31,9 @@ public class BattleMechManager
         public int MaxHealth;
         public int Health;
         public int Shield;
+        public int Entity;
+        public bool CanMove;
+        public bool CanUseWeapon;
         public List<RoomInfo> Rooms;
         public List<WeaponInfo> Weapons;
     }
@@ -49,17 +53,17 @@ public class BattleMechManager
         public MechSystemType SystemType;
     }
 
-    private readonly EcsWorld _world;
+    private readonly Config _config;
 
     public BattleMechManager(Config config)
     {
-        _world = config.World;
+        _config = config;
     }
 
     public List<BattleUnitInfo> GetUnitInfos()
     {
         var resultList = new List<BattleUnitInfo>();
-        var activeUnitsFilter = _world
+        var activeUnitsFilter = _config.World
             .Filter<ActiveCreatureComponent>()
             .End();
         foreach (var unitEntity in activeUnitsFilter)
@@ -83,6 +87,9 @@ public class BattleMechManager
             Position = GetUnitPosition(unitEntity),
             MaxActionPoints = GetUnitMaxActionPoints(unitEntity),
             ActionPoints = GetUnitActionPoints(unitEntity),
+            CanMove = GetUnitCanMove(unitEntity),
+            CanUseWeapon = GetUnitCanUseWeapon(unitEntity),
+            Entity = unitEntity,
             Rooms = GetUnitRoomInfos(unitEntity),
             Weapons = GetUnitWeapons(unitEntity),
         };
@@ -90,13 +97,13 @@ public class BattleMechManager
 
     private ControlledBy GetUnitControl(int unitEntity)
     {
-        var playerControlPool = _world.GetPool<PlayerControlComponent>();
+        var playerControlPool = _config.World.GetPool<PlayerControlComponent>();
         if (playerControlPool.Has(unitEntity))
         {
             return ControlledBy.Player;
         }
 
-        var aiControlPool = _world.GetPool<AiControlComponent>();
+        var aiControlPool = _config.World.GetPool<AiControlComponent>();
         if (aiControlPool.Has(unitEntity))
         {
             return ControlledBy.AI;
@@ -107,44 +114,69 @@ public class BattleMechManager
 
     private MechHealthComponent GetUnitHealth(int unitEntity)
     {
-        var mechHealthComp = _world.GetComponent<MechHealthComponent>(unitEntity);
+        var mechHealthComp = _config.World.GetComponent<MechHealthComponent>(unitEntity);
         return mechHealthComp;
     }
 
     private int GetUnitMoveSpeed(int unitEntity)
     {
-        var activeCreatureComp = _world.GetComponent<ActiveCreatureComponent>(unitEntity);
+        var activeCreatureComp = _config.World.GetComponent<ActiveCreatureComponent>(unitEntity);
         return activeCreatureComp.MoveSpeed;
     }
 
     private Vector2Int GetUnitPosition(int unitEntity)
     {
-        var positionComp = _world.GetComponent<PositionComponent>(unitEntity);
+        var positionComp = _config.World.GetComponent<PositionComponent>(unitEntity);
         return positionComp.Pos;
     }
 
     private int GetUnitMaxActionPoints(int unitEntity)
     {
-        var activeCreatureComp = _world.GetComponent<ActiveCreatureComponent>(unitEntity);
+        var activeCreatureComp = _config.World.GetComponent<ActiveCreatureComponent>(unitEntity);
         return activeCreatureComp.MaxActionPoints;
     }
 
     private int GetUnitActionPoints(int unitEntity)
     {
-        var activeCreatureComp = _world.GetComponent<ActiveCreatureComponent>(unitEntity);
+        var activeCreatureComp = _config.World.GetComponent<ActiveCreatureComponent>(unitEntity);
         return activeCreatureComp.ActionPoints;
+    }
+
+    private bool GetUnitCanMove(int unitEntity)
+    {
+        var unitActionPoints = GetUnitActionPoints(unitEntity);
+        if (unitActionPoints <= 0)
+        {
+            return false;
+        }
+
+        var controlledBy = GetUnitControl(unitEntity);
+        switch (_config.TurnsManager.Phase)
+        {
+            case TurnsManager.TurnPhase.PlayerMove when controlledBy == ControlledBy.Player:
+            case TurnsManager.TurnPhase.AIMove when controlledBy == ControlledBy.AI:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private bool GetUnitCanUseWeapon(int unitEntity)
+    {
+        var unitActionPoints = GetUnitActionPoints(unitEntity);
+        return unitActionPoints > 0;
     }
 
     private List<RoomInfo> GetUnitRoomInfos(int unitEntity)
     {
         var roomInfos = new List<RoomInfo>();
-        var roomFilter = _world.Filter<MechRoomComponent>().Inc<HealthComponent>().End();
-        var roomsPool = _world.GetPool<MechRoomComponent>();
-        var healthsPool = _world.GetPool<HealthComponent>();
+        var roomFilter = _config.World.Filter<MechRoomComponent>().Inc<HealthComponent>().End();
+        var roomsPool = _config.World.GetPool<MechRoomComponent>();
+        var healthsPool = _config.World.GetPool<HealthComponent>();
         foreach (var roomEntity in roomFilter)
         {
             ref var roomComp = ref roomsPool.Get(roomEntity);
-            if (!roomComp.MechEntity.TryUnpack(_world, out var roomMechEntity))
+            if (!roomComp.MechEntity.TryUnpack(_config.World, out var roomMechEntity))
             {
                 continue;
             }
@@ -171,7 +203,7 @@ public class BattleMechManager
     {
         var weapons = new List<WeaponInfo>();
         
-        var mechPool = _world.GetPool<MechComponent>();
+        var mechPool = _config.World.GetPool<MechComponent>();
         if (!mechPool.Has(unitEntity))
         {
             return weapons;
@@ -181,7 +213,7 @@ public class BattleMechManager
 
         foreach (var weaponId in unitMechComp.WeaponIds)
         {
-            if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(weaponId, _world, 
+            if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(weaponId, _config.World, 
                     out var weaponEntity))
             {
                 Debug.LogError($"Unit {unitEntity} has no weapon {weaponId}");
@@ -204,7 +236,7 @@ public class BattleMechManager
 
     private void AddDamageInfo(ref WeaponInfo weaponInfo, int weaponEntity)
     {
-        var damageWeaponPool = _world.GetPool<DamageWeaponComponent>();
+        var damageWeaponPool = _config.World.GetPool<DamageWeaponComponent>();
         weaponInfo.Damage = damageWeaponPool.Has(weaponEntity)
             ? damageWeaponPool.Get(weaponEntity).DamageAmount
             : null;
@@ -212,7 +244,7 @@ public class BattleMechManager
 
     private void AddPushInfo(ref WeaponInfo weaponInfo, int weaponEntity)
     {
-        var pushWeaponPool = _world.GetPool<PushWeaponComponent>();
+        var pushWeaponPool = _config.World.GetPool<PushWeaponComponent>();
         weaponInfo.PushDistance = pushWeaponPool.Has(weaponEntity)
             ? pushWeaponPool.Get(weaponEntity).PushDistance
             : null;
@@ -220,21 +252,20 @@ public class BattleMechManager
 
     private void AddStunInfo(ref WeaponInfo weaponInfo, int weaponEntity)
     {
-        var stunWeaponPool = _world.GetPool<StunWeaponComponent>();
+        var stunWeaponPool = _config.World.GetPool<StunWeaponComponent>();
         weaponInfo.StunDuration = stunWeaponPool.Has(weaponEntity)
             ? stunWeaponPool.Get(weaponEntity).StunDuration
             : null;
     }
 
-    public bool TryGetUnitInPos(int x, int y, out int unitEntity)
+    public bool TryGetUnitInPos(Vector2Int pos, out int unitEntity)
     {
-        var posToCheck = new Vector2Int(x, y);
-        var positionPool = _world.GetPool<PositionComponent>();
-        var positionEntities = _world.Filter<PositionComponent>().End();
+        var positionPool = _config.World.GetPool<PositionComponent>();
+        var positionEntities = _config.World.Filter<PositionComponent>().End();
         foreach (var positionCompEntity in positionEntities)
         {
             var positionComp = positionPool.Get(positionCompEntity);
-            if (positionComp.Pos == posToCheck)
+            if (positionComp.Pos == pos)
             {
                 unitEntity = positionCompEntity;
                 return true;
@@ -243,5 +274,18 @@ public class BattleMechManager
 
         unitEntity = default;
         return false;
+    }
+
+    public void BuildMoveOrder(int unitEntity, Graph.Path path)
+    {
+        var moveSpeed = GetUnitMoveSpeed(unitEntity);
+        
+        Debug.Assert(path.Parts.Count <= moveSpeed);
+        while (path.Parts.Count > moveSpeed)
+        {
+            path.Parts.RemoveAt(path.Parts.Count - 1);
+        }
+
+        EntitiesFactory.BuildMoveOrder(unitEntity, path, _config.World);
     }
 }

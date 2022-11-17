@@ -6,6 +6,7 @@ public class FieldTileController : MonoBehaviour
     [SerializeField] private GameObject selectedMark;
     [SerializeField] private Transform contentParent;
     [SerializeField] private BoxCollider2D tileCollider;
+    [SerializeField] private Color highlightedColor;
     
     public struct Config
     {
@@ -35,5 +36,12 @@ public class FieldTileController : MonoBehaviour
     public void SetupContent(Transform contentRoot)
     {
         contentRoot.SetParent(contentParent, false);
+    }
+
+    public void SetHighlighted(bool highlighted)
+    {
+        backgroundImage.color = highlighted
+            ? highlightedColor
+            : Color.white;
     }
 }

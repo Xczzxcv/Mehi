@@ -10,6 +10,7 @@ public static class EntitiesFactory
     [Serializable]
     public struct MechConfig
     {
+        public BattleMechManager.ControlledBy Control;
         public List<MechRoomConfig> Rooms;
         public int RightHandsAmount;
         public int LeftHandsAmount;
@@ -29,6 +30,8 @@ public static class EntitiesFactory
     public static EcsPackedEntity BuildMechEntity(EcsWorld world, MechConfig config)
     {
         var newMechEntity = world.NewEntity();
+
+        SetupControl(world, config.Control, newMechEntity);
         
         ref var mechComp = ref world.AddComponent<MechComponent>(newMechEntity);
         mechComp.WeaponIds = config.InitWeapons;
@@ -44,6 +47,9 @@ public static class EntitiesFactory
         
         ref var positionComp = ref world.AddComponent<PositionComponent>(newMechEntity);
         positionComp.Pos = config.Position;
+        
+        ref var moveCreatureComp = ref world.AddComponent<MoveCreatureComponent>(newMechEntity);
+        moveCreatureComp.Path = new Queue<MoveCreatureComponent.PathPart>();
         
         ref var statsComp = ref world.AddComponent<StatsComponent>(newMechEntity);
         statsComp.Red = config.RedStats;
@@ -70,7 +76,20 @@ public static class EntitiesFactory
 
         return newMechEntityPacked;
     }
-    
+
+    private static void SetupControl(EcsWorld world, BattleMechManager.ControlledBy control, int unitEntity)
+    {
+        switch (control)
+        {
+            case BattleMechManager.ControlledBy.Player:
+                world.AddComponent<PlayerControlComponent>(unitEntity);
+                break;
+            case BattleMechManager.ControlledBy.AI:
+                world.AddComponent<AiControlComponent>(unitEntity);
+                break;
+        }
+    }
+
     [Serializable]
     public struct MechSystemConfig
     {
@@ -137,5 +156,11 @@ public static class EntitiesFactory
         }
 
         return world.PackEntity(newWeaponEntity);
+    }
+
+    public static void BuildMoveOrder(int unitEntity, Graph.Path path, EcsWorld world)
+    {
+        ref var moveOrder = ref world.AddComponent<MoveOrderComponent>(unitEntity);
+        moveOrder.Path = path;
     }
 }

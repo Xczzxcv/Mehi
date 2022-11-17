@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class SelectedUnitPresenter : UIBehaviour
 {
@@ -13,6 +14,8 @@ public class SelectedUnitPresenter : UIBehaviour
     [Space]
     [SerializeField] private SystemPresenter systemPrefab;
     [SerializeField] private Transform systemsRoot;
+    [Space]
+    [SerializeField] private Button moveUnitBtn;
     
     public struct ViewInfo
     {
@@ -22,6 +25,9 @@ public class SelectedUnitPresenter : UIBehaviour
         public int ShieldAmount;
         public int MaxActionPoints;
         public int CurrentActionPoints;
+        public bool CanMove;
+        public bool CanUseWeapon;
+        public Vector2Int UnitPosition;
         public List<WeaponPresenter.ViewInfo> Weapons;
         public List<SystemPresenter.ViewInfo> Systems;
 
@@ -33,6 +39,9 @@ public class SelectedUnitPresenter : UIBehaviour
                 CurrentHp = 0,
                 CurrentActionPoints = 0,
                 MaxActionPoints = 0,
+                CanMove = false,
+                CanUseWeapon = false,
+                UnitPosition = Vector2Int.zero,
                 ControlledBy = BattleMechManager.ControlledBy.None,
                 Systems = new List<SystemPresenter.ViewInfo>(),
                 Weapons = new List<WeaponPresenter.ViewInfo>()
@@ -41,17 +50,39 @@ public class SelectedUnitPresenter : UIBehaviour
     }
 
     private ViewInfo _viewInfo;
-    private List<WeaponPresenter> _weapons = new();
-    private List<SystemPresenter> _systems = new();
+    private readonly List<WeaponPresenter> _weapons = new();
+    private readonly List<SystemPresenter> _systems = new();
+
+    private bool _isMoveUnitOrderStateActive;
+
+    public void Init()
+    {
+        moveUnitBtn.onClick.AddListener(OnMoveUnitBtnClick);
+    }
+
+    private void OnMoveUnitBtnClick()
+    {
+        UpdateMoveUnitOrderState(!_isMoveUnitOrderStateActive);
+    }
 
     public void Setup(ViewInfo viewInfo)
     {
         _viewInfo = viewInfo;
 
         UpdateHpView();
-        UpdateActionPointsView();
+        UpdateActionsView();
         UpdateWeaponsView();
         UpdateSystemsView();
+
+        UpdateMoveUnitOrderState(false);
+    }
+
+    private void UpdateMoveUnitOrderState(bool isActive)
+    {
+        _isMoveUnitOrderStateActive = isActive;
+        GlobalEventManager.BattleField.UnitMoveOrderSetActive.HappenedWith(
+            _viewInfo.UnitPosition, _isMoveUnitOrderStateActive
+        );
     }
 
     private void UpdateHpView()
@@ -60,10 +91,12 @@ public class SelectedUnitPresenter : UIBehaviour
         hpText.text = hpInfo;
     }
 
-    private void UpdateActionPointsView()
+    private void UpdateActionsView()
     {
         var actionPointsInfo = $"Act. pts: {_viewInfo.CurrentActionPoints} / {_viewInfo.MaxActionPoints}";
         actionPointsText.text = actionPointsInfo;
+
+        moveUnitBtn.interactable = _viewInfo.CanMove;
     }
 
     private void UpdateWeaponsView()
@@ -78,7 +111,8 @@ public class SelectedUnitPresenter : UIBehaviour
         foreach (var weaponViewInfo in _viewInfo.Weapons)
         {
             var newWeapon = Instantiate(weaponPrefab, weaponsRoot);
-            newWeapon.Setup(weaponViewInfo);
+            newWeapon.Init();
+            newWeapon.Setup(weaponViewInfo, _viewInfo.CanUseWeapon);
             _weapons.Add(newWeapon);
         }
     }

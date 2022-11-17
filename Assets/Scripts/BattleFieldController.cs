@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Ext;
 using UnityEngine;
 
 public class BattleFieldController : MonoBehaviour
@@ -16,32 +17,24 @@ public class BattleFieldController : MonoBehaviour
 
     public struct Config
     {
-        public int FieldSize;
-        public BattleFieldManager.Tile[] Field;
-        public List<BattleMechManager.BattleUnitInfo> UnitInfos;
+        public BattleManager BattleManager;
     }
 
     private readonly Dictionary<Vector2Int, FieldTileController> _tiles = new();
+    private readonly Dictionary<int, BattleUnitController> _units = new();
     private Config _config;
 
     private FieldTileController _lastSelected;
+    private Vector2Int? _activeMoveOrderUnitPos;
+    private Graph.Path _highlightedPath = Graph.Path.Empty();
 
     public void Init()
     {
-        GlobalEventManager.BattleFieldGridTileSelected.Event += OnFieldGridTileSelected;
-    }
-
-    private void OnFieldGridTileSelected(BattleFieldManager.Tile tile, Vector2Int tilePos)
-    {
-        var selectedTile = GetTileController(tilePos);
-
-        if (_lastSelected)
-        {
-            _lastSelected.SetSelected(false);
-        }
-
-        selectedTile.SetSelected(true);
-        _lastSelected = selectedTile;
+        GlobalEventManager.BattleField.GridTileSelected.Event += OnFieldGridTileSelected;
+        GlobalEventManager.BattleField.UnitMoveOrderSetActive.Event += OnUnitMoveOrderSetActive;
+        GlobalEventManager.BattleField.GridTileHovered.Event += OnFieldGridTileHovered;
+        GlobalEventManager.BattleField.UnitMoved.Event += OnUnitMoved;
+        GlobalEventManager.Turns.TurnUpdated.Event += OnTurnUpdated;
     }
 
     public void Setup(Config config)
@@ -56,11 +49,103 @@ public class BattleFieldController : MonoBehaviour
         SetupCamera();
     }
 
+    private void OnFieldGridTileSelected(BattleFieldManager.Tile tile, Vector2Int tilePos)
+    {
+        if (_activeMoveOrderUnitPos.HasValue)
+        {
+            BuildMoveOrder(tilePos);
+            return;
+        }
+
+        var selectedTile = GetTileController(tilePos);
+
+        if (_lastSelected)
+        {
+            _lastSelected.SetSelected(false);
+        }
+
+        selectedTile.SetSelected(true);
+        _lastSelected = selectedTile;
+    }
+
+    private void BuildMoveOrder(Vector2Int destPos)
+    {
+        if (!_activeMoveOrderUnitPos.HasValue)
+        {
+            Debug.LogError("Chto za cert!");
+            return;
+        }
+
+        if (!_config.BattleManager.TryGetPath(_activeMoveOrderUnitPos.Value, destPos, out var path))
+        {
+            Debug.LogError($"Can't find path between {_activeMoveOrderUnitPos.Value} and {destPos}");
+            return;
+        }
+
+        if (!_config.BattleManager.TryGetUnitInPos(_activeMoveOrderUnitPos.Value, out int unitEntity))
+        {
+            Debug.LogError($"Can't find unit in pos {_activeMoveOrderUnitPos.Value}");
+            return;
+        }
+
+        var unitController = GetUnitController(unitEntity);
+        if (path.Parts.Count > unitController.UnitInfo.MoveSpeed)
+        {
+            return;
+        }
+
+        _config.BattleManager.BuildMoveOrder(unitEntity, path);
+        _activeMoveOrderUnitPos = null;
+    }
+
+    private void OnUnitMoveOrderSetActive(Vector2Int unitPos, bool isActive)
+    {
+        ClearPathHighlight();
+        if (!isActive)
+        {
+            _activeMoveOrderUnitPos = null;
+            return;
+        }
+
+        _activeMoveOrderUnitPos = unitPos;
+    }
+
+    private void OnFieldGridTileHovered(BattleFieldManager.Tile tile, Vector2Int tilePos)
+    {
+        if (!_activeMoveOrderUnitPos.HasValue)
+        {
+            return;
+        }
+        
+        HighlightPath(tilePos);
+    }
+
+    private void OnUnitMoved(int unitEntity, Vector2Int srcPos, Vector2Int destPos)
+    {
+        UpdateUnit(unitEntity);
+    }
+
+    private void OnTurnUpdated(int newTurnIndex, TurnsManager.TurnPhase turnPhase)
+    {
+        SetupUnits();
+    }
+
+    private void UpdateUnit(int unitEntity)
+    {
+        var unitController = GetUnitController(unitEntity);
+        var unitInfo = _config.BattleManager.GetBattleUnitInfo(unitEntity);
+        unitController.Setup(unitInfo, GetUnitColor(unitInfo));
+
+        var unitPos = unitInfo.Position;
+        var unitTile = GetTileController(unitPos);
+        unitTile.SetupContent(unitController.transform);
+    }
+
     private void AddTiles()
     {
-        for (var tileIndex = 0; tileIndex < _config.Field.Length; tileIndex++)
+        for (var tileIndex = 0; tileIndex < _config.BattleManager.GetField().Length; tileIndex++)
         {
-            var tilePos = BattleFieldManager.GetPositionFromIndex(tileIndex, _config.FieldSize);
+            var tilePos = BattleFieldManager.GetPositionFromIndex(tileIndex, _config.BattleManager.FieldSize);
             var tileObjectPos = new Vector3(
                 tilePos.x * tileSize,
                 -tilePos.y * tileSize,
@@ -78,10 +163,11 @@ public class BattleFieldController : MonoBehaviour
 
     private void SetupTiles()
     {
-        for (var tileIndex = 0; tileIndex < _config.Field.Length; tileIndex++)
+        var field = _config.BattleManager.GetField();
+        for (var tileIndex = 0; tileIndex < field.Length; tileIndex++)
         {
-            var currTile = _config.Field[tileIndex];
-            var tilePos = BattleFieldManager.GetPositionFromIndex(tileIndex, _config.FieldSize);
+            var currTile = field[tileIndex];
+            var tilePos = BattleFieldManager.GetPositionFromIndex(tileIndex, _config.BattleManager.FieldSize);
             var currTileController = GetTileController(tilePos);
             if (!backgrounds.TryGetValue(currTile.Type, out var backgroundSprite))
             {
@@ -101,37 +187,96 @@ public class BattleFieldController : MonoBehaviour
 
     private FieldTileController GetTileController(Vector2Int tilePos)
     {
-        Debug.Assert(BattleFieldManager.IsValidFieldPos(tilePos, _config.FieldSize));
+        Debug.Assert(BattleFieldManager.IsValidFieldPos(tilePos, _config.BattleManager.FieldSize));
 
         return _tiles[tilePos];
     }
 
+    private BattleUnitController GetUnitController(int unitEntity)
+    {
+        return _units[unitEntity];
+    }
+
+    private Color GetUnitColor(BattleMechManager.BattleUnitInfo unitInfo)
+    {
+        if (!unitControlColors.TryGetValue(unitInfo.ControlledBy, out var unitColor))
+        {
+            Debug.LogError($"Can't find unit color for unit control  {unitInfo.ControlledBy}");
+            unitColor = Color.magenta;
+        }
+
+        return unitColor;
+    }
+
     private void SetupUnits()
     {
-        foreach (var unitInfo in _config.UnitInfos)
+        var unitInfos = _config.BattleManager.GetPlayerUnitInfos();
+        foreach (var unitInfo in unitInfos)
         {
-            var unitController = Instantiate(unitPrefab);
-            if (!unitControlColors.TryGetValue(unitInfo.ControlledBy, out var unitColor))
+            if (!_units.TryGetValue(unitInfo.Entity, out var unitController))
             {
-                Debug.LogError($"Can't find unit color for unit control  {unitInfo.ControlledBy}");
-                unitColor = Color.magenta;
+                unitController = Instantiate(unitPrefab);
+                _units.Add(unitInfo.Entity, unitController);
             }
 
-            unitController.Setup(unitInfo, unitColor);
-            
-            var unitPos = unitInfo.Position;
-            var unitTile = GetTileController(unitPos);
-            unitTile.SetupContent(unitController.transform);
+            UpdateUnit(unitInfo.Entity);
         }
     }
 
     private void SetupCamera()
     {
         mainCam.transform.position = new Vector3(
-            (_config.FieldSize - 1) * tileSize / 2f,
-            -(_config.FieldSize - 1) * tileSize / 2f * (1 + cameraScreenShareCoeff - 0.5f),
+            (_config.BattleManager.FieldSize - 1) * tileSize / 2f,
+            -(_config.BattleManager.FieldSize - 1) * tileSize / 2f * (1 + cameraScreenShareCoeff - 0.5f),
             mainCam.transform.position.z
         );
-        mainCam.orthographicSize = _config.FieldSize * tileSize / 2f * (1 + cameraScreenShareCoeff - 0.5f);
+        mainCam.orthographicSize = _config.BattleManager.FieldSize * tileSize / 2f * (1 + cameraScreenShareCoeff - 0.5f);
+    }
+
+    private void HighlightPath(Vector2Int destPos)
+    {
+        ClearPathHighlight();
+
+        if (!_activeMoveOrderUnitPos.HasValue)
+        {
+            return;
+        }
+        
+        if (!_config.BattleManager.TryGetPath(_activeMoveOrderUnitPos.Value, destPos, out var path))
+        {
+            return;
+        }
+
+        if (!_config.BattleManager.TryGetUnitInPos(_activeMoveOrderUnitPos.Value, out int unitEntity))
+        {
+            return;
+        }
+
+        var unitController = GetUnitController(unitEntity);
+        if (path.Parts.Count > unitController.UnitInfo.MoveSpeed)
+        {
+            return;
+        }
+            
+        foreach (var pathPart in path.Parts)
+        {
+            var tilePos = pathPart.Node.Position.ToV2I();
+            var tileControllerToHighlight = GetTileController(tilePos);
+            tileControllerToHighlight.SetHighlighted(true);
+        }
+
+        _highlightedPath = path;
+    }
+
+    private void ClearPathHighlight()
+    {
+        foreach (var pathPart in _highlightedPath.Parts)
+        {
+            var tilePos = pathPart.Node.Position.ToV2I();
+            var tileControllerToHighlight = GetTileController(tilePos);
+            tileControllerToHighlight.SetHighlighted(false);
+        }
+
+        _highlightedPath = Graph.Path.Empty();
     }
 }

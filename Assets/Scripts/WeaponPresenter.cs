@@ -29,12 +29,13 @@ public class WeaponPresenter : UIBehaviour
         Debug.Log($"Use weapon {weaponName} placeholder");
     }
 
-    public void Setup(ViewInfo viewInfo)
+    public void Setup(ViewInfo viewInfo, bool canUseWeapon)
     {
         _viewInfo = viewInfo;
 
         weaponName.text = _viewInfo.WeaponId;
         weaponStats.text = GetWeaponStatsText(_viewInfo);
+        useWeaponButton.interactable = canUseWeapon;
     }
 
     private static string GetWeaponStatsText(ViewInfo viewInfo)

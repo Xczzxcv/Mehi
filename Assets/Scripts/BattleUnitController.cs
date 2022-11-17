@@ -4,11 +4,11 @@ public class BattleUnitController : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer img;
 
-    private BattleMechManager.BattleUnitInfo _unitInfo;
-    
+    public BattleMechManager.BattleUnitInfo UnitInfo { get; private set; }
+
     public void Setup(BattleMechManager.BattleUnitInfo unitInfo, Color unitColor)
     {
-        _unitInfo = unitInfo;
+        UnitInfo = unitInfo;
 
         img.color = unitColor;
     }

@@ -17,9 +17,13 @@ public class EcsManager : MonoBehaviour
     private IEcsSystems _weaponSystems;
     private EnvironmentServices _environmentServices;
 
+    private int _lastProcessedTurnIndex;
+
     private void Awake()
     {
         World = new EcsWorld();
+        
+        GlobalEventManager.Turns.TurnUpdated.Event += OnTurnUpdated;
     }
 
     public void Setup()
@@ -34,7 +38,6 @@ public class EcsManager : MonoBehaviour
     {
         _turnSystems = new EcsSystems(World);
         _turnSystems
-            .Add(new TurnUpdateSystem(_environmentServices))
             .Add(new RefreshActionPoints(_environmentServices))
             .Add(new MechRoomBurningDamageApplySystem(_environmentServices))
 #if UNITY_EDITOR
@@ -49,8 +52,10 @@ public class EcsManager : MonoBehaviour
         _systems
             .Add(new DamageApplySystem(_environmentServices))
             .Add(new MoveOrdersExecutionSystem(_environmentServices))
+            .Add(new MoveCreatureSystem(_environmentServices))
             .Add(new UseWeaponOrdersExecutionSystem(_environmentServices))
             .DelHere<MoveOrderComponent>()
+            .DelHere<UseWeaponOrderComponent>()
 #if UNITY_EDITOR
             .Add(new EcsWorldDebugSystem())
 #endif
@@ -79,8 +84,23 @@ public class EcsManager : MonoBehaviour
 
     public void OnUpdate()
     {
-        _turnSystems.Run();
         _systems.Run();
         _weaponSystems.Run();
+    }
+
+    private void OnTurnUpdated(int turnIndex, TurnsManager.TurnPhase turnPhase)
+    {
+        if (turnIndex == _lastProcessedTurnIndex)
+        {
+            return;
+        }
+
+        RunTurnSystems();
+        _lastProcessedTurnIndex = turnIndex;
+    }
+
+    private void RunTurnSystems()
+    {
+        _turnSystems.Run();
     }
 }
