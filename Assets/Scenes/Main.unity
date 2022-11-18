@@ -623,13 +623,25 @@ MonoBehaviour:
     - weapon2
   weaponConfigs:
   - WeaponId: weapon1
+    UseDistance: 3
+    TargetType: 0
+    ProjectileType: 0
+    GripType: 0
     WeaponComponents:
     - rid: 9092259981470728192
     - rid: 9092259981470728193
   - WeaponId: weapon2
+    UseDistance: 0
+    TargetType: 0
+    ProjectileType: 0
+    GripType: 0
     WeaponComponents:
     - rid: 9092259981470728194
   - WeaponId: weapon3
+    UseDistance: 0
+    TargetType: 0
+    ProjectileType: 0
+    GripType: 0
     WeaponComponents:
     - rid: 9092259984142761984
     - rid: 9092259984142761985

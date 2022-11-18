@@ -147,6 +147,10 @@ public static class EntitiesFactory
         var weaponPool = world.GetPool<WeaponMainComponent>();
         ref var weaponMainComp = ref weaponPool.Add(newWeaponEntity);
         weaponMainComp.WeaponId = weaponConfig.WeaponId;
+        weaponMainComp.UseDistance = weaponConfig.UseDistance;
+        weaponMainComp.TargetType = weaponConfig.TargetType;
+        weaponMainComp.ProjectileType = weaponConfig.ProjectileType;
+        weaponMainComp.GripType = weaponConfig.GripType;
 
         foreach (var weaponComponent in weaponConfig.WeaponComponents)
         {

@@ -21,9 +21,8 @@ public class MoveCreatureSystem : EcsRunSystemBase2<PositionComponent, MoveCreat
         var posShift = destPos - posComp.Pos;
         
         var resultPos = posComp.Pos + posShift;
-        Debug.Assert(BattleFieldManager.IsValidFieldPos(resultPos, Services.BattleManager.FieldSize));
 
-        posComp.SetPos(resultPos, entity);
+        posComp.SetPos(resultPos, entity, Services.BattleManager.FieldSize);
     }
 }
 }

@@ -52,7 +52,7 @@ public class PushWeaponSystem : WeaponSystemBase<PushWeaponComponent>
             }
 
             var resultTargetPos = targetMechPosition.Pos + pushDirection * pushDistance;
-            targetMechPosition.SetPos(resultTargetPos, targetMechEntity);
+            targetMechPosition.SetPos(resultTargetPos, targetMechEntity, Services.BattleManager.FieldSize);
         }
     }
 
@@ -90,11 +90,15 @@ public class PushWeaponSystem : WeaponSystemBase<PushWeaponComponent>
         for (var i = 1; i <= pushWeapon.PushDistance; i++)
         {
             var tileToCheckPos = targetMechPosition.Pos + pushDirection * i;
-            if (Services.BattleManager.TryGetUnitInPos(tileToCheckPos, out _))
+            var isValidFieldPos = BattleFieldManager.IsValidFieldPos(tileToCheckPos, Services.BattleManager.FieldSize);
+            var noUnitAtPos = !Services.BattleManager.TryGetUnitInPos(tileToCheckPos, out _);
+            if (isValidFieldPos && noUnitAtPos)
             {
-                var pushDistance = i - 1;
-                return pushDistance;
+                continue;
             }
+
+            var pushDistance = i - 1;
+            return pushDistance;
         }
 
         return pushWeapon.PushDistance;

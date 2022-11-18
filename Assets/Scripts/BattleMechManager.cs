@@ -41,6 +41,9 @@ public class BattleMechManager
     public struct WeaponInfo
     {
         public string WeaponId;
+        public WeaponProjectileType ProjectileType;
+        public WeaponGripType GripType;
+        public int UseDistance;
         public int? Damage;
         public int? PushDistance;
         public int? StunDuration;
@@ -215,28 +218,41 @@ public class BattleMechManager
         }
 
         var unitMechComp = mechPool.Get(unitEntity);
-
         foreach (var weaponId in unitMechComp.WeaponIds)
         {
-            if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(weaponId, _config.World, 
-                    out var weaponEntity))
+            if (TryGetWeaponInfo(unitEntity, weaponId, _config.World, out var weaponInfo))
             {
-                Debug.LogError($"Unit {unitEntity} has no weapon {weaponId}");
-                continue;
+                weapons.Add(weaponInfo);
             }
-
-            var weaponInfo = new WeaponInfo
-            {
-                WeaponId = weaponId
-            };
-            AddDamageInfo(ref weaponInfo, weaponEntity);
-            AddPushInfo(ref weaponInfo, weaponEntity);
-            AddStunInfo(ref weaponInfo, weaponEntity);
-            
-            weapons.Add(weaponInfo);
         }
 
         return weapons;
+    }
+
+    private bool TryGetWeaponInfo(int unitEntity, string weaponId, EcsWorld world,
+        out WeaponInfo weaponInfo)
+    {
+        if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(weaponId, _config.World,
+                out var weaponEntity))
+        {
+            Debug.LogError($"Unit {unitEntity} has no weapon {weaponId}");
+            weaponInfo = default;
+            return false;
+        }
+
+        var weaponMainComp = world.GetComponent<WeaponMainComponent>(weaponEntity);
+        weaponInfo = new WeaponInfo
+        {
+            WeaponId = weaponId,
+            UseDistance = weaponMainComp.UseDistance,
+            ProjectileType = weaponMainComp.ProjectileType,
+            GripType = weaponMainComp.GripType,
+        };
+        AddDamageInfo(ref weaponInfo, weaponEntity);
+        AddPushInfo(ref weaponInfo, weaponEntity);
+        AddStunInfo(ref weaponInfo, weaponEntity);
+        
+        return true;
     }
 
     private void AddDamageInfo(ref WeaponInfo weaponInfo, int weaponEntity)

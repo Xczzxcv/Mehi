@@ -7,6 +7,10 @@ using UnityEngine;
 public struct WeaponConfig
 {
     public string WeaponId;
+    public int UseDistance;
+    public WeaponTargetType TargetType;
+    public WeaponProjectileType ProjectileType;
+    public WeaponGripType GripType;
     [SerializeReference, ReferencePicker]
     public List<IWeaponComponent> WeaponComponents;
 }

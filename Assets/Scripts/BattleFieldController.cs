@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Ext;
 using UnityEngine;
 
@@ -26,7 +27,7 @@ public class BattleFieldController : MonoBehaviour
 
     private FieldTileController _lastSelected;
     private Vector2Int? _activeMoveOrderUnitPos;
-    private Graph.Path _highlightedPath = Graph.Path.Empty();
+    private List<Vector2Int> _highlightedTiles = new();
 
     public void Init()
     {
@@ -34,6 +35,7 @@ public class BattleFieldController : MonoBehaviour
         GlobalEventManager.BattleField.UnitMoveOrderSetActive.Event += OnUnitMoveOrderSetActive;
         GlobalEventManager.BattleField.GridTileHovered.Event += OnFieldGridTileHovered;
         GlobalEventManager.BattleField.UnitMoved.Event += OnUnitMoved;
+        GlobalEventManager.BattleField.UseWeaponBtnClicked.Event += OnUseWeaponBtnClicked;
         GlobalEventManager.Turns.TurnUpdated.Event += OnTurnUpdated;
     }
 
@@ -100,7 +102,7 @@ public class BattleFieldController : MonoBehaviour
 
     private void OnUnitMoveOrderSetActive(Vector2Int unitPos, bool isActive)
     {
-        ClearPathHighlight();
+        ClearHighlightedTiles();
         if (!isActive)
         {
             _activeMoveOrderUnitPos = null;
@@ -123,6 +125,43 @@ public class BattleFieldController : MonoBehaviour
     private void OnUnitMoved(int unitEntity, Vector2Int srcPos, Vector2Int destPos)
     {
         UpdateUnit(unitEntity);
+    }
+
+    private void OnUseWeaponBtnClicked(int unitEntity, BattleMechManager.WeaponInfo weaponInfo)
+    {
+        _activeMoveOrderUnitPos = null;
+        HighlightWeaponDistanceArea(unitEntity, weaponInfo);
+    }
+
+    private void HighlightWeaponDistanceArea(int unitEntity, BattleMechManager.WeaponInfo weaponInfo)
+    {
+        ClearHighlightedTiles();
+        
+        var unitController = GetUnitController(unitEntity);
+        var weaponPos = unitController.UnitInfo.Position;
+
+        var weaponUseDistance = weaponInfo.UseDistance;
+        for (int i = -weaponInfo.UseDistance; i <= weaponInfo.UseDistance; i++)
+        {
+            for (int j = -weaponUseDistance; j <= weaponUseDistance; j++)
+            {
+                var posDiff = new Vector2Int(i, j);
+                var posToCheck = weaponPos + posDiff;
+                if (!BattleFieldManager.IsValidFieldPos(posToCheck, _config.BattleManager.FieldSize))
+                {
+                    continue;
+                }
+
+                if (posDiff.magnitude > weaponUseDistance)
+                {
+                    continue;
+                }
+
+                var tileController = GetTileController(posToCheck);
+                tileController.SetHighlighted(true);
+                _highlightedTiles.Add(posToCheck);
+            }
+        }
     }
 
     private void OnTurnUpdated(int newTurnIndex, TurnsManager.TurnPhase turnPhase)
@@ -235,7 +274,7 @@ public class BattleFieldController : MonoBehaviour
 
     private void HighlightPath(Vector2Int destPos)
     {
-        ClearPathHighlight();
+        ClearHighlightedTiles();
 
         if (!_activeMoveOrderUnitPos.HasValue)
         {
@@ -265,18 +304,17 @@ public class BattleFieldController : MonoBehaviour
             tileControllerToHighlight.SetHighlighted(true);
         }
 
-        _highlightedPath = path;
+        _highlightedTiles = path.Parts.Select(pathPart => pathPart.Node.Position.ToV2I()).ToList();
     }
 
-    private void ClearPathHighlight()
+    private void ClearHighlightedTiles()
     {
-        foreach (var pathPart in _highlightedPath.Parts)
+        foreach (var tilePos in _highlightedTiles)
         {
-            var tilePos = pathPart.Node.Position.ToV2I();
             var tileControllerToHighlight = GetTileController(tilePos);
             tileControllerToHighlight.SetHighlighted(false);
         }
 
-        _highlightedPath = Graph.Path.Empty();
+        _highlightedTiles.Clear();
     }
 }
