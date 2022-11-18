@@ -48,9 +48,11 @@ public class BattleMechManager
 
     public struct RoomInfo
     {
+        public int Entity;
         public int Health;
         public int MaxHealth;
         public MechSystemType SystemType;
+        public int SystemLvl;
     }
 
     private readonly Config _config;
@@ -79,7 +81,7 @@ public class BattleMechManager
     {
         return new BattleUnitInfo
         {
-            ControlledBy = GetUnitControl(unitEntity),
+            ControlledBy = GetUnitControl(unitEntity, _config.World),
             MaxHealth = GetUnitHealth(unitEntity).MaxHealth,
             Health = GetUnitHealth(unitEntity).Health,
             Shield = GetUnitHealth(unitEntity).Shield,
@@ -95,15 +97,15 @@ public class BattleMechManager
         };
     }
 
-    private ControlledBy GetUnitControl(int unitEntity)
+    public static ControlledBy GetUnitControl(int unitEntity, EcsWorld world)
     {
-        var playerControlPool = _config.World.GetPool<PlayerControlComponent>();
+        var playerControlPool = world.GetPool<PlayerControlComponent>();
         if (playerControlPool.Has(unitEntity))
         {
             return ControlledBy.Player;
         }
 
-        var aiControlPool = _config.World.GetPool<AiControlComponent>();
+        var aiControlPool = world.GetPool<AiControlComponent>();
         if (aiControlPool.Has(unitEntity))
         {
             return ControlledBy.AI;
@@ -145,12 +147,12 @@ public class BattleMechManager
     private bool GetUnitCanMove(int unitEntity)
     {
         var unitActionPoints = GetUnitActionPoints(unitEntity);
-        if (unitActionPoints <= 0)
-        {
-            return false;
-        }
+        return unitActionPoints > 0 && IsUnitTurnNow(unitEntity);
+    }
 
-        var controlledBy = GetUnitControl(unitEntity);
+    private bool IsUnitTurnNow(int unitEntity)
+    {
+        var controlledBy = GetUnitControl(unitEntity, _config.World);
         switch (_config.TurnsManager.Phase)
         {
             case TurnsManager.TurnPhase.PlayerMove when controlledBy == ControlledBy.Player:
@@ -164,7 +166,7 @@ public class BattleMechManager
     private bool GetUnitCanUseWeapon(int unitEntity)
     {
         var unitActionPoints = GetUnitActionPoints(unitEntity);
-        return unitActionPoints > 0;
+        return unitActionPoints > 0 && IsUnitTurnNow(unitEntity);
     }
 
     private List<RoomInfo> GetUnitRoomInfos(int unitEntity)
@@ -190,8 +192,11 @@ public class BattleMechManager
 
             var roomInfo = new RoomInfo
             {
+                Entity = roomEntity,
                 Health = roomHealthComp.Health,
+                MaxHealth = roomHealthComp.MaxHealth,
                 SystemType = roomComp.SystemType,
+                SystemLvl = -1
             };
             roomInfos.Add(roomInfo);
         }
@@ -287,5 +292,15 @@ public class BattleMechManager
         }
 
         EntitiesFactory.BuildMoveOrder(unitEntity, path, _config.World);
+    }
+
+    public void BuildUseWeaponOrder(int userUnitEntity, WeaponInfo usedWeaponInfo, List<int> targetRooms)
+    {
+        EntitiesFactory.BuildUseWeaponOrder(userUnitEntity, usedWeaponInfo, targetRooms, _config.World);
+    }
+
+    public static bool CanAttack(ControlledBy attackerSide, ControlledBy victimSide)
+    {
+        return attackerSide != victimSide;
     }
 }

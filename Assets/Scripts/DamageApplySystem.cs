@@ -40,26 +40,15 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
 
     private void RoomDamageApply(MechDamageEvent mechDamageEvent)
     {
-        HealthComponent roomHpComp = default;
-        if (TryGetRoomHealth(mechDamageEvent.DamageTargetRoom, ref roomHpComp))
+        if (mechDamageEvent.DamageTargetRoom.TryUnpack(World, out var mechRoomEntity))
         {
+            ref var roomHpComp = ref World.GetComponent<HealthComponent>(mechRoomEntity);
             roomHpComp.Health = Math.Max(roomHpComp.Health - mechDamageEvent.DamageAmount, 0);
         }
         else
         {
             Debug.LogError("Has no room already");
         }
-    }
-
-    private bool TryGetRoomHealth(EcsPackedEntity damageTargetRoom, ref HealthComponent healthComp)
-    {
-        if (!damageTargetRoom.TryUnpack(World, out var mechRoomEntity))
-        {
-            return false;
-        }
-
-        healthComp = World.GetComponent<HealthComponent>(mechRoomEntity);
-        return true;
     }
 
     public static bool TryAddDamageEvent(MechDamageEvent damageEvent, EcsPackedEntity mechEntityPacked,

@@ -14,7 +14,20 @@ public struct MechHealthComponent
 
 public struct PositionComponent
 {
-    public Vector2Int Pos;
+    public Vector2Int Pos { get; private set; }
+
+    public void Init(Vector2Int initPos)
+    {
+        Pos = initPos;
+    }
+
+    public void SetPos(Vector2Int newPos, int updatedEntity)
+    {
+        var oldPos = Pos;
+        Pos = newPos;
+
+        GlobalEventManager.BattleField.UnitMoved.HappenedWith(updatedEntity, oldPos, Pos);
+    }
 }
 
 public struct StatsComponent

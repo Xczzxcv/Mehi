@@ -9,6 +9,7 @@ using UnityEngine;
 public class EcsManager : MonoBehaviour
 {
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private float updatePeriod;
     
     public EcsWorld World { get; private set; }
  
@@ -18,6 +19,7 @@ public class EcsManager : MonoBehaviour
     private EnvironmentServices _environmentServices;
 
     private int _lastProcessedTurnIndex;
+    private float _lastTimeUpdate;
 
     private void Awake()
     {
@@ -79,13 +81,24 @@ public class EcsManager : MonoBehaviour
 
     private void Update()
     {
-        OnUpdate();
+        if (Time.time - _lastTimeUpdate < updatePeriod)
+        {
+            return;
+        }
+
+        _lastTimeUpdate = Time.time;
+        RunSystems();
     }
 
-    public void OnUpdate()
+    public void RunSystems()
     {
         _systems.Run();
         _weaponSystems.Run();
+    }
+
+    private void RunTurnSystems()
+    {
+        _turnSystems.Run();
     }
 
     private void OnTurnUpdated(int turnIndex, TurnsManager.TurnPhase turnPhase)
@@ -97,10 +110,5 @@ public class EcsManager : MonoBehaviour
 
         RunTurnSystems();
         _lastProcessedTurnIndex = turnIndex;
-    }
-
-    private void RunTurnSystems()
-    {
-        _turnSystems.Run();
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Ecs.Components;
+using Ecs.Systems;
 using Ext.LeoEcs;
 using Leopotam.EcsLite;
 using UnityEngine;
@@ -45,8 +47,11 @@ public static class EntitiesFactory
         mechHealthComp.Health = config.Health;
         mechHealthComp.Shield = config.Shield;
         
+        ref var mechDmgApplyComp = ref world.AddComponent<MechDamageApplyComponent>(newMechEntity);
+        mechDmgApplyComp.Events = new List<MechDamageEvent>();
+
         ref var positionComp = ref world.AddComponent<PositionComponent>(newMechEntity);
-        positionComp.Pos = config.Position;
+        positionComp.Init(config.Position);
         
         ref var moveCreatureComp = ref world.AddComponent<MoveCreatureComponent>(newMechEntity);
         moveCreatureComp.Path = new Queue<MoveCreatureComponent.PathPart>();
@@ -162,5 +167,20 @@ public static class EntitiesFactory
     {
         ref var moveOrder = ref world.AddComponent<MoveOrderComponent>(unitEntity);
         moveOrder.Path = path;
+    }
+
+    public static void BuildUseWeaponOrder(int userUnitEntity, BattleMechManager.WeaponInfo usedWeaponInfo,
+        List<int> targetRooms, EcsWorld world)
+    {
+        ref var useWeaponOrder = ref world.AddComponent<UseWeaponOrderComponent>(userUnitEntity);
+        if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(usedWeaponInfo.WeaponId, world,
+                out var weaponEntity))
+        {
+            Debug.LogError($"Can't find weapon {usedWeaponInfo.WeaponId}");
+            return;
+        }
+
+        useWeaponOrder.WeaponEntity = world.PackEntity(weaponEntity);
+        useWeaponOrder.WeaponTarget = InputWeaponTarget.BuildTargetRooms(targetRooms.Select(world.PackEntity));
     }
 }

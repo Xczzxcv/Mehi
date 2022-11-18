@@ -39,7 +39,7 @@ public class PushWeaponSystem : WeaponSystemBase<PushWeaponComponent>
                 continue;
             }
 
-            ref var weaponUserMechPosition = ref positionPool.Get(targetMechEntity);
+            ref var weaponUserMechPosition = ref positionPool.Get(weaponUserEntity);
             ref var targetMechPosition = ref positionPool.Get(targetMechEntity);
 
             var posDiff = targetMechPosition.Pos - weaponUserMechPosition.Pos;
@@ -51,7 +51,8 @@ public class PushWeaponSystem : WeaponSystemBase<PushWeaponComponent>
                 continue;
             }
 
-            targetMechPosition.Pos += pushDirection * pushDistance;
+            var resultTargetPos = targetMechPosition.Pos + pushDirection * pushDistance;
+            targetMechPosition.SetPos(resultTargetPos, targetMechEntity);
         }
     }
 
@@ -86,17 +87,17 @@ public class PushWeaponSystem : WeaponSystemBase<PushWeaponComponent>
     private int GetPushDistance(in PushWeaponComponent pushWeapon, in PositionComponent targetMechPosition,
         Vector2Int pushDirection)
     {
-        var pushDistance = 0;
         for (var i = 1; i <= pushWeapon.PushDistance; i++)
         {
             var tileToCheckPos = targetMechPosition.Pos + pushDirection * i;
             if (Services.BattleManager.TryGetUnitInPos(tileToCheckPos, out _))
             {
-                pushDistance = i - 1;
+                var pushDistance = i - 1;
+                return pushDistance;
             }
         }
 
-        return pushDistance;
+        return pushWeapon.PushDistance;
     }
 }
 }

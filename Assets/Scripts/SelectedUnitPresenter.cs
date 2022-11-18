@@ -47,6 +47,45 @@ public class SelectedUnitPresenter : UIBehaviour
                 Weapons = new List<WeaponPresenter.ViewInfo>()
             };
         }
+
+        public static ViewInfo BuildFromBattleInfo(BattleMechManager.BattleUnitInfo battleUnitInfo)
+        {
+            return new ViewInfo
+            {
+                ControlledBy = battleUnitInfo.ControlledBy,
+                MaxHp = battleUnitInfo.MaxHealth,
+                CurrentHp = battleUnitInfo.Health,
+                ShieldAmount = battleUnitInfo.Shield,
+                MaxActionPoints = battleUnitInfo.MaxActionPoints,
+                CurrentActionPoints = battleUnitInfo.ActionPoints,
+                CanMove = battleUnitInfo.CanMove,
+                CanUseWeapon = battleUnitInfo.CanUseWeapon,
+                UnitPosition = battleUnitInfo.Position,
+                Weapons = GetUnitWeapons(battleUnitInfo),
+                Systems = GetUnitSystems(battleUnitInfo),
+            };
+        }
+        
+        private static List<WeaponPresenter.ViewInfo> GetUnitWeapons(BattleMechManager.BattleUnitInfo battleUnitInfo)
+        {
+            var unitWeaponViews = new List<WeaponPresenter.ViewInfo>();
+            foreach (var weaponInfo in battleUnitInfo.Weapons)
+            {
+                var weaponView = new WeaponPresenter.ViewInfo
+                {
+                    UnitEntity = battleUnitInfo.Entity,
+                    WeaponInfo = weaponInfo,
+                };
+                unitWeaponViews.Add(weaponView);
+            }
+
+            return unitWeaponViews;
+        }
+
+        private static List<SystemPresenter.ViewInfo> GetUnitSystems(BattleMechManager.BattleUnitInfo battleUnitInfo)
+        {
+            return new List<SystemPresenter.ViewInfo>();
+        }
     }
 
     private ViewInfo _viewInfo;

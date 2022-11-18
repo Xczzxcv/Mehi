@@ -82,4 +82,10 @@ public class BattleManager
     {
         _mechManager.BuildMoveOrder(unitEntity, path);
     }
+
+    public void BuildUseWeaponOrder(int userUnitEntity, BattleMechManager.WeaponInfo usedWeaponInfo,
+        List<int> targetRooms)
+    {
+        _mechManager.BuildUseWeaponOrder(userUnitEntity, usedWeaponInfo, targetRooms);
+    }
 }

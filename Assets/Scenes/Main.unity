@@ -594,6 +594,33 @@ MonoBehaviour:
     InitWeapons:
     - weapon1
     - weapon2
+  - Control: 2
+    Rooms:
+    - SystemConfig:
+        Type: 1
+        Level: 1
+        IsActive: 1
+      Health: 3
+    - SystemConfig:
+        Type: 2
+        Level: 2
+        IsActive: 0
+      Health: 4
+    RightHandsAmount: 1
+    LeftHandsAmount: 1
+    RightLegsAmount: 1
+    LeftLegsAmount: 1
+    Health: 5
+    Shield: 2
+    Position: {x: 2, y: 3}
+    RedStats: 1
+    GreenStats: 2
+    BlueStats: 3
+    ActionPoints: 2
+    MoveSpeed: 4
+    InitWeapons:
+    - weapon1
+    - weapon2
   weaponConfigs:
   - WeaponId: weapon1
     WeaponComponents:
@@ -746,6 +773,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 547186783}
+  updatePeriod: 0.2
 --- !u!4 &1176894223
 Transform:
   m_ObjectHideFlags: 0

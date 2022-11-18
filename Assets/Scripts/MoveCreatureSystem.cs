@@ -23,10 +23,7 @@ public class MoveCreatureSystem : EcsRunSystemBase2<PositionComponent, MoveCreat
         var resultPos = posComp.Pos + posShift;
         Debug.Assert(BattleFieldManager.IsValidFieldPos(resultPos, Services.BattleManager.FieldSize));
 
-        var oldPos = posComp.Pos;
-        posComp.Pos = resultPos;
-        
-        GlobalEventManager.BattleField.UnitMoved.HappenedWith(entity, oldPos, posComp.Pos);
+        posComp.SetPos(resultPos, entity);
     }
 }
 }

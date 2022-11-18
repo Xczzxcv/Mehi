@@ -11,10 +11,8 @@ public class WeaponPresenter : UIBehaviour
  
     public struct ViewInfo
     {
-        public string WeaponId;
-        public int? Damage;
-        public int? StunDuration;
-        public int? PushDistance;
+        public int UnitEntity;
+        public BattleMechManager.WeaponInfo WeaponInfo;
     }
 
     private ViewInfo _viewInfo;
@@ -26,14 +24,15 @@ public class WeaponPresenter : UIBehaviour
 
     private void OnUseWeaponBtnClick()
     {
-        Debug.Log($"Use weapon {weaponName} placeholder");
+        GlobalEventManager.BattleField.UseWeaponBtnClicked.HappenedWith(
+            _viewInfo.UnitEntity, _viewInfo.WeaponInfo);
     }
 
     public void Setup(ViewInfo viewInfo, bool canUseWeapon)
     {
         _viewInfo = viewInfo;
 
-        weaponName.text = _viewInfo.WeaponId;
+        weaponName.text = _viewInfo.WeaponInfo.WeaponId;
         weaponStats.text = GetWeaponStatsText(_viewInfo);
         useWeaponButton.interactable = canUseWeapon;
     }
@@ -41,9 +40,16 @@ public class WeaponPresenter : UIBehaviour
     private static string GetWeaponStatsText(ViewInfo viewInfo)
     {
         const string statPlaceHolder = "—";
-        var dmgText = viewInfo.Damage.HasValue ? viewInfo.Damage.Value.ToString() : statPlaceHolder;
-        var stunText = viewInfo.StunDuration.HasValue ? viewInfo.StunDuration.Value.ToString() : statPlaceHolder;
-        var pushText = viewInfo.PushDistance.HasValue ? viewInfo.PushDistance.Value.ToString() : statPlaceHolder;
+        var weaponInfo = viewInfo.WeaponInfo;
+        var dmgText = weaponInfo.Damage.HasValue 
+            ? weaponInfo.Damage.Value.ToString() 
+            : statPlaceHolder;
+        var stunText = weaponInfo.StunDuration.HasValue 
+            ? weaponInfo.StunDuration.Value.ToString()
+            : statPlaceHolder;
+        var pushText = weaponInfo.PushDistance.HasValue 
+            ? weaponInfo.PushDistance.Value.ToString() 
+            : statPlaceHolder;
         return $"Stats: dmg {dmgText}, stun {stunText}, push {pushText}";
     }
 }

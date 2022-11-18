@@ -11,6 +11,15 @@ internal class BattleFieldScreenController : MonoBehaviour
     
     private Vector2Int? _selectedTilePos;
 
+    private struct UseWeaponInfo
+    {
+        public bool UseWeaponModeActive;
+        public int WeaponUserEntity;
+        public BattleMechManager.WeaponInfo UsedWeaponInfo;
+    }
+
+    private UseWeaponInfo _useWeaponInfo;
+
     public void Init(Transform uiRoot, BattleManager battleManager)
     {
         _uiRoot = uiRoot;
@@ -18,6 +27,7 @@ internal class BattleFieldScreenController : MonoBehaviour
         
         GlobalEventManager.BattleField.GridTileSelected.Event += OnBattleFieldTileSelected;
         GlobalEventManager.Turns.TurnUpdated.Event += OnTurnUpdated;
+        GlobalEventManager.BattleField.UseWeaponBtnClicked.Event += OnUseWeaponBtnClicked;
     }
 
     public void Setup()
@@ -31,11 +41,22 @@ internal class BattleFieldScreenController : MonoBehaviour
         });
         
         _battleFieldPresenter.NextTurnPhaseBtnClicked += OnPresenterNextTurnPhaseBtnClicked;
+        _battleFieldPresenter.RoomsChoiceConfirmed += OnPresenterRoomsChoiceConfirmed;
     }
 
     private void OnPresenterNextTurnPhaseBtnClicked()
     {
         _battleManager.NextPhase();
+    }
+
+    private void OnPresenterRoomsChoiceConfirmed(List<int> selectedRooms)
+    {
+        _battleManager.BuildUseWeaponOrder(
+            _useWeaponInfo.WeaponUserEntity,
+            _useWeaponInfo.UsedWeaponInfo,
+            selectedRooms
+            );
+        _useWeaponInfo.UseWeaponModeActive = false;
     }
 
     private void OnBattleFieldTileSelected(BattleFieldManager.Tile selectedTile, Vector2Int tilePos)
@@ -54,30 +75,43 @@ internal class BattleFieldScreenController : MonoBehaviour
         var selectedPos = _selectedTilePos.Value;
 
         SelectedUnitPresenter.ViewInfo selectedUnitViewInfo;
+        RoomListPresenter.ViewInfo roomViews;
         if (_battleManager.TryGetUnitInPos(selectedPos, out var unitEntity))
         {
             var battleUnitInfo = _battleManager.GetBattleUnitInfo(unitEntity);
-            selectedUnitViewInfo = new SelectedUnitPresenter.ViewInfo
+            
+            if (IsSelectedUnitThatCanBeAttacked(battleUnitInfo))
             {
-                ControlledBy = battleUnitInfo.ControlledBy,
-                MaxHp = battleUnitInfo.MaxHealth,
-                CurrentHp = battleUnitInfo.Health,
-                ShieldAmount = battleUnitInfo.Shield,
-                MaxActionPoints = battleUnitInfo.MaxActionPoints,
-                CurrentActionPoints = battleUnitInfo.ActionPoints,
-                CanMove = battleUnitInfo.CanMove,
-                CanUseWeapon = battleUnitInfo.CanUseWeapon,
-                UnitPosition = battleUnitInfo.Position,
-                Weapons = GetUnitWeapons(battleUnitInfo),
-                Systems = GetUnitSystems(battleUnitInfo),
-            };
+                selectedUnitViewInfo = SelectedUnitPresenter.ViewInfo.BuildEmpty();
+                roomViews = RoomListPresenter.ViewInfo.BuildFromBattleInfo(battleUnitInfo, true);
+            }
+            else
+            {
+                selectedUnitViewInfo = SelectedUnitPresenter.ViewInfo.BuildFromBattleInfo(battleUnitInfo);
+                roomViews = RoomListPresenter.ViewInfo.BuildFromBattleInfo(battleUnitInfo, false);
+            }
         }
         else
         {
             selectedUnitViewInfo = SelectedUnitPresenter.ViewInfo.BuildEmpty();
+            roomViews = RoomListPresenter.ViewInfo.BuildEmpty();
         }
 
         _battleFieldPresenter.UpdateSelectedUnit(selectedUnitViewInfo);
+        _battleFieldPresenter.UpdateRoomsInfo(roomViews);
+    }
+
+    private bool IsSelectedUnitThatCanBeAttacked(BattleMechManager.BattleUnitInfo battleUnitInfo)
+    {
+        if (!_useWeaponInfo.UseWeaponModeActive)
+        {
+            return false;
+        }
+
+        var attackerControl = _battleManager.GetBattleUnitInfo(
+            _useWeaponInfo.WeaponUserEntity).ControlledBy;
+        var victimControl = battleUnitInfo.ControlledBy;
+        return BattleMechManager.CanAttack(attackerControl, victimControl);
     }
 
     private void OnTurnUpdated(int newTurnIndex, TurnsManager.TurnPhase turnPhase)
@@ -86,26 +120,10 @@ internal class BattleFieldScreenController : MonoBehaviour
         UpdateSelectedUnit();
     }
 
-    private List<WeaponPresenter.ViewInfo> GetUnitWeapons(BattleMechManager.BattleUnitInfo battleUnitInfo)
+    private void OnUseWeaponBtnClicked(int unitEntity, BattleMechManager.WeaponInfo weaponInfo)
     {
-        var unitWeaponViews = new List<WeaponPresenter.ViewInfo>();
-        foreach (var weaponInfo in battleUnitInfo.Weapons)
-        {
-            var weaponView = new WeaponPresenter.ViewInfo
-            {
-                WeaponId = weaponInfo.WeaponId,
-                Damage = weaponInfo.Damage,
-                PushDistance = weaponInfo.PushDistance,
-                StunDuration = weaponInfo.StunDuration,
-            };
-            unitWeaponViews.Add(weaponView);
-        }
-
-        return unitWeaponViews;
-    }
-
-    private List<SystemPresenter.ViewInfo> GetUnitSystems(BattleMechManager.BattleUnitInfo battleUnitInfo)
-    {
-        return new List<SystemPresenter.ViewInfo>();
+        _useWeaponInfo.WeaponUserEntity = unitEntity;
+        _useWeaponInfo.UsedWeaponInfo = weaponInfo;
+        _useWeaponInfo.UseWeaponModeActive = true;
     }
 }
