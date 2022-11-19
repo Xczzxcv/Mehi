@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Ecs.Components;
 using Ecs.Systems;
 using Ext.LeoEcs;
@@ -13,12 +14,19 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
     protected override void ProcessComponent(ref MechHealthComponent mechHealthComp, 
         ref MechDamageApplyComponent mechDmgApplyComp, int entity)
     {
-        foreach (var mechDamageEvent in mechDmgApplyComp.Events)
+        var dmgEventInd = 0;
+        for (; dmgEventInd < mechDmgApplyComp.Events.Count; dmgEventInd++)
         {
+            var mechDamageEvent = mechDmgApplyComp.Events[dmgEventInd];
             ProcessDamageEvent(mechDamageEvent, ref mechHealthComp, entity);
         }
-        
         mechDmgApplyComp.Events.Clear();
+
+        var someEventsWereProcessed = dmgEventInd > 0;
+        if (someEventsWereProcessed)
+        {
+            GlobalEventManager.BattleField.UnitUpdated.HappenedWith(entity);
+        }
     }
 
     private void ProcessDamageEvent(MechDamageEvent mechDamageEvent, 

@@ -26,6 +26,7 @@ internal class BattleFieldScreenController : MonoBehaviour
         _battleManager = battleManager;
         
         GlobalEventManager.BattleField.GridTileSelected.Event += OnBattleFieldTileSelected;
+        GlobalEventManager.BattleField.UnitUpdated.Event += OnUnitUpdated;
         GlobalEventManager.Turns.TurnUpdated.Event += OnTurnUpdated;
         GlobalEventManager.BattleField.UseWeaponBtnClicked.Event += OnUseWeaponBtnClicked;
     }
@@ -42,6 +43,7 @@ internal class BattleFieldScreenController : MonoBehaviour
         
         _battleFieldPresenter.NextTurnPhaseBtnClicked += OnPresenterNextTurnPhaseBtnClicked;
         _battleFieldPresenter.RoomsChoiceConfirmed += OnPresenterRoomsChoiceConfirmed;
+        _battleFieldPresenter.RepairButtonClick += OnPresenterRepairButtonClick;
     }
 
     private void OnPresenterNextTurnPhaseBtnClicked()
@@ -59,9 +61,24 @@ internal class BattleFieldScreenController : MonoBehaviour
         _useWeaponInfo.UseWeaponModeActive = false;
     }
 
+    private void OnPresenterRepairButtonClick(int unitEntity)
+    {
+        _battleManager.BuildRepairSelfOrder(unitEntity);
+    }
+
     private void OnBattleFieldTileSelected(BattleFieldManager.Tile selectedTile, Vector2Int tilePos)
     {
         _selectedTilePos = tilePos;
+        UpdateSelectedUnit();
+    }
+
+    private void OnUnitUpdated(int updatedUnitEntity)
+    {
+        if (updatedUnitEntity != _battleFieldPresenter.SelectedUnitEntity)
+        {
+            return;
+        }
+        
         UpdateSelectedUnit();
     }
 

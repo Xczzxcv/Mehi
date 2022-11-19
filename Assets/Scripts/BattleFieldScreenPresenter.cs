@@ -21,14 +21,18 @@ public class BattleFieldScreenPresenter : UIBehaviour
 
     public event Action NextTurnPhaseBtnClicked;
     public event Action<List<int>> RoomsChoiceConfirmed;
+    public event Action<int> RepairButtonClick;
     
     private ViewInfo _viewInfo;
-    
+    public int SelectedUnitEntity => selectedUnitPresenter.View.Entity;
+
     public void Init()
     {
         nextPhaseButton.onClick.AddListener(OnNextPhaseBtnClick);
         selectedUnitPresenter.Init();
         roomsPresenter.Init();
+        
+        selectedUnitPresenter.RepairButtonClick += OnRepairButtonClick;
         roomsPresenter.RoomsChoiceConfirmed += OnRoomsChoiceConfirmed;
     }
 
@@ -48,6 +52,11 @@ public class BattleFieldScreenPresenter : UIBehaviour
     private void OnRoomsChoiceConfirmed(List<int> selectedRooms)
     {
         RoomsChoiceConfirmed?.Invoke(selectedRooms);
+    }
+
+    private void OnRepairButtonClick(int unitEntity)
+    {
+        RepairButtonClick?.Invoke(unitEntity);
     }
 
     public void UpdateSelectedUnit(SelectedUnitPresenter.ViewInfo unitInfo)

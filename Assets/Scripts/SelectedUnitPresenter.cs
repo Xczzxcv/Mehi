@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -16,9 +17,11 @@ public class SelectedUnitPresenter : UIBehaviour
     [SerializeField] private Transform systemsRoot;
     [Space]
     [SerializeField] private Button moveUnitBtn;
+    [SerializeField] private Button repairUnitBtn;
     
     public struct ViewInfo
     {
+        public int Entity;
         public BattleMechManager.ControlledBy ControlledBy;
         public int MaxHp;
         public int CurrentHp;
@@ -27,6 +30,7 @@ public class SelectedUnitPresenter : UIBehaviour
         public int CurrentActionPoints;
         public bool CanMove;
         public bool CanUseWeapon;
+        public bool CanRepairSelf;
         public Vector2Int UnitPosition;
         public List<WeaponPresenter.ViewInfo> Weapons;
         public List<SystemPresenter.ViewInfo> Systems;
@@ -35,12 +39,14 @@ public class SelectedUnitPresenter : UIBehaviour
         {
             return new ViewInfo
             {
+                Entity = -1,
                 MaxHp = 0,
                 CurrentHp = 0,
                 CurrentActionPoints = 0,
                 MaxActionPoints = 0,
                 CanMove = false,
                 CanUseWeapon = false,
+                CanRepairSelf = false,
                 UnitPosition = Vector2Int.zero,
                 ControlledBy = BattleMechManager.ControlledBy.None,
                 Systems = new List<SystemPresenter.ViewInfo>(),
@@ -52,6 +58,7 @@ public class SelectedUnitPresenter : UIBehaviour
         {
             return new ViewInfo
             {
+                Entity = battleUnitInfo.Entity,
                 ControlledBy = battleUnitInfo.ControlledBy,
                 MaxHp = battleUnitInfo.MaxHealth,
                 CurrentHp = battleUnitInfo.Health,
@@ -60,6 +67,7 @@ public class SelectedUnitPresenter : UIBehaviour
                 CurrentActionPoints = battleUnitInfo.ActionPoints,
                 CanMove = battleUnitInfo.CanMove,
                 CanUseWeapon = battleUnitInfo.CanUseWeapon,
+                CanRepairSelf = battleUnitInfo.CanRepairSelf,
                 UnitPosition = battleUnitInfo.Position,
                 Weapons = GetUnitWeapons(battleUnitInfo),
                 Systems = GetUnitSystems(battleUnitInfo),
@@ -88,7 +96,9 @@ public class SelectedUnitPresenter : UIBehaviour
         }
     }
 
-    private ViewInfo _viewInfo;
+    public event Action<int> RepairButtonClick;
+
+    public ViewInfo View;
     private readonly List<WeaponPresenter> _weapons = new();
     private readonly List<SystemPresenter> _systems = new();
 
@@ -97,16 +107,12 @@ public class SelectedUnitPresenter : UIBehaviour
     public void Init()
     {
         moveUnitBtn.onClick.AddListener(OnMoveUnitBtnClick);
-    }
-
-    private void OnMoveUnitBtnClick()
-    {
-        UpdateMoveUnitOrderState(!_isMoveUnitOrderStateActive);
+        repairUnitBtn.onClick.AddListener(OnRepairUnitBtnClick);
     }
 
     public void Setup(ViewInfo viewInfo)
     {
-        _viewInfo = viewInfo;
+        View = viewInfo;
 
         UpdateHpView();
         UpdateActionsView();
@@ -116,26 +122,37 @@ public class SelectedUnitPresenter : UIBehaviour
         UpdateMoveUnitOrderState(false);
     }
 
+    private void OnMoveUnitBtnClick()
+    {
+        UpdateMoveUnitOrderState(!_isMoveUnitOrderStateActive);
+    }
+
+    private void OnRepairUnitBtnClick()
+    {
+        RepairButtonClick?.Invoke(View.Entity);
+    }
+
     private void UpdateMoveUnitOrderState(bool isActive)
     {
         _isMoveUnitOrderStateActive = isActive;
         GlobalEventManager.BattleField.UnitMoveOrderSetActive.HappenedWith(
-            _viewInfo.UnitPosition, _isMoveUnitOrderStateActive
+            View.UnitPosition, _isMoveUnitOrderStateActive
         );
     }
 
     private void UpdateHpView()
     {
-        var hpInfo = $"Sh: {_viewInfo.ShieldAmount} HP: {_viewInfo.CurrentHp} / {_viewInfo.MaxHp}";
+        var hpInfo = $"Sh: {View.ShieldAmount} HP: {View.CurrentHp} / {View.MaxHp}";
         hpText.text = hpInfo;
     }
 
     private void UpdateActionsView()
     {
-        var actionPointsInfo = $"Act. pts: {_viewInfo.CurrentActionPoints} / {_viewInfo.MaxActionPoints}";
+        var actionPointsInfo = $"Act. pts: {View.CurrentActionPoints} / {View.MaxActionPoints}";
         actionPointsText.text = actionPointsInfo;
 
-        moveUnitBtn.interactable = _viewInfo.CanMove;
+        moveUnitBtn.interactable = View.CanMove;
+        repairUnitBtn.interactable = View.CanRepairSelf;
     }
 
     private void UpdateWeaponsView()
@@ -147,11 +164,11 @@ public class SelectedUnitPresenter : UIBehaviour
 
         _weapons.Clear();
 
-        foreach (var weaponViewInfo in _viewInfo.Weapons)
+        foreach (var weaponViewInfo in View.Weapons)
         {
             var newWeapon = Instantiate(weaponPrefab, weaponsRoot);
             newWeapon.Init();
-            newWeapon.Setup(weaponViewInfo, _viewInfo.CanUseWeapon);
+            newWeapon.Setup(weaponViewInfo, View.CanUseWeapon);
             _weapons.Add(newWeapon);
         }
     }
@@ -165,7 +182,7 @@ public class SelectedUnitPresenter : UIBehaviour
 
         _systems.Clear();
 
-        foreach (var systemViewInfo in _viewInfo.Systems)
+        foreach (var systemViewInfo in View.Systems)
         {
             var newSystem = Instantiate(systemPrefab, systemsRoot);
             newSystem.Setup(systemViewInfo);

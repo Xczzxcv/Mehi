@@ -19,6 +19,7 @@ public struct PositionComponent
         Pos = newPos;
 
         GlobalEventManager.BattleField.UnitMoved.HappenedWith(updatedEntity, oldPos, Pos);
+        GlobalEventManager.BattleField.UnitUpdated.HappenedWith(updatedEntity);
     }
 }
 }

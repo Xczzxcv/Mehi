@@ -187,4 +187,9 @@ public static class EntitiesFactory
         useWeaponOrder.WeaponEntity = world.PackEntity(weaponEntity);
         useWeaponOrder.WeaponTarget = InputWeaponTarget.BuildTargetRooms(targetRooms.Select(world.PackEntity));
     }
+
+    public static void BuildRepairSelfOrder(int unitEntity, EcsWorld world)
+    {
+        ref var repairSelfOrder = ref world.AddComponent<RepairSelfOrderComponent>(unitEntity);
+    }
 }

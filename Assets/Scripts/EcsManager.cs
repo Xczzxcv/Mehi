@@ -52,10 +52,12 @@ public class EcsManager : MonoBehaviour
     {
         _systems = new EcsSystems(World);
         _systems
+            .Add(new RepairSelfOrderExecutionSystem(_environmentServices))
             .Add(new DamageApplySystem(_environmentServices))
             .Add(new MoveOrdersExecutionSystem(_environmentServices))
             .Add(new MoveCreatureSystem(_environmentServices))
             .Add(new UseWeaponOrdersExecutionSystem(_environmentServices))
+            .DelHere<RepairSelfOrderComponent>()
             .DelHere<MoveOrderComponent>()
             .DelHere<UseWeaponOrderComponent>()
 #if UNITY_EDITOR

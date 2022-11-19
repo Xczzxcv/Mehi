@@ -34,6 +34,7 @@ public class BattleMechManager
         public int Entity;
         public bool CanMove;
         public bool CanUseWeapon;
+        public bool CanRepairSelf;
         public List<RoomInfo> Rooms;
         public List<WeaponInfo> Weapons;
     }
@@ -94,6 +95,7 @@ public class BattleMechManager
             ActionPoints = GetUnitActionPoints(unitEntity),
             CanMove = GetUnitCanMove(unitEntity),
             CanUseWeapon = GetUnitCanUseWeapon(unitEntity),
+            CanRepairSelf = GetUnitCanRepairSelf(unitEntity),
             Entity = unitEntity,
             Rooms = GetUnitRoomInfos(unitEntity),
             Weapons = GetUnitWeapons(unitEntity),
@@ -150,7 +152,19 @@ public class BattleMechManager
     private bool GetUnitCanMove(int unitEntity)
     {
         var unitActionPoints = GetUnitActionPoints(unitEntity);
-        return unitActionPoints > 0 && IsUnitTurnNow(unitEntity);
+        return unitActionPoints >= MoveOrdersExecutionSystem.MOVE_UNIT_ACTION_COST && IsUnitTurnNow(unitEntity);
+    }
+
+    private bool GetUnitCanUseWeapon(int unitEntity)
+    {
+        var unitActionPoints = GetUnitActionPoints(unitEntity);
+        return unitActionPoints >= UseWeaponOrdersExecutionSystem.USE_WEAPON_ACTION_COST && IsUnitTurnNow(unitEntity);
+    }
+
+    private bool GetUnitCanRepairSelf(int unitEntity)
+    {
+        var unitActionPoints = GetUnitActionPoints(unitEntity);
+        return unitActionPoints >= RepairSelfOrderExecutionSystem.REPAIR_ALL_ROOMS_ACTION_COST && IsUnitTurnNow(unitEntity);
     }
 
     private bool IsUnitTurnNow(int unitEntity)
@@ -166,31 +180,17 @@ public class BattleMechManager
         }
     }
 
-    private bool GetUnitCanUseWeapon(int unitEntity)
-    {
-        var unitActionPoints = GetUnitActionPoints(unitEntity);
-        return unitActionPoints > 0 && IsUnitTurnNow(unitEntity);
-    }
-
     private List<RoomInfo> GetUnitRoomInfos(int unitEntity)
     {
         var roomInfos = new List<RoomInfo>();
-        var roomFilter = _config.World.Filter<MechRoomComponent>().Inc<HealthComponent>().End();
+        var roomEntities = GetRoomEntities(unitEntity, _config.World);
+
         var roomsPool = _config.World.GetPool<MechRoomComponent>();
         var healthsPool = _config.World.GetPool<HealthComponent>();
-        foreach (var roomEntity in roomFilter)
+        
+        foreach (var roomEntity in roomEntities)
         {
             ref var roomComp = ref roomsPool.Get(roomEntity);
-            if (!roomComp.MechEntity.TryUnpack(_config.World, out var roomMechEntity))
-            {
-                continue;
-            }
-
-            if (unitEntity != roomMechEntity)
-            {
-                continue;
-            }
-
             ref var roomHealthComp = ref healthsPool.Get(roomEntity);
 
             var roomInfo = new RoomInfo
@@ -205,6 +205,30 @@ public class BattleMechManager
         }
 
         return roomInfos;
+    }
+
+    public static List<int> GetRoomEntities(int unitEntity, EcsWorld world)
+    {
+        var roomFilter = world.Filter<MechRoomComponent>().Inc<HealthComponent>().End();
+        var roomsPool = world.GetPool<MechRoomComponent>();
+        var roomEntities = new List<int>();
+        foreach (var roomEntity in roomFilter)
+        {
+            ref var roomComp = ref roomsPool.Get(roomEntity);
+            if (!roomComp.MechEntity.TryUnpack(world, out var roomMechEntity))
+            {
+                continue;
+            }
+
+            if (unitEntity != roomMechEntity)
+            {
+                continue;
+            }
+
+            roomEntities.Add(roomEntity);
+        }
+
+        return roomEntities;
     }
 
     private List<WeaponInfo> GetUnitWeapons(int unitEntity)
@@ -313,6 +337,11 @@ public class BattleMechManager
     public void BuildUseWeaponOrder(int userUnitEntity, WeaponInfo usedWeaponInfo, List<int> targetRooms)
     {
         EntitiesFactory.BuildUseWeaponOrder(userUnitEntity, usedWeaponInfo, targetRooms, _config.World);
+    }
+
+    public void BuildRepairSelfOrder(int unitEntity)
+    {
+        EntitiesFactory.BuildRepairSelfOrder(unitEntity, _config.World);
     }
 
     public static bool CanAttack(ControlledBy attackerSide, ControlledBy victimSide)

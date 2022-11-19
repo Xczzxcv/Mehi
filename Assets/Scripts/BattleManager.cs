@@ -88,4 +88,9 @@ public class BattleManager
     {
         _mechManager.BuildUseWeaponOrder(userUnitEntity, usedWeaponInfo, targetRooms);
     }
+
+    public void BuildRepairSelfOrder(int unitEntity)
+    {
+        _mechManager.BuildRepairSelfOrder(unitEntity);
+    }
 }

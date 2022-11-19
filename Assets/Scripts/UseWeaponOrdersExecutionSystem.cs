@@ -8,6 +8,8 @@ namespace Ecs.Systems
 {
 public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderComponent, ActiveCreatureComponent>
 {
+    public const int USE_WEAPON_ACTION_COST = 1;
+    
     public UseWeaponOrdersExecutionSystem(EnvironmentServices services) : base(services)
     { }
 
