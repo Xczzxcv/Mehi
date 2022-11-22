@@ -14,10 +14,6 @@ public static class EntitiesFactory
     {
         public BattleMechManager.ControlledBy Control;
         public List<MechRoomConfig> Rooms;
-        public int RightHandsAmount;
-        public int LeftHandsAmount;
-        public int RightLegsAmount;
-        public int LeftLegsAmount;
         public int Health;
         public int Shield;
         public Vector2Int Position;
@@ -26,7 +22,6 @@ public static class EntitiesFactory
         public int BlueStats;
         public int ActionPoints;
         public int MoveSpeed;
-        public List<string> InitWeapons;
     }
     
     public static EcsPackedEntity BuildMechEntity(EcsWorld world, MechConfig config)
@@ -36,11 +31,6 @@ public static class EntitiesFactory
         SetupControl(world, config.Control, newMechEntity);
         
         ref var mechComp = ref world.AddComponent<MechComponent>(newMechEntity);
-        mechComp.WeaponIds = config.InitWeapons;
-        mechComp.RightHandsAmount = config.RightHandsAmount;
-        mechComp.LeftHandsAmount = config.LeftHandsAmount;
-        mechComp.RightLegsAmount = config.RightLegsAmount;
-        mechComp.LeftLegsAmount = config.LeftLegsAmount;
 
         ref var mechHealthComp = ref world.AddComponent<MechHealthComponent>(newMechEntity);
         mechHealthComp.MaxHealth = config.Health;
@@ -75,7 +65,7 @@ public static class EntitiesFactory
 
             if (roomConfig.SystemConfig.Type != MechSystemType.None)
             {
-                BuildMechSystemEntity(world, roomConfig.SystemConfig);
+                BuildMechSystemEntity(world, newMechEntity, roomConfig.SystemConfig);
             }
         }
 
@@ -101,10 +91,11 @@ public static class EntitiesFactory
         public MechSystemType Type;
         public int Level;
         public bool IsActive;
-        public EcsPackedEntity MechEntity;
+        public string WeaponId;
     }
 
-    public static EcsPackedEntity BuildMechSystemEntity(EcsWorld world, MechSystemConfig config)
+    public static EcsPackedEntity BuildMechSystemEntity(EcsWorld world, int newMechEntity, 
+        MechSystemConfig config)
     {
         var newMechSystemEntity = world.NewEntity();
         
@@ -112,7 +103,13 @@ public static class EntitiesFactory
         mechSystemComp.Type = config.Type;
         mechSystemComp.Level = config.Level;
         mechSystemComp.IsActive = config.IsActive;
-        mechSystemComp.MechEntity = config.MechEntity;
+        mechSystemComp.MechEntity = world.PackEntity(newMechEntity);
+
+        if (MechSystemComponent.IsWeaponHandlingSystem(mechSystemComp.Type))
+        {
+            ref var mechWeaponSlot = ref world.AddComponent<MechWeaponSlotComponent>(newMechSystemEntity);
+            mechWeaponSlot.WeaponId = config.WeaponId;
+        }
         
         return world.PackEntity(newMechSystemEntity);
     }

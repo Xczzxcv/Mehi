@@ -3,6 +3,7 @@ using Ecs.Components;
 using Ecs.Components.Weapon;
 using Ecs.Systems;
 using Ext.LeoEcs;
+using Extension;
 using Leopotam.EcsLite;
 using UnityEngine;
 
@@ -152,7 +153,33 @@ public class BattleMechManager
     private bool GetUnitCanMove(int unitEntity)
     {
         var unitActionPoints = GetUnitActionPoints(unitEntity);
-        return unitActionPoints >= MoveOrdersExecutionSystem.MOVE_UNIT_ACTION_COST && IsUnitTurnNow(unitEntity);
+        if (unitActionPoints < MoveOrdersExecutionSystem.MOVE_UNIT_ACTION_COST 
+            || !IsUnitTurnNow(unitEntity))
+        {
+            return false;
+        }
+
+        var mechSystems = GetMechSystemTypes(unitEntity, _config.World);
+        return MechSystemComponent.CanMechMove(mechSystems);
+    }
+
+    public static List<MechSystemType> GetMechSystemTypes(int unitEntity, EcsWorld world)
+    {
+        var systemPool = world.GetPool<MechSystemComponent>();
+        var systemEntities = GetSystemEntities(unitEntity, world);
+        var mechSystems = new List<MechSystemType>();
+        foreach (var systemEntity in systemEntities)
+        {
+            if (!systemPool.Has(systemEntity))
+            {
+                continue;
+            }
+
+            var mechSystem = systemPool.Get(systemEntity);
+            mechSystems.Add(mechSystem.Type);
+        }
+
+        return mechSystems;
     }
 
     private bool GetUnitCanUseWeapon(int unitEntity)
@@ -209,7 +236,7 @@ public class BattleMechManager
 
     public static List<int> GetRoomEntities(int unitEntity, EcsWorld world)
     {
-        var roomFilter = world.Filter<MechRoomComponent>().Inc<HealthComponent>().End();
+        var roomFilter = world.Filter<MechRoomComponent>().End();
         var roomsPool = world.GetPool<MechRoomComponent>();
         var roomEntities = new List<int>();
         foreach (var roomEntity in roomFilter)
@@ -230,6 +257,30 @@ public class BattleMechManager
 
         return roomEntities;
     }
+    
+    public static List<int> GetSystemEntities(int unitEntity, EcsWorld world)
+    {
+        var systemsFilter = world.Filter<MechSystemComponent>().End();
+        var systemPool = world.GetPool<MechSystemComponent>();
+        var systemEntities = new List<int>();
+        foreach (var systemEntity in systemsFilter)
+        {
+            ref var systemComp = ref systemPool.Get(systemEntity);
+            if (!systemComp.MechEntity.TryUnpack(world, out var roomMechEntity))
+            {
+                continue;
+            }
+
+            if (unitEntity != roomMechEntity)
+            {
+                continue;
+            }
+
+            systemEntities.Add(systemEntity);
+        }
+
+        return systemEntities;
+    }
 
     private List<WeaponInfo> GetUnitWeapons(int unitEntity)
     {
@@ -241,8 +292,8 @@ public class BattleMechManager
             return weapons;
         }
 
-        var unitMechComp = mechPool.Get(unitEntity);
-        foreach (var weaponId in unitMechComp.WeaponIds)
+        var unitWeaponIds = GetUnitWeaponIds(unitEntity, _config.World);
+        foreach (var weaponId in unitWeaponIds)
         {
             if (TryGetWeaponInfo(unitEntity, weaponId, _config.World, out var weaponInfo))
             {
@@ -251,6 +302,30 @@ public class BattleMechManager
         }
 
         return weapons;
+    }
+
+    public static List<string> GetUnitWeaponIds(int unitEntity, EcsWorld world)
+    {
+        var systemEntities = GetSystemEntities(unitEntity, world);
+        var unitWeaponIds = new List<string>();
+        var weaponSlotPool = world.GetPool<MechWeaponSlotComponent>();
+        foreach (var systemEntity in systemEntities)
+        {
+            if (!weaponSlotPool.Has(systemEntity))
+            {
+                continue;
+            }
+
+            var weaponSlot = weaponSlotPool.Get(systemEntity);
+            if (weaponSlot.WeaponId.IsNullOrEmpty())
+            {
+                continue;
+            }
+
+            unitWeaponIds.Add(weaponSlot.WeaponId);
+        }
+
+        return unitWeaponIds;
     }
 
     private bool TryGetWeaponInfo(int unitEntity, string weaponId, EcsWorld world,

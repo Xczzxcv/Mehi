@@ -1,10 +1,10 @@
 using System;
-using System.Linq;
 using Ecs.Components;
 using Ecs.Systems;
 using Ext.LeoEcs;
 using Leopotam.EcsLite;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDamageApplyComponent>
 {
@@ -32,6 +32,12 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
     private void ProcessDamageEvent(MechDamageEvent mechDamageEvent, 
         ref MechHealthComponent mechHealthComp, int entity)
     {
+        var isHit = mechDamageEvent.HitChance <= Random.value;
+        if (!isHit)
+        {
+            return;
+        }
+        
         RoomDamageApply(mechDamageEvent);
         MechDamageApply(mechDamageEvent, ref mechHealthComp);
     }
