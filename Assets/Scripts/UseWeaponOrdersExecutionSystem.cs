@@ -147,18 +147,28 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         weaponTarget.TargetMechRooms.Add(randomRoomEntityPacked);
     }
 
-    public static bool TryGetWeaponEntity(string weaponId, EcsWorld world, out int resultWeaponEntity)
+    public static bool TryGetWeaponEntity(string weaponId, int unitEntity, EcsWorld world,
+        out int resultWeaponEntity)
     {
         var weapons = world.Filter<WeaponMainComponent>().End();
         var weaponsPool = world.GetPool<WeaponMainComponent>();
         foreach (var weaponEntity in weapons)
         {
             ref var weapon = ref weaponsPool.Get(weaponEntity);
-            if (weapon.WeaponId == weaponId)
+            if (weapon.WeaponId != weaponId)
             {
-                resultWeaponEntity = weaponEntity;
-                return true;
+                continue;
             }
+
+            var checkOwner = weapon.OwnerUnitEntity.Unpack(world, out var ownerEntity)
+                    && unitEntity == ownerEntity;
+            if (!checkOwner)
+            {
+                continue;
+            }
+
+            resultWeaponEntity = weaponEntity;
+            return true;
         }
 
         resultWeaponEntity = default;

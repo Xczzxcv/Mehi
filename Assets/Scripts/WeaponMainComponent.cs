@@ -1,7 +1,10 @@
-﻿namespace Ecs.Components
+﻿using Leopotam.EcsLite;
+
+namespace Ecs.Components
 {
 public struct WeaponMainComponent
 {
+    public EcsPackedEntity OwnerUnitEntity;
     public string WeaponId;
     public int UseDistance;
     public WeaponTargetType TargetType;

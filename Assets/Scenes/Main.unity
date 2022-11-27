@@ -570,59 +570,65 @@ MonoBehaviour:
   - Control: 1
     Rooms:
     - SystemConfig:
-        Type: 1
+        Type: 11
         Level: 1
         IsActive: 1
+        WeaponId: 
       Health: 3
     - SystemConfig:
-        Type: 2
+        Type: 8
         Level: 2
         IsActive: 0
+        WeaponId: weapon1
+      Health: 4
+    - SystemConfig:
+        Type: 7
+        Level: 2
+        IsActive: 0
+        WeaponId: weapon2
+      Health: 4
+    - SystemConfig:
+        Type: 10
+        Level: 2
+        IsActive: 0
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 9
+        Level: 2
+        IsActive: 0
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 3
+        Level: 2
+        IsActive: 0
+        WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 2
         Level: 2
         IsActive: 0
+        WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 2
         Level: 2
         IsActive: 0
+        WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 2
         Level: 2
         IsActive: 0
+        WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 2
         Level: 2
         IsActive: 0
+        WeaponId: 
       Health: 4
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-      Health: 4
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-      Health: 4
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-      Health: 4
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-      Health: 4
-    RightHandsAmount: 1
-    LeftHandsAmount: 100000000
-    RightLegsAmount: 1
-    LeftLegsAmount: 1
     Health: 5
     Shield: 2
     Position: {x: 0, y: 1}
@@ -631,25 +637,20 @@ MonoBehaviour:
     BlueStats: 3
     ActionPoints: 2
     MoveSpeed: 10
-    InitWeapons:
-    - weapon1
-    - weapon2
   - Control: 2
     Rooms:
     - SystemConfig:
         Type: 1
         Level: 1
         IsActive: 1
+        WeaponId: 
       Health: 3
     - SystemConfig:
         Type: 2
         Level: 2
         IsActive: 0
+        WeaponId: 
       Health: 4
-    RightHandsAmount: 1
-    LeftHandsAmount: 1
-    RightLegsAmount: 1
-    LeftLegsAmount: 1
     Health: 5
     Shield: 2
     Position: {x: 2, y: 3}
@@ -658,25 +659,20 @@ MonoBehaviour:
     BlueStats: 3
     ActionPoints: 2
     MoveSpeed: 4
-    InitWeapons:
-    - weapon1
-    - weapon2
   - Control: 0
     Rooms:
     - SystemConfig:
         Type: 1
         Level: 1
         IsActive: 1
+        WeaponId: 
       Health: 3
     - SystemConfig:
         Type: 2
         Level: 2
         IsActive: 0
+        WeaponId: 
       Health: 4
-    RightHandsAmount: 1
-    LeftHandsAmount: 1
-    RightLegsAmount: 1
-    LeftLegsAmount: 1
     Health: 5
     Shield: 2
     Position: {x: 4, y: 3}
@@ -685,25 +681,20 @@ MonoBehaviour:
     BlueStats: 3
     ActionPoints: 2
     MoveSpeed: 4
-    InitWeapons:
-    - weapon1
-    - weapon2
   - Control: 0
     Rooms:
     - SystemConfig:
         Type: 1
         Level: 1
         IsActive: 1
+        WeaponId: 
       Health: 3
     - SystemConfig:
         Type: 2
         Level: 2
         IsActive: 0
+        WeaponId: 
       Health: 4
-    RightHandsAmount: 1
-    LeftHandsAmount: 1
-    RightLegsAmount: 1
-    LeftLegsAmount: 1
     Health: 5
     Shield: 2
     Position: {x: 8, y: 3}
@@ -712,25 +703,20 @@ MonoBehaviour:
     BlueStats: 3
     ActionPoints: 2
     MoveSpeed: 4
-    InitWeapons:
-    - weapon1
-    - weapon2
   - Control: 0
     Rooms:
     - SystemConfig:
         Type: 1
         Level: 1
         IsActive: 1
+        WeaponId: 
       Health: 3
     - SystemConfig:
         Type: 2
         Level: 2
         IsActive: 0
+        WeaponId: 
       Health: 4
-    RightHandsAmount: 1
-    LeftHandsAmount: 1
-    RightLegsAmount: 1
-    LeftLegsAmount: 1
     Health: 5
     Shield: 2
     Position: {x: 5, y: 3}
@@ -739,9 +725,6 @@ MonoBehaviour:
     BlueStats: 3
     ActionPoints: 2
     MoveSpeed: 4
-    InitWeapons:
-    - weapon1
-    - weapon2
   weaponConfigs:
   - WeaponId: weapon1
     UseDistance: 3

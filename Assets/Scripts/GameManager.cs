@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
 
     public BattleManager BattleManager { get; private set; }
     public GameConfig Config => gameConfig;
+    public readonly Dictionary<string, WeaponConfig> WeaponConfigs = new();
 
     private void Start()
     {
@@ -44,7 +45,12 @@ public class GameManager : MonoBehaviour
             ? $"{string.Join(", ", path.Parts.Select(part => Vector2Int.RoundToInt(part.Node.Position)))}"
             : string.Empty;
         Debug.Log($"hasPath: {hasPath} path: {pathString}");
-
+        
+        foreach (var weaponConfig in weaponConfigs)
+        {
+            WeaponConfigs.Add(weaponConfig.WeaponId, weaponConfig);
+        }
+        
         ecsManager.Setup();
         BuildEcsEntities();
 
@@ -58,14 +64,9 @@ public class GameManager : MonoBehaviour
 
     private void BuildEcsEntities()
     {
-        foreach (var weaponConfig in weaponConfigs)
-        {
-            EntitiesFactory.BuildWeapon(ecsManager.World, weaponConfig);
-        }
-
         foreach (var mechConfig in mechConfigs)
         {
-            EntitiesFactory.BuildMechEntity(ecsManager.World, mechConfig);
+            EntitiesFactory.BuildMechEntity(ecsManager.World, mechConfig, WeaponConfigs);
         }
     }
 }

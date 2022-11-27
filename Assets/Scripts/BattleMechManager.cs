@@ -331,7 +331,7 @@ public class BattleMechManager
     private bool TryGetWeaponInfo(int unitEntity, string weaponId, EcsWorld world,
         out WeaponInfo weaponInfo)
     {
-        if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(weaponId, _config.World,
+        if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(weaponId, unitEntity, _config.World,
                 out var weaponEntity))
         {
             Debug.LogError($"Unit {unitEntity} has no weapon {weaponId}");

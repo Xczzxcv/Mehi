@@ -24,7 +24,8 @@ public static class EntitiesFactory
         public int MoveSpeed;
     }
     
-    public static EcsPackedEntity BuildMechEntity(EcsWorld world, MechConfig config)
+    public static EcsPackedEntity BuildMechEntity(EcsWorld world, MechConfig config, 
+        Dictionary<string, WeaponConfig> weaponConfigs)
     {
         var newMechEntity = world.NewEntity();
 
@@ -65,7 +66,7 @@ public static class EntitiesFactory
 
             if (roomConfig.SystemConfig.Type != MechSystemType.None)
             {
-                BuildMechSystemEntity(world, newMechEntity, roomConfig.SystemConfig);
+                BuildMechSystemEntity(world, newMechEntityPacked, roomConfig.SystemConfig, weaponConfigs);
             }
         }
 
@@ -88,14 +89,15 @@ public static class EntitiesFactory
     [Serializable]
     public struct MechSystemConfig
     {
+        [SearchableEnum]
         public MechSystemType Type;
         public int Level;
         public bool IsActive;
         public string WeaponId;
     }
 
-    public static EcsPackedEntity BuildMechSystemEntity(EcsWorld world, int newMechEntity, 
-        MechSystemConfig config)
+    public static EcsPackedEntity BuildMechSystemEntity(EcsWorld world, EcsPackedEntity newMechEntityPacked,
+        MechSystemConfig config, Dictionary<string, WeaponConfig> weaponConfigs)
     {
         var newMechSystemEntity = world.NewEntity();
         
@@ -103,12 +105,15 @@ public static class EntitiesFactory
         mechSystemComp.Type = config.Type;
         mechSystemComp.Level = config.Level;
         mechSystemComp.IsActive = config.IsActive;
-        mechSystemComp.MechEntity = world.PackEntity(newMechEntity);
+        mechSystemComp.MechEntity = newMechEntityPacked;
 
         if (MechSystemComponent.IsWeaponHandlingSystem(mechSystemComp.Type))
         {
             ref var mechWeaponSlot = ref world.AddComponent<MechWeaponSlotComponent>(newMechSystemEntity);
             mechWeaponSlot.WeaponId = config.WeaponId;
+            
+            var weaponConfig = weaponConfigs[config.WeaponId];
+            BuildWeapon(world, newMechEntityPacked, weaponConfig);
         }
         
         return world.PackEntity(newMechSystemEntity);
@@ -137,13 +142,15 @@ public static class EntitiesFactory
         return world.PackEntity(newMechRoomEntity);
     }
 
-    public static EcsPackedEntity BuildWeapon(EcsWorld world, WeaponConfig weaponConfig)
+    public static EcsPackedEntity BuildWeapon(EcsWorld world, EcsPackedEntity weaponOwnerEntity, 
+        WeaponConfig weaponConfig)
     {
         var newWeaponEntity = world.NewEntity();
         
         var weaponPool = world.GetPool<WeaponMainComponent>();
         ref var weaponMainComp = ref weaponPool.Add(newWeaponEntity);
         weaponMainComp.WeaponId = weaponConfig.WeaponId;
+        weaponMainComp.OwnerUnitEntity = weaponOwnerEntity;
         weaponMainComp.UseDistance = weaponConfig.UseDistance;
         weaponMainComp.TargetType = weaponConfig.TargetType;
         weaponMainComp.ProjectileType = weaponConfig.ProjectileType;
@@ -174,8 +181,8 @@ public static class EntitiesFactory
         List<int> targetRooms, EcsWorld world)
     {
         ref var useWeaponOrder = ref world.AddComponent<UseWeaponOrderComponent>(userUnitEntity);
-        if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(usedWeaponInfo.WeaponId, world,
-                out var weaponEntity))
+        if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(usedWeaponInfo.WeaponId, userUnitEntity,
+                world, out var weaponEntity))
         {
             Debug.LogError($"Can't find weapon {usedWeaponInfo.WeaponId}");
             return;

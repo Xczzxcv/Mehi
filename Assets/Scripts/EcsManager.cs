@@ -30,7 +30,12 @@ public class EcsManager : MonoBehaviour
 
     public void Setup()
     {
-        _environmentServices = new EnvironmentServices(World, gameManager.BattleManager, gameManager.Config);
+        _environmentServices = new EnvironmentServices(
+            World,
+            gameManager.BattleManager,
+            gameManager.Config,
+            gameManager.WeaponConfigs
+        );
         SetupTurnSystems();
         SetupSystems();
         SetupWeaponSystems();
