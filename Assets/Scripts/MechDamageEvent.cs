@@ -10,14 +10,14 @@ public struct MechDamageEvent
     public float HitChance;
 
     public static MechDamageEvent BuildFromRoom(EcsPackedEntity dmgSrc, int roomEntity, 
-        int dmgAmount, EcsWorld world)
+        int dmgAmount, EcsWorld world, float hitChance = 1f)
     {
         return new MechDamageEvent
         {
             DamageSource = dmgSrc,
             DamageTargetRoom = world.PackEntity(roomEntity),
             DamageAmount = dmgAmount,
-            HitChance = 1,
+            HitChance = hitChance,
         };
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Ecs.Components;
 using Ecs.Components.Weapon;
 using Ext.LeoEcs;
+using Leopotam.EcsLite;
 
 namespace Ecs.Systems.Weapon
 {
@@ -30,9 +31,22 @@ public class DamageWeaponSystem : WeaponSystemBase<DamageWeaponComponent>
             ref var targetRoom = ref roomPool.Get(targetRoomEntity);
 
             var newDmgEvent = MechDamageEvent.BuildFromRoom(activeWeapon.WeaponUser, targetRoomEntity,
-                damageComp.DamageAmount, World);
+                damageComp.DamageAmount, World, GetHitChance(activeWeapon.WeaponUser, World));
             DamageApplySystem.TryAddDamageEvent(newDmgEvent, targetRoom.MechEntity, World);
         }
+    }
+
+    public static float GetHitChance(EcsPackedEntity weaponUserPacked, EcsWorld world)
+    {
+        if (!weaponUserPacked.Unpack(world, out var weaponUserEntity))
+        {
+            return 0;
+        }
+
+        var mechSystemTypes = BattleMechManager.GetMechSystemTypes(weaponUserEntity, world);
+        return mechSystemTypes.Contains(MechSystemType.AimSystem_Head)
+            ? 1f
+            : 0.5f;
     }
 }
 }
