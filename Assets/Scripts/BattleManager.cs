@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Ecs.Components;
 using Leopotam.EcsLite;
 using UnityEngine;
 
@@ -84,9 +85,9 @@ public class BattleManager
     }
 
     public void BuildUseWeaponOrder(int userUnitEntity, BattleMechManager.WeaponInfo usedWeaponInfo,
-        List<int> targetRooms)
+        InputWeaponTarget weaponTarget)
     {
-        _mechManager.BuildUseWeaponOrder(userUnitEntity, usedWeaponInfo, targetRooms);
+        _mechManager.BuildUseWeaponOrder(userUnitEntity, usedWeaponInfo, weaponTarget);
     }
 
     public void BuildRepairSelfOrder(int unitEntity)

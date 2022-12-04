@@ -40,8 +40,8 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         var resultWeaponTarget = new WeaponTarget
         {
             TargetType = target.TargetType,
-            TargetMechRooms = new List<EcsPackedEntity>(target.TargetMechRooms),
-            TargetMechEntities = new List<EcsPackedEntity>(target.TargetMechEntities),
+            TargetMechRooms = new List<EcsPackedEntity>(World.PackEntities(target.TargetMechRoomEntities)),
+            TargetMechEntities = new List<EcsPackedEntity>(World.PackEntities(target.TargetMechEntities)),
             TargetTiles = new List<Vector2Int>(target.TargetTiles),
         };
 
@@ -61,13 +61,8 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         ref WeaponTarget resultWeaponTarget)
     {
         var mechRoomCompPool = World.GetPool<MechRoomComponent>();
-        foreach (var targetMechRoomPacked in target.TargetMechRooms)
+        foreach (var targetMechRoomEntity in target.TargetMechRoomEntities)
         {
-            if (!targetMechRoomPacked.TryUnpack(World, out var targetMechRoomEntity))
-            {
-                continue;
-            }
-
             ref var mechRoomComp = ref mechRoomCompPool.Get(targetMechRoomEntity);
             if (!mechRoomComp.MechEntity.TryUnpack(World, out var mechEntity))
             {
@@ -84,13 +79,8 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
     private void ConvertTargetMechEntities(InputWeaponTarget target, EcsFilter rooms,
         EcsPool<MechRoomComponent> roomPool, ref WeaponTarget resultWeaponTarget)
     {
-        foreach (var targetMechEntityPacked in target.TargetMechEntities)
+        foreach (var targetMechEntity in target.TargetMechEntities)
         {
-            if (!targetMechEntityPacked.TryUnpack(World, out var targetMechEntity))
-            {
-                continue;
-            }
-
             AddRandomMechRoom(rooms, roomPool, targetMechEntity, ref resultWeaponTarget);
         }
     }

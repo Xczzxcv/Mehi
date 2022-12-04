@@ -11,7 +11,6 @@ public class RoomListPresenter : UIBehaviour
     [SerializeField] private int rowWidth;
     [SerializeField] private Transform roomsParent;
     [SerializeField] private RoomPresenter roomPrefab;
-    [SerializeField] private Button confirmRoomsChoiceBtn;
     [SerializeField] private GameObject root;
 
     public struct ViewInfo
@@ -55,44 +54,23 @@ public class RoomListPresenter : UIBehaviour
         }
     }
 
-    public event Action<List<int>> RoomsChoiceConfirmed;
-    
+    public event Action<int> RoomClicked;
+
     private ViewInfo _view;
     private readonly Dictionary<int, RoomPresenter> _rooms = new();
 
     public void Init()
     {
         UpdateGridWidth();
-        confirmRoomsChoiceBtn.onClick.AddListener(OnConfirmRoomsChoiceClick);
+
+        GlobalEventManager.BattleField.RoomSelectedAsWeaponTarget.Event += OnRoomSelectedAsWeaponTarget;
     }
 
     public void Setup(ViewInfo view)
     {
         _view = view;
         
-        confirmRoomsChoiceBtn.interactable = _view.RoomsCanBeSelected;
-
         UpdateRooms();
-    }
-
-    private void OnConfirmRoomsChoiceClick()
-    {
-        if (!_view.RoomsCanBeSelected)
-        {
-            return;
-        }
-
-        var selectedRooms = _rooms
-            .Where(pair => pair.Value.View.Selected)
-            .Select(pair => pair.Key)
-            .ToList();
-
-        foreach (var roomPresenter in _rooms.Values)
-        {
-            roomPresenter.SetSelected(false);
-        }
-
-        RoomsChoiceConfirmed?.Invoke(selectedRooms);
     }
 
     private void UpdateGridWidth()
@@ -102,7 +80,7 @@ public class RoomListPresenter : UIBehaviour
 
     private void UpdateRooms()
     {
-        foreach (var (roomEntity, roomPresenter) in _rooms)
+        foreach (var roomPresenter in _rooms.Values)
         {
             roomPresenter.RoomClicked -= OnRoomClicked;
             Destroy(roomPresenter.gameObject);
@@ -132,13 +110,13 @@ public class RoomListPresenter : UIBehaviour
         {
             return;
         }
-
-        var roomPresenter = _rooms[roomEntity];
-        roomPresenter.SetSelected(!roomPresenter.View.Selected);
+        
+        RoomClicked?.Invoke(roomEntity);
     }
 
-    protected override void OnValidate()
+    private void OnRoomSelectedAsWeaponTarget(int roomEntity, bool selected)
     {
-        UpdateGridWidth();
+        var roomPresenter = _rooms[roomEntity];
+        roomPresenter.SetSelected(selected);
     }
 }

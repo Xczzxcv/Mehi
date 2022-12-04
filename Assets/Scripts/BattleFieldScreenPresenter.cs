@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using Ecs.Components;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,8 +20,9 @@ public class BattleFieldScreenPresenter : UIBehaviour
     }
 
     public event Action NextTurnPhaseBtnClicked;
-    public event Action<List<int>> RoomsChoiceConfirmed;
+    public event Action TargetsChoiceConfirmed;
     public event Action<int> RepairButtonClick;
+    public event Action<int> RoomClicked;
     
     private ViewInfo _viewInfo;
     public int SelectedUnitEntity => selectedUnitPresenter.View.Entity;
@@ -32,8 +33,9 @@ public class BattleFieldScreenPresenter : UIBehaviour
         selectedUnitPresenter.Init();
         roomsPresenter.Init();
         
-        selectedUnitPresenter.RepairButtonClick += OnRepairButtonClick;
-        roomsPresenter.RoomsChoiceConfirmed += OnRoomsChoiceConfirmed;
+        selectedUnitPresenter.RepairBtnClick += OnRepairBtnClick;
+        selectedUnitPresenter.ConfirmTargetsBtnClick += OnConfirmTargetsBtnClick;
+        roomsPresenter.RoomClicked += OnRoomClicked;
     }
 
     public void Setup(ViewInfo viewInfo)
@@ -49,14 +51,19 @@ public class BattleFieldScreenPresenter : UIBehaviour
         NextTurnPhaseBtnClicked?.Invoke();
     }
 
-    private void OnRoomsChoiceConfirmed(List<int> selectedRooms)
-    {
-        RoomsChoiceConfirmed?.Invoke(selectedRooms);
-    }
-
-    private void OnRepairButtonClick(int unitEntity)
+    private void OnRepairBtnClick(int unitEntity)
     {
         RepairButtonClick?.Invoke(unitEntity);
+    }
+
+    private void OnConfirmTargetsBtnClick()
+    {
+        TargetsChoiceConfirmed?.Invoke();
+    }
+
+    private void OnRoomClicked(int roomEntity)
+    {
+        RoomClicked?.Invoke(roomEntity);
     }
 
     public void UpdateSelectedUnit(SelectedUnitPresenter.ViewInfo unitInfo)
@@ -73,5 +80,10 @@ public class BattleFieldScreenPresenter : UIBehaviour
     {
         turnIndex.text = $"TURN: {turnInd}";
         turnPhase.text = $"PHASE: {phase}";
+    }
+
+    public void UpdateConfirmTargetsBtn(bool canConfirmTargets)
+    {
+        selectedUnitPresenter.UpdateConfirmTargetsBtn(canConfirmTargets);
     }
 }

@@ -10,6 +10,9 @@ public static partial class GlobalEventManager
         public static EventManager<int, Vector2Int, Vector2Int> UnitMoved;
         public static EventManager<int> UnitUpdated;
         public static EventManager<int, BattleMechManager.WeaponInfo> UseWeaponBtnClicked;
+        public static EventManager<int, bool> RoomSelectedAsWeaponTarget;
+        public static EventManager<int, bool> UnitSelectedAsWeaponTarget;
+        public static EventManager<Vector2Int, bool> TileSelectedAsWeaponTarget;
     }
 
     public static class Turns

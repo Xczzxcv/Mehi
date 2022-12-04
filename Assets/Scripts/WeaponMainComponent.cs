@@ -4,10 +4,10 @@ namespace Ecs.Components
 {
 public struct WeaponMainComponent
 {
-    public EcsPackedEntity OwnerUnitEntity;
     public string WeaponId;
+    public EcsPackedEntity OwnerUnitEntity;
+    public WeaponTargetConfig TargetConfig;
     public int UseDistance;
-    public WeaponTargetType TargetType;
     public WeaponProjectileType ProjectileType;
     public WeaponGripType GripType;
 }

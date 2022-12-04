@@ -728,22 +728,34 @@ MonoBehaviour:
   weaponConfigs:
   - WeaponId: weapon1
     UseDistance: 3
-    TargetType: 0
+    WeaponTarget:
+      TargetType: 2
+      RoomTargetsSize: {x: 1, y: 2}
+      UnitTargetsCount: 1
+      TileTargetsSize: {x: 0, y: 0}
     ProjectileType: 0
     GripType: 0
     WeaponComponents:
     - rid: 9092259981470728192
     - rid: 9092259981470728193
   - WeaponId: weapon2
-    UseDistance: 0
-    TargetType: 0
+    UseDistance: 4
+    WeaponTarget:
+      TargetType: 3
+      RoomTargetsSize: {x: 0, y: 0}
+      UnitTargetsCount: 0
+      TileTargetsSize: {x: 2, y: 2}
     ProjectileType: 0
     GripType: 0
     WeaponComponents:
     - rid: 9092259981470728194
   - WeaponId: weapon3
-    UseDistance: 0
-    TargetType: 0
+    UseDistance: 1
+    WeaponTarget:
+      TargetType: 2
+      RoomTargetsSize: {x: 0, y: 0}
+      UnitTargetsCount: 0
+      TileTargetsSize: {x: 0, y: 0}
     ProjectileType: 0
     GripType: 0
     WeaponComponents:

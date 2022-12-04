@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Ecs.Components;
 using Ecs.Components.Weapon;
 using Ecs.Systems;
@@ -43,9 +44,11 @@ public class BattleMechManager
     public struct WeaponInfo
     {
         public string WeaponId;
+        public WeaponTargetConfig WeaponTarget;
         public WeaponProjectileType ProjectileType;
         public WeaponGripType GripType;
         public int UseDistance;
+        public int? Cooldown;
         public int? Damage;
         public int? PushDistance;
         public int? StunDuration;
@@ -343,14 +346,33 @@ public class BattleMechManager
         weaponInfo = new WeaponInfo
         {
             WeaponId = weaponId,
+            WeaponTarget = weaponMainComp.TargetConfig,
             UseDistance = weaponMainComp.UseDistance,
             ProjectileType = weaponMainComp.ProjectileType,
             GripType = weaponMainComp.GripType,
+            Cooldown = TryGetWeaponCooldown(weaponEntity, out var cd) 
+                ? cd 
+                : null,
         };
         AddDamageInfo(ref weaponInfo, weaponEntity);
         AddPushInfo(ref weaponInfo, weaponEntity);
         AddStunInfo(ref weaponInfo, weaponEntity);
         
+        return true;
+    }
+
+    private bool TryGetWeaponCooldown(int weaponEntity, out int cd)
+    {
+        var cooldownPool = _config.World.GetPool<HasCooldownComponent>();
+        if (!cooldownPool.Has(weaponEntity))
+        {
+            cd = default;
+            return false;
+        }
+
+        var weaponCdComp = cooldownPool.Get(weaponEntity);
+        var cooldownLastUntilTurn = weaponCdComp.LastUseTurn + weaponCdComp.Cooldown;
+        cd = Math.Max(0, _config.TurnsManager.TurnIndex - cooldownLastUntilTurn);
         return true;
     }
 
@@ -409,9 +431,9 @@ public class BattleMechManager
         EntitiesFactory.BuildMoveOrder(unitEntity, path, _config.World);
     }
 
-    public void BuildUseWeaponOrder(int userUnitEntity, WeaponInfo usedWeaponInfo, List<int> targetRooms)
+    public void BuildUseWeaponOrder(int userUnitEntity, WeaponInfo usedWeaponInfo, InputWeaponTarget weaponTarget)
     {
-        EntitiesFactory.BuildUseWeaponOrder(userUnitEntity, usedWeaponInfo, targetRooms, _config.World);
+        EntitiesFactory.BuildUseWeaponOrder(userUnitEntity, usedWeaponInfo, weaponTarget, _config.World);
     }
 
     public void BuildRepairSelfOrder(int unitEntity)

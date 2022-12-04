@@ -18,6 +18,7 @@ public class SelectedUnitPresenter : UIBehaviour
     [Space]
     [SerializeField] private Button moveUnitBtn;
     [SerializeField] private Button repairUnitBtn;
+    [SerializeField] private Button confirmTargetsBtn;
     
     public struct ViewInfo
     {
@@ -29,8 +30,9 @@ public class SelectedUnitPresenter : UIBehaviour
         public int MaxActionPoints;
         public int CurrentActionPoints;
         public bool CanMove;
-        public bool CanUseWeapon;
+        public bool CanUseWeapons;
         public bool CanRepairSelf;
+        public bool CanConfirmTargets;
         public Vector2Int UnitPosition;
         public List<WeaponPresenter.ViewInfo> Weapons;
         public List<SystemPresenter.ViewInfo> Systems;
@@ -45,8 +47,9 @@ public class SelectedUnitPresenter : UIBehaviour
                 CurrentActionPoints = 0,
                 MaxActionPoints = 0,
                 CanMove = false,
-                CanUseWeapon = false,
+                CanUseWeapons = false,
                 CanRepairSelf = false,
+                CanConfirmTargets = false,
                 UnitPosition = Vector2Int.zero,
                 ControlledBy = BattleMechManager.ControlledBy.None,
                 Systems = new List<SystemPresenter.ViewInfo>(),
@@ -66,8 +69,9 @@ public class SelectedUnitPresenter : UIBehaviour
                 MaxActionPoints = battleUnitInfo.MaxActionPoints,
                 CurrentActionPoints = battleUnitInfo.ActionPoints,
                 CanMove = battleUnitInfo.CanMove,
-                CanUseWeapon = battleUnitInfo.CanUseWeapon,
+                CanUseWeapons = battleUnitInfo.CanUseWeapon,
                 CanRepairSelf = battleUnitInfo.CanRepairSelf,
+                CanConfirmTargets = false,
                 UnitPosition = battleUnitInfo.Position,
                 Weapons = GetUnitWeapons(battleUnitInfo),
                 Systems = GetUnitSystems(battleUnitInfo),
@@ -96,7 +100,8 @@ public class SelectedUnitPresenter : UIBehaviour
         }
     }
 
-    public event Action<int> RepairButtonClick;
+    public event Action<int> RepairBtnClick;
+    public event Action ConfirmTargetsBtnClick;
 
     public ViewInfo View;
     private readonly List<WeaponPresenter> _weapons = new();
@@ -108,6 +113,7 @@ public class SelectedUnitPresenter : UIBehaviour
     {
         moveUnitBtn.onClick.AddListener(OnMoveUnitBtnClick);
         repairUnitBtn.onClick.AddListener(OnRepairUnitBtnClick);
+        confirmTargetsBtn.onClick.AddListener(OnConfirmTargetsBtnClick);
     }
 
     public void Setup(ViewInfo viewInfo)
@@ -129,7 +135,17 @@ public class SelectedUnitPresenter : UIBehaviour
 
     private void OnRepairUnitBtnClick()
     {
-        RepairButtonClick?.Invoke(View.Entity);
+        RepairBtnClick?.Invoke(View.Entity);
+    }
+
+    private void OnConfirmTargetsBtnClick()
+    {
+        if (!View.CanConfirmTargets)
+        {
+            return;
+        }
+
+        ConfirmTargetsBtnClick?.Invoke();
     }
 
     private void UpdateMoveUnitOrderState(bool isActive)
@@ -153,6 +169,7 @@ public class SelectedUnitPresenter : UIBehaviour
 
         moveUnitBtn.interactable = View.CanMove;
         repairUnitBtn.interactable = View.CanRepairSelf;
+        confirmTargetsBtn.interactable = View.CanConfirmTargets;
     }
 
     private void UpdateWeaponsView()
@@ -168,7 +185,7 @@ public class SelectedUnitPresenter : UIBehaviour
         {
             var newWeapon = Instantiate(weaponPrefab, weaponsRoot);
             newWeapon.Init();
-            newWeapon.Setup(weaponViewInfo, View.CanUseWeapon);
+            newWeapon.Setup(weaponViewInfo, View.CanUseWeapons);
             _weapons.Add(newWeapon);
         }
     }
@@ -188,5 +205,11 @@ public class SelectedUnitPresenter : UIBehaviour
             newSystem.Setup(systemViewInfo);
             _systems.Add(newSystem);
         }
+    }
+
+    public void UpdateConfirmTargetsBtn(bool canConfirmTargets)
+    {
+        View.CanConfirmTargets = canConfirmTargets;
+        confirmTargetsBtn.interactable = View.CanConfirmTargets;
     }
 }

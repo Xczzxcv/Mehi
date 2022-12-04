@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   img: {fileID: 7723320271431618787}
+  selectedAsTargetColor: {r: 0.89411765, g: 0.69411767, b: 0.67058825, a: 1}
 --- !u!1 &896598232745344589
 GameObject:
   m_ObjectHideFlags: 0

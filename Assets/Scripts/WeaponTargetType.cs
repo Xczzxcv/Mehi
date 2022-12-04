@@ -1,7 +1,7 @@
 ﻿public enum WeaponTargetType
 {
     None,
-    Unit,
     Rooms,
+    Unit,
     BattleFieldTiles
 }

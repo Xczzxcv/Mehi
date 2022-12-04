@@ -206,6 +206,7 @@ RectTransform:
   - {fileID: 4195422328100372592}
   - {fileID: 1724190603037846313}
   - {fileID: 8218168794354583060}
+  - {fileID: 5535516074307896707}
   - {fileID: 3620965488701535498}
   - {fileID: 4315407747021431464}
   m_Father: {fileID: 284897760435771371}
@@ -236,6 +237,7 @@ MonoBehaviour:
   systemsRoot: {fileID: 4315407747021431464}
   moveUnitBtn: {fileID: 4502092792890346645}
   repairUnitBtn: {fileID: 7743701435863191513}
+  confirmTargetsBtn: {fileID: 6533140672643588100}
 --- !u!1 &284897760435771368
 GameObject:
   m_ObjectHideFlags: 0
@@ -529,7 +531,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 284897759061660538}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.61, y: 0}
   m_AnchorMax: {x: 1, y: 1}
@@ -797,7 +799,7 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 284897759061660538}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.21, y: 0}
   m_AnchorMax: {x: 0.6, y: 1}
@@ -1900,7 +1902,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: CONFIRM ROOMS
+  m_text: CONFIRM TARGETS
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1927,7 +1929,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 29.95
+  m_fontSize: 24.1
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2074,11 +2076,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6477436833336402563}
-  m_Father: {fileID: 3064989659554012019}
-  m_RootOrder: 3
+  m_Father: {fileID: 284897759061660538}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0.1}
+  m_AnchorMin: {x: 0, y: 1.6}
+  m_AnchorMax: {x: 0.15, y: 1.9}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -2444,7 +2446,6 @@ RectTransform:
   - {fileID: 29462152602814490}
   - {fileID: 7660505708689053126}
   - {fileID: 1474177967589529856}
-  - {fileID: 5535516074307896707}
   m_Father: {fileID: 284897760435771371}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2469,7 +2470,6 @@ MonoBehaviour:
   rowWidth: 3
   roomsParent: {fileID: 1474177967589529856}
   roomPrefab: {fileID: 5351946581114730955, guid: 6751bdd5e923ebc46b249ea8c576c149, type: 3}
-  confirmRoomsChoiceBtn: {fileID: 6533140672643588100}
   root: {fileID: 8308980246586020516}
 --- !u!1 &8591593408738766652
 GameObject:

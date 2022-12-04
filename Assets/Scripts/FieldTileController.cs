@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class FieldTileController : MonoBehaviour
 {
@@ -7,6 +8,7 @@ public class FieldTileController : MonoBehaviour
     [SerializeField] private Transform contentParent;
     [SerializeField] private BoxCollider2D tileCollider;
     [SerializeField] private Color highlightedColor;
+    [SerializeField] private Color highlightedAsTargetColor;
     
     public struct Config
     {
@@ -16,10 +18,19 @@ public class FieldTileController : MonoBehaviour
         public float TileSize;
     }
 
+    public enum HighlightType
+    {
+        None,
+        Default,
+        AsWeaponTarget
+    }
+
     public BattleFieldManager.Tile Tile => _config.Tile;
     public Vector2Int Pos => _config.TilePosition;
     
     private Config _config;
+    private HighlightType _currHighlightType = HighlightType.None;
+    public HighlightType LastHighlightType { get; private set; } = HighlightType.None;
 
     public void Setup(Config config)
     {
@@ -38,10 +49,24 @@ public class FieldTileController : MonoBehaviour
         contentRoot.SetParent(contentParent, false);
     }
 
-    public void SetHighlighted(bool highlighted)
+    public void SetHighlighted(HighlightType highlightType)
     {
-        backgroundImage.color = highlighted
-            ? highlightedColor
-            : Color.white;
+        LastHighlightType = _currHighlightType;
+        _currHighlightType = highlightType;
+        
+        UpdateHighlight();
+    }
+
+    private void UpdateHighlight()
+    {
+        var backgroundColor = _currHighlightType switch
+        {
+            HighlightType.None => Color.white,
+            HighlightType.Default => highlightedColor,
+            HighlightType.AsWeaponTarget => highlightedAsTargetColor,
+            _ => throw new NotImplementedException()
+        };
+
+        backgroundImage.color = backgroundColor;
     }
 }

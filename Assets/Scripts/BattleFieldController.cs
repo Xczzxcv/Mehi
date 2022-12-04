@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Ext;
 using UnityEngine;
 
@@ -27,7 +26,7 @@ public class BattleFieldController : MonoBehaviour
 
     private FieldTileController _lastSelected;
     private Vector2Int? _activeMoveOrderUnitPos;
-    private List<Vector2Int> _highlightedTiles = new();
+    private readonly List<Vector2Int> _highlightedTiles = new();
 
     public void Init()
     {
@@ -36,6 +35,8 @@ public class BattleFieldController : MonoBehaviour
         GlobalEventManager.BattleField.GridTileHovered.Event += OnFieldGridTileHovered;
         GlobalEventManager.BattleField.UnitMoved.Event += OnUnitMoved;
         GlobalEventManager.BattleField.UseWeaponBtnClicked.Event += OnUseWeaponBtnClicked;
+        GlobalEventManager.BattleField.TileSelectedAsWeaponTarget.Event += OnTileSelectedAsWeaponTarget;
+        GlobalEventManager.BattleField.UnitSelectedAsWeaponTarget.Event += OnUnitSelectedAsWeaponTarget;
         GlobalEventManager.Turns.TurnUpdated.Event += OnTurnUpdated;
     }
 
@@ -133,6 +134,23 @@ public class BattleFieldController : MonoBehaviour
         HighlightWeaponDistanceArea(unitEntity, weaponInfo);
     }
 
+    private void OnTileSelectedAsWeaponTarget(Vector2Int tilePos, bool selected)
+    {
+        var highlightType = selected 
+            ? FieldTileController.HighlightType.AsWeaponTarget 
+            : GetTileController(tilePos).LastHighlightType;
+        HighlightTile(tilePos, highlightType);
+    }
+
+    private void OnUnitSelectedAsWeaponTarget(int targetUnitEntity, bool selected)
+    {
+        var unitController = GetUnitController(targetUnitEntity);
+        var highlightType = selected
+            ? BattleUnitController.HighlightType.AsWeaponTarget
+            : BattleUnitController.HighlightType.None;
+        unitController.SetHighlighted(highlightType);
+    }
+
     private void HighlightWeaponDistanceArea(int unitEntity, BattleMechManager.WeaponInfo weaponInfo)
     {
         ClearHighlightedTiles();
@@ -157,11 +175,16 @@ public class BattleFieldController : MonoBehaviour
                     continue;
                 }
 
-                var tileController = GetTileController(posToCheck);
-                tileController.SetHighlighted(true);
-                _highlightedTiles.Add(posToCheck);
+                HighlightTile(posToCheck, FieldTileController.HighlightType.Default);
             }
         }
+    }
+
+    private void HighlightTile(Vector2Int tilePos, FieldTileController.HighlightType highlightType)
+    {
+        var tileController = GetTileController(tilePos);
+        tileController.SetHighlighted(highlightType);
+        _highlightedTiles.Add(tileController.Pos);
     }
 
     private void OnTurnUpdated(int newTurnIndex, TurnsManager.TurnPhase turnPhase)
@@ -300,11 +323,8 @@ public class BattleFieldController : MonoBehaviour
         foreach (var pathPart in path.Parts)
         {
             var tilePos = pathPart.Node.Position.ToV2I();
-            var tileControllerToHighlight = GetTileController(tilePos);
-            tileControllerToHighlight.SetHighlighted(true);
+            HighlightTile(tilePos, FieldTileController.HighlightType.Default);
         }
-
-        _highlightedTiles = path.Parts.Select(pathPart => pathPart.Node.Position.ToV2I()).ToList();
     }
 
     private void ClearHighlightedTiles()
@@ -312,7 +332,7 @@ public class BattleFieldController : MonoBehaviour
         foreach (var tilePos in _highlightedTiles)
         {
             var tileControllerToHighlight = GetTileController(tilePos);
-            tileControllerToHighlight.SetHighlighted(false);
+            tileControllerToHighlight.SetHighlighted(FieldTileController.HighlightType.None);
         }
 
         _highlightedTiles.Clear();

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Leopotam.EcsLite;
 using UnityEngine;
 
@@ -40,6 +41,19 @@ public static class LeoEcsExt
         }
 
         return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static List<EcsPackedEntity> PackEntities(this EcsWorld world, IEnumerable<int> entities)
+    {
+        var resultEntities = new List<EcsPackedEntity>();
+        foreach (var entity in entities)
+        {
+            var packedEntity = world.PackEntity(entity);
+            resultEntities.Add(packedEntity);
+        }
+
+        return resultEntities;
     }
 }
 }

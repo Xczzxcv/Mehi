@@ -8,7 +8,7 @@ public struct WeaponConfig
 {
     public string WeaponId;
     public int UseDistance;
-    public WeaponTargetType TargetType;
+    public WeaponTargetConfig WeaponTarget;
     public WeaponProjectileType ProjectileType;
     public WeaponGripType GripType;
     [SerializeReference, ReferencePicker]

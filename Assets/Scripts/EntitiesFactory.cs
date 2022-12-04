@@ -151,8 +151,8 @@ public static class EntitiesFactory
         ref var weaponMainComp = ref weaponPool.Add(newWeaponEntity);
         weaponMainComp.WeaponId = weaponConfig.WeaponId;
         weaponMainComp.OwnerUnitEntity = weaponOwnerEntity;
+        weaponMainComp.TargetConfig = weaponConfig.WeaponTarget;
         weaponMainComp.UseDistance = weaponConfig.UseDistance;
-        weaponMainComp.TargetType = weaponConfig.TargetType;
         weaponMainComp.ProjectileType = weaponConfig.ProjectileType;
         weaponMainComp.GripType = weaponConfig.GripType;
 
@@ -178,7 +178,7 @@ public static class EntitiesFactory
     }
 
     public static void BuildUseWeaponOrder(int userUnitEntity, BattleMechManager.WeaponInfo usedWeaponInfo,
-        List<int> targetRooms, EcsWorld world)
+        InputWeaponTarget weaponTarget, EcsWorld world)
     {
         ref var useWeaponOrder = ref world.AddComponent<UseWeaponOrderComponent>(userUnitEntity);
         if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(usedWeaponInfo.WeaponId, userUnitEntity,
@@ -189,7 +189,7 @@ public static class EntitiesFactory
         }
 
         useWeaponOrder.WeaponEntity = world.PackEntity(weaponEntity);
-        useWeaponOrder.WeaponTarget = InputWeaponTarget.BuildTargetRooms(targetRooms.Select(world.PackEntity));
+        useWeaponOrder.WeaponTarget = weaponTarget;
     }
 
     public static void BuildRepairSelfOrder(int unitEntity, EcsWorld world)

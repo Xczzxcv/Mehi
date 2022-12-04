@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 internal class BattleFieldScreenController : MonoBehaviour
 {
@@ -8,27 +7,23 @@ internal class BattleFieldScreenController : MonoBehaviour
     private Transform _uiRoot;
     private BattleManager _battleManager;
     private BattleFieldScreenPresenter _battleFieldPresenter;
-    
+    private UseWeaponManager _useWeaponManager;
+
     private Vector2Int? _selectedTilePos;
-
-    private struct UseWeaponInfo
-    {
-        public bool UseWeaponModeActive;
-        public int WeaponUserEntity;
-        public BattleMechManager.WeaponInfo UsedWeaponInfo;
-    }
-
-    private UseWeaponInfo _useWeaponInfo;
 
     public void Init(Transform uiRoot, BattleManager battleManager)
     {
         _uiRoot = uiRoot;
         _battleManager = battleManager;
+        _useWeaponManager = new UseWeaponManager(_battleManager);
+        _useWeaponManager.Init();
         
         GlobalEventManager.BattleField.GridTileSelected.Event += OnBattleFieldTileSelected;
         GlobalEventManager.BattleField.UnitUpdated.Event += OnUnitUpdated;
         GlobalEventManager.Turns.TurnUpdated.Event += OnTurnUpdated;
-        GlobalEventManager.BattleField.UseWeaponBtnClicked.Event += OnUseWeaponBtnClicked;
+        GlobalEventManager.BattleField.RoomSelectedAsWeaponTarget.Event += OnRoomSelectedAsWeaponTarget;
+        GlobalEventManager.BattleField.UnitSelectedAsWeaponTarget.Event += OnUnitSelectedAsWeaponTarget;
+        GlobalEventManager.BattleField.TileSelectedAsWeaponTarget.Event += OnTileSelectedAsWeaponTarget;
     }
 
     public void Setup()
@@ -42,8 +37,9 @@ internal class BattleFieldScreenController : MonoBehaviour
         });
         
         _battleFieldPresenter.NextTurnPhaseBtnClicked += OnPresenterNextTurnPhaseBtnClicked;
-        _battleFieldPresenter.RoomsChoiceConfirmed += OnPresenterRoomsChoiceConfirmed;
+        _battleFieldPresenter.TargetsChoiceConfirmed += OnPresenterTargetsChoiceConfirmed;
         _battleFieldPresenter.RepairButtonClick += OnPresenterRepairButtonClick;
+        _battleFieldPresenter.RoomClicked += OnPresenterRoomClicked;
     }
 
     private void OnPresenterNextTurnPhaseBtnClicked()
@@ -51,14 +47,10 @@ internal class BattleFieldScreenController : MonoBehaviour
         _battleManager.NextPhase();
     }
 
-    private void OnPresenterRoomsChoiceConfirmed(List<int> selectedRooms)
+    private void OnPresenterTargetsChoiceConfirmed()
     {
-        _battleManager.BuildUseWeaponOrder(
-            _useWeaponInfo.WeaponUserEntity,
-            _useWeaponInfo.UsedWeaponInfo,
-            selectedRooms
-            );
-        _useWeaponInfo.UseWeaponModeActive = false;
+        _useWeaponManager.BuildUseWeaponOrder();
+        _battleFieldPresenter.UpdateSelectedUnit(SelectedUnitPresenter.ViewInfo.BuildEmpty());
     }
 
     private void OnPresenterRepairButtonClick(int unitEntity)
@@ -66,9 +58,20 @@ internal class BattleFieldScreenController : MonoBehaviour
         _battleManager.BuildRepairSelfOrder(unitEntity);
     }
 
+    private void OnPresenterRoomClicked(int roomEntity)
+    {
+        _useWeaponManager.ProcessUnitRoomAsTargetForAttack(roomEntity);
+    }
+
     private void OnBattleFieldTileSelected(BattleFieldManager.Tile selectedTile, Vector2Int tilePos)
     {
         _selectedTilePos = tilePos;
+
+        if (_useWeaponManager.TryProcessTileAsTargetForAttack(_selectedTilePos.Value))
+        {
+            return;
+        }
+
         UpdateSelectedUnit();
     }
 
@@ -96,8 +99,13 @@ internal class BattleFieldScreenController : MonoBehaviour
         if (_battleManager.TryGetUnitInPos(selectedPos, out var unitEntity))
         {
             var battleUnitInfo = _battleManager.GetBattleUnitInfo(unitEntity);
+
+            if (_useWeaponManager.TrySelectUnitBodyAsTargetForAttack(battleUnitInfo))
+            {
+                return;
+            }
             
-            if (IsSelectedUnitThatCanBeAttacked(battleUnitInfo))
+            if (_useWeaponManager.CanSelectUnitRoomAsTargetForAttack(battleUnitInfo))
             {
                 selectedUnitViewInfo = SelectedUnitPresenter.ViewInfo.BuildEmpty();
                 roomViews = RoomListPresenter.ViewInfo.BuildFromBattleInfo(battleUnitInfo, true);
@@ -118,29 +126,29 @@ internal class BattleFieldScreenController : MonoBehaviour
         _battleFieldPresenter.UpdateRoomsInfo(roomViews);
     }
 
-    private bool IsSelectedUnitThatCanBeAttacked(BattleMechManager.BattleUnitInfo battleUnitInfo)
-    {
-        if (!_useWeaponInfo.UseWeaponModeActive)
-        {
-            return false;
-        }
-
-        var attackerControl = _battleManager.GetBattleUnitInfo(
-            _useWeaponInfo.WeaponUserEntity).ControlledBy;
-        var victimControl = battleUnitInfo.ControlledBy;
-        return BattleMechManager.CanAttack(attackerControl, victimControl);
-    }
-
     private void OnTurnUpdated(int newTurnIndex, TurnsManager.TurnPhase turnPhase)
     {
         _battleFieldPresenter.UpdateTurnInfo(newTurnIndex, turnPhase);
         UpdateSelectedUnit();
     }
-
-    private void OnUseWeaponBtnClicked(int unitEntity, BattleMechManager.WeaponInfo weaponInfo)
+    
+    private void OnRoomSelectedAsWeaponTarget(int roomEntity, bool selected)
     {
-        _useWeaponInfo.WeaponUserEntity = unitEntity;
-        _useWeaponInfo.UsedWeaponInfo = weaponInfo;
-        _useWeaponInfo.UseWeaponModeActive = true;
+        UpdateConfirmBtn();
+    }
+
+    private void OnUnitSelectedAsWeaponTarget(int unitEntity, bool selected)
+    {
+        UpdateConfirmBtn();
+    }
+
+    private void OnTileSelectedAsWeaponTarget(Vector2Int selectedTile, bool selected)
+    {
+        UpdateConfirmBtn();
+    }
+
+    private void UpdateConfirmBtn()
+    {
+        _battleFieldPresenter.UpdateConfirmTargetsBtn(_useWeaponManager.CanConfirmWeaponTargets());
     }
 }
