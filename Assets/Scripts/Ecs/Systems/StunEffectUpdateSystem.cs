@@ -1,5 +1,6 @@
 ﻿using Ecs.Components;
 using Ecs.Systems;
+using Ext.LeoEcs;
 
 public class StunEffectUpdateSystem : EcsRunSystemBase<StunEffectComponent>
 {

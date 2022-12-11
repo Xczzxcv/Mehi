@@ -45,7 +45,7 @@ public class EcsManager : MonoBehaviour
     {
         _turnSystems = new EcsSystems(World);
         _turnSystems
-            .Add(new RefreshActionPoints(_environmentServices))
+            .Add(new RefreshActionPointsSystem(_environmentServices))
             .Add(new MechRoomBurningDamageApplySystem(_environmentServices))
             .Add(new StunEffectResetUpdateSystem(_environmentServices))
 #if UNITY_EDITOR

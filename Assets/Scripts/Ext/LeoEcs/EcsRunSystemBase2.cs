@@ -1,7 +1,7 @@
 ﻿using Leopotam.EcsLite;
 using UnityEngine.Profiling;
 
-namespace Ecs.Systems
+namespace Ext.LeoEcs
 {
 public abstract class EcsRunSystemBase2<TComponent1, TComponent2> : EcsRunSystemBaseInternal
     where TComponent1 : struct

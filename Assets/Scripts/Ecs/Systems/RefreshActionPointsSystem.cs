@@ -3,9 +3,9 @@ using Ext.LeoEcs;
 
 namespace Ecs.Systems
 {
-public class RefreshActionPoints : EcsRunSystemBase<ActiveCreatureComponent>
+public class RefreshActionPointsSystem : EcsRunSystemBase<ActiveCreatureComponent>
 {
-    public RefreshActionPoints(EnvironmentServices services) : base(services)
+    public RefreshActionPointsSystem(EnvironmentServices services) : base(services)
     { }
 
     protected override void ProcessComponent(ref ActiveCreatureComponent creatureComp, int entity)

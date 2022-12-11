@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using Leopotam.EcsLite;
 
-namespace Ecs.Systems
+namespace Ext.LeoEcs
 {
 public abstract class EcsRunSystemBaseInternal : IEcsRunSystem, IEcsInitSystem
 {

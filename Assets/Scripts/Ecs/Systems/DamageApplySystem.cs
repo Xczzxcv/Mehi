@@ -1,11 +1,12 @@
 using System;
 using Ecs.Components;
-using Ecs.Systems;
 using Ext.LeoEcs;
 using Leopotam.EcsLite;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
+namespace Ecs.Systems
+{
 public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDamageApplyComponent>
 {
     public DamageApplySystem(EnvironmentServices services) : base(services)
@@ -106,4 +107,5 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
         dmgApplyComp.Events.Add(damageEvent);
         return true;
     }
+}
 }

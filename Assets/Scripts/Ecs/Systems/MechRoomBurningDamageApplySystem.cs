@@ -1,4 +1,5 @@
 ﻿using Ecs.Components;
+using Ext.LeoEcs;
 
 namespace Ecs.Systems
 {

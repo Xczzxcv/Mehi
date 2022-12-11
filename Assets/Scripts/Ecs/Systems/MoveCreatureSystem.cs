@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Ecs.Components;
+using Ext.LeoEcs;
 using UnityEngine;
 
 namespace Ecs.Systems

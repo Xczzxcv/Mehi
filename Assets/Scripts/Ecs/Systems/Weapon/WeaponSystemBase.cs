@@ -1,5 +1,6 @@
 ﻿using Ecs.Components;
 using Ecs.Components.Weapon;
+using Ext.LeoEcs;
 
 namespace Ecs.Systems.Weapon
 {
@@ -9,10 +10,5 @@ public abstract class WeaponSystemBase<TComponent> :
 {
     protected WeaponSystemBase(EnvironmentServices services) : base(services)
     { }
-}
-
-public struct AddShieldToSelfWeaponComponent : IWeaponComponent
-{
-    public int ShieldAmount;
 }
 }

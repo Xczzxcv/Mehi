@@ -1,4 +1,5 @@
 ﻿using Ecs.Components;
+using Ecs.Components.Weapon;
 using Ext.LeoEcs;
 
 namespace Ecs.Systems.Weapon
