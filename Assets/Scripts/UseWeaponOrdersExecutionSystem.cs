@@ -24,7 +24,6 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         ref var weaponActivation = ref World.AddComponent<ActiveWeaponComponent>(weaponEntity);
         weaponActivation.WeaponUser = World.PackEntity(entity);
         weaponActivation.WeaponTarget = GetCompleteWeaponTarget(useWeaponOrder.WeaponTarget);
-        weaponActivation.CanBeDeactivated = true;
 
         activeCreature.ActionPoints = 0;
 

@@ -27,6 +27,7 @@ public class SelectedUnitPresenter : UIBehaviour
         public int MaxHp;
         public int CurrentHp;
         public int ShieldAmount;
+        public int? TempShieldAmount;
         public int MaxActionPoints;
         public int CurrentActionPoints;
         public bool CanMove;
@@ -66,6 +67,7 @@ public class SelectedUnitPresenter : UIBehaviour
                 MaxHp = battleUnitInfo.MaxHealth,
                 CurrentHp = battleUnitInfo.Health,
                 ShieldAmount = battleUnitInfo.Shield,
+                TempShieldAmount = battleUnitInfo.TempShield,
                 MaxActionPoints = battleUnitInfo.MaxActionPoints,
                 CurrentActionPoints = battleUnitInfo.ActionPoints,
                 CanMove = battleUnitInfo.CanMove,
@@ -158,7 +160,10 @@ public class SelectedUnitPresenter : UIBehaviour
 
     private void UpdateHpView()
     {
-        var hpInfo = $"Sh: {View.ShieldAmount} HP: {View.CurrentHp} / {View.MaxHp}";
+        var tempShieldStr = View.TempShieldAmount.HasValue
+            ? $"Temp Sh: {View.TempShieldAmount.Value}\n"
+            : string.Empty;
+        var hpInfo = $"{tempShieldStr}Sh: {View.ShieldAmount} HP: {View.CurrentHp} / {View.MaxHp}";
         hpText.text = hpInfo;
     }
 

@@ -32,6 +32,14 @@ public static class LeoEcsExt
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void DelComponent<TComponent>(this EcsWorld world, int entity)
+        where TComponent : struct
+    {
+        var components = world.GetPool<TComponent>();
+        components.Del(entity);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool TryUnpack(this in EcsPackedEntity packed, EcsWorld world, out int entity)
     {
         if (!packed.Unpack(world, out entity))
@@ -55,7 +63,14 @@ public static class LeoEcsExt
 
         return resultEntities;
     }
-    
+
+    public static ref TComponent GetOrAddComponent<TComponent>(this EcsWorld world, int entity)
+        where TComponent : struct
+    {
+        var pool = world.GetPool<TComponent>();
+        return ref pool.GetOrAdd(entity);
+    }
+
     public static ref TComponent GetOrAdd<TComponent>(this EcsPool<TComponent> pool, int entity) 
         where TComponent : struct
     {

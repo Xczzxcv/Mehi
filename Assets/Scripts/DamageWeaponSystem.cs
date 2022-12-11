@@ -43,7 +43,7 @@ public class DamageWeaponSystem : WeaponSystemBase<DamageWeaponComponent>
             return false;
         }
 
-        targetRoom = ref roomPool.Get(targetRoomEntity);
+        targetRoom = roomPool.Get(targetRoomEntity);
         return true;
     }
 

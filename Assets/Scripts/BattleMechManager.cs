@@ -33,6 +33,7 @@ public class BattleMechManager
         public int MaxHealth;
         public int Health;
         public int Shield;
+        public int? TempShield;
         public int Entity;
         public bool CanMove;
         public bool CanUseWeapons;
@@ -92,6 +93,7 @@ public class BattleMechManager
             MaxHealth = GetUnitHealth(unitEntity).MaxHealth,
             Health = GetUnitHealth(unitEntity).Health,
             Shield = GetUnitHealth(unitEntity).Shield,
+            TempShield = GetUnitTempShield(unitEntity),
             MoveSpeed = GetUnitMoveSpeed(unitEntity),
             Position = GetUnitPosition(unitEntity),
             MaxActionPoints = GetUnitMaxActionPoints(unitEntity),
@@ -107,14 +109,12 @@ public class BattleMechManager
 
     public static ControlledBy GetUnitControl(int unitEntity, EcsWorld world)
     {
-        var playerControlPool = world.GetPool<PlayerControlComponent>();
-        if (playerControlPool.Has(unitEntity))
+        if (world.HasComponent<PlayerControlComponent>(unitEntity))
         {
             return ControlledBy.Player;
         }
 
-        var aiControlPool = world.GetPool<AiControlComponent>();
-        if (aiControlPool.Has(unitEntity))
+        if (world.HasComponent<AiControlComponent>(unitEntity))
         {
             return ControlledBy.AI;
         }
@@ -126,6 +126,14 @@ public class BattleMechManager
     {
         var mechHealthComp = _config.World.GetComponent<MechHealthComponent>(unitEntity);
         return mechHealthComp;
+    }
+
+    private int? GetUnitTempShield(int unitEntity)
+    {
+        var tempShieldPool = _config.World.GetPool<TempShieldComponent>();
+        return tempShieldPool.Has(unitEntity)
+            ? tempShieldPool.Get(unitEntity).Amount
+            : null;
     }
 
     private int GetUnitMoveSpeed(int unitEntity)

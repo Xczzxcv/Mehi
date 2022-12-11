@@ -39,17 +39,40 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
         }
         
         RoomDamageApply(mechDamageEvent);
-        MechDamageApply(mechDamageEvent, ref mechHealthComp);
+        MechDamageApply(mechDamageEvent, ref mechHealthComp, entity);
     }
 
-    private void MechDamageApply(MechDamageEvent mechDmgEvent, ref MechHealthComponent mechHpComp)
+    private void MechDamageApply(MechDamageEvent mechDmgEvent, ref MechHealthComponent mechHpComp,
+        int mechEntity)
     {
-        var dmgShieldAbsorb = Math.Min(mechDmgEvent.DamageAmount, mechHpComp.Shield);
+        var dmgTempShieldPierce = ProcessTempShield(mechDmgEvent, mechEntity);
+
+        var dmgShieldAbsorb = Math.Min(dmgTempShieldPierce, mechHpComp.Shield);
         mechHpComp.Shield -= dmgShieldAbsorb;
         mechDmgEvent.DamageAmount -= dmgShieldAbsorb;
 
         mechHpComp.Health -= mechDmgEvent.DamageAmount;
         mechDmgEvent.DamageAmount = 0;
+    }
+
+    private int ProcessTempShield(MechDamageEvent mechDmgEvent, int mechEntity)
+    {
+        var tempShieldPool = World.GetPool<TempShieldComponent>();
+        int dmgTempShieldPierce;
+        if (tempShieldPool.Has(mechEntity))
+        {
+            ref var tempShield = ref tempShieldPool.Get(mechEntity);
+            var dmgTempShieldAbsorb = Math.Min(mechDmgEvent.DamageAmount, tempShield.Amount);
+            dmgTempShieldPierce = mechDmgEvent.DamageAmount - dmgTempShieldAbsorb;
+
+            tempShield.Amount -= dmgTempShieldPierce;
+        }
+        else
+        {
+            dmgTempShieldPierce = 0;
+        }
+
+        return dmgTempShieldPierce;
     }
 
     private void RoomDamageApply(MechDamageEvent mechDamageEvent)

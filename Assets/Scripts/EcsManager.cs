@@ -59,6 +59,8 @@ public class EcsManager : MonoBehaviour
         _systems = new EcsSystems(World);
         _systems
             .Add(new StunEffectUpdateSystem(_environmentServices))
+            .Add(new TempShieldUpdateSystem(_environmentServices))
+            .Add(new DelayUsageWeaponUpdateSystem(_environmentServices))
             .Add(new RepairSelfOrderExecutionSystem(_environmentServices))
             .Add(new DamageApplySystem(_environmentServices))
             .Add(new MoveOrdersExecutionSystem(_environmentServices))
@@ -78,11 +80,12 @@ public class EcsManager : MonoBehaviour
         _weaponSystems = new EcsSystems(World);
         _weaponSystems
             .Add(new DelayUsageWeaponSystem(_environmentServices))
+            .Add(new AddShieldToSelfWeaponSystem(_environmentServices))
             .Add(new DamageWeaponSystem(_environmentServices))
             .Add(new DamageByDistanceWeaponSystem(_environmentServices))
             .Add(new PushWeaponSystem(_environmentServices))
             .Add(new StunWeaponSystem(_environmentServices))
-            .Add(new DeactivateWeaponSystem(_environmentServices))
+            .DelHere<ActiveWeaponComponent>()
             .Add(new DamageApplySystem(_environmentServices))
 #if UNITY_EDITOR
             .Add(new EcsWorldDebugSystem())

@@ -739,6 +739,7 @@ MonoBehaviour:
     - rid: 9092259981470728192
     - rid: 9092259981470728193
     - rid: 7207661684300185600
+    - rid: 7207661817887195136
   - WeaponId: weapon2
     UseDistance: 4
     WeaponTarget:
@@ -769,6 +770,10 @@ MonoBehaviour:
       type: {class: DelayUsageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:
         DelayAmount: 1
+    - rid: 7207661817887195136
+      type: {class: AddShieldToSelfWeaponComponent, ns: Ecs.Systems.Weapon, asm: Assembly-CSharp}
+      data:
+        ShieldAmount: 5
     - rid: 9092259981470728192
       type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:

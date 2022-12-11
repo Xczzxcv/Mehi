@@ -6,6 +6,5 @@ public struct ActiveWeaponComponent
 {
     public EcsPackedEntity WeaponUser;
     public WeaponTarget WeaponTarget;
-    public bool CanBeDeactivated;
 }
 }

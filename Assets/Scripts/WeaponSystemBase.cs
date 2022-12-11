@@ -10,4 +10,9 @@ public abstract class WeaponSystemBase<TComponent> :
     protected WeaponSystemBase(EnvironmentServices services) : base(services)
     { }
 }
+
+public struct AddShieldToSelfWeaponComponent : IWeaponComponent
+{
+    public int ShieldAmount;
+}
 }
