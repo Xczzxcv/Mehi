@@ -35,7 +35,7 @@ public class BattleMechManager
         public int Shield;
         public int Entity;
         public bool CanMove;
-        public bool CanUseWeapon;
+        public bool CanUseWeapons;
         public bool CanRepairSelf;
         public List<RoomInfo> Rooms;
         public List<WeaponInfo> Weapons;
@@ -48,10 +48,9 @@ public class BattleMechManager
         public WeaponProjectileType ProjectileType;
         public WeaponGripType GripType;
         public int UseDistance;
+        public bool CanUse;
         public int? Cooldown;
-        public int? Damage;
-        public int? PushDistance;
-        public int? StunDuration;
+        public Dictionary<string, object> Stats;
     }
 
     public struct RoomInfo
@@ -98,7 +97,7 @@ public class BattleMechManager
             MaxActionPoints = GetUnitMaxActionPoints(unitEntity),
             ActionPoints = GetUnitActionPoints(unitEntity),
             CanMove = GetUnitCanMove(unitEntity),
-            CanUseWeapon = GetUnitCanUseWeapon(unitEntity),
+            CanUseWeapons = GetUnitCanUseWeapons(unitEntity),
             CanRepairSelf = GetUnitCanRepairSelf(unitEntity),
             Entity = unitEntity,
             Rooms = GetUnitRoomInfos(unitEntity),
@@ -135,7 +134,7 @@ public class BattleMechManager
         return activeCreatureComp.MoveSpeed;
     }
 
-    private Vector2Int GetUnitPosition(int unitEntity)
+    public Vector2Int GetUnitPosition(int unitEntity)
     {
         var positionComp = _config.World.GetComponent<PositionComponent>(unitEntity);
         return positionComp.Pos;
@@ -158,6 +157,11 @@ public class BattleMechManager
         var unitActionPoints = GetUnitActionPoints(unitEntity);
         if (unitActionPoints < MoveOrdersExecutionSystem.MOVE_UNIT_ACTION_COST 
             || !IsUnitTurnNow(unitEntity))
+        {
+            return false;
+        }
+
+        if (_config.World.HasComponent<StunEffectComponent>(unitEntity))
         {
             return false;
         }
@@ -185,14 +189,24 @@ public class BattleMechManager
         return mechSystems;
     }
 
-    private bool GetUnitCanUseWeapon(int unitEntity)
+    private bool GetUnitCanUseWeapons(int unitEntity)
     {
+        if (_config.World.HasComponent<StunEffectComponent>(unitEntity))
+        {
+            return false;
+        }
+
         var unitActionPoints = GetUnitActionPoints(unitEntity);
         return unitActionPoints >= UseWeaponOrdersExecutionSystem.USE_WEAPON_ACTION_COST && IsUnitTurnNow(unitEntity);
     }
 
     private bool GetUnitCanRepairSelf(int unitEntity)
     {
+        if (_config.World.HasComponent<StunEffectComponent>(unitEntity))
+        {
+            return false;
+        }
+        
         var unitActionPoints = GetUnitActionPoints(unitEntity);
         return unitActionPoints >= RepairSelfOrderExecutionSystem.REPAIR_ALL_ROOMS_ACTION_COST && IsUnitTurnNow(unitEntity);
     }
@@ -353,10 +367,15 @@ public class BattleMechManager
             Cooldown = TryGetWeaponCooldown(weaponEntity, out var cd) 
                 ? cd 
                 : null,
+            
+            Stats = new Dictionary<string, object>()
         };
+        weaponInfo.CanUse = GetCanUseWeapon(weaponInfo, weaponEntity);
+        
         AddDamageInfo(ref weaponInfo, weaponEntity);
         AddPushInfo(ref weaponInfo, weaponEntity);
         AddStunInfo(ref weaponInfo, weaponEntity);
+        AddDelayInfo(ref weaponInfo, weaponEntity);
         
         return true;
     }
@@ -376,28 +395,45 @@ public class BattleMechManager
         return true;
     }
 
+    private bool GetCanUseWeapon(WeaponInfo weaponInfo, int weaponEntity)
+    {
+        return !weaponInfo.Cooldown.HasValue || weaponInfo.Cooldown.Value <= 0;
+    }
+
     private void AddDamageInfo(ref WeaponInfo weaponInfo, int weaponEntity)
     {
         var damageWeaponPool = _config.World.GetPool<DamageWeaponComponent>();
-        weaponInfo.Damage = damageWeaponPool.Has(weaponEntity)
-            ? damageWeaponPool.Get(weaponEntity).DamageAmount
-            : null;
+        if (damageWeaponPool.Has(weaponEntity))
+        {
+            weaponInfo.Stats.Add("Damage", damageWeaponPool.Get(weaponEntity).DamageAmount);
+        }
     }
 
     private void AddPushInfo(ref WeaponInfo weaponInfo, int weaponEntity)
     {
         var pushWeaponPool = _config.World.GetPool<PushWeaponComponent>();
-        weaponInfo.PushDistance = pushWeaponPool.Has(weaponEntity)
-            ? pushWeaponPool.Get(weaponEntity).PushDistance
-            : null;
+        if (pushWeaponPool.Has(weaponEntity))
+        {
+            weaponInfo.Stats.Add("Push distance", pushWeaponPool.Get(weaponEntity).PushDistance);
+        }
     }
 
     private void AddStunInfo(ref WeaponInfo weaponInfo, int weaponEntity)
     {
         var stunWeaponPool = _config.World.GetPool<StunWeaponComponent>();
-        weaponInfo.StunDuration = stunWeaponPool.Has(weaponEntity)
-            ? stunWeaponPool.Get(weaponEntity).StunDuration
-            : null;
+        if (stunWeaponPool.Has(weaponEntity))
+        {
+            weaponInfo.Stats.Add("Stun duration", stunWeaponPool.Get(weaponEntity).StunDuration);
+        }
+    }
+
+    private void AddDelayInfo(ref WeaponInfo weaponInfo, int weaponEntity)
+    {
+        var delayWeaponPool = _config.World.GetPool<DelayUsageWeaponComponent>();
+        if (delayWeaponPool.Has(weaponEntity))
+        {
+            weaponInfo.Stats.Add("Usage delay", delayWeaponPool.Get(weaponEntity).DelayAmount);
+        }
     }
 
     public bool TryGetUnitInPos(Vector2Int pos, out int unitEntity)

@@ -15,25 +15,44 @@ public class DamageWeaponSystem : WeaponSystemBase<DamageWeaponComponent>
     {
         var weaponTarget = activeWeapon.WeaponTarget;
         var targetRooms = weaponTarget.TargetMechRooms;
-        var roomPool = World.GetPool<MechRoomComponent>();
         foreach (var targetRoomEntityPacked in targetRooms)
         {
-            if (!targetRoomEntityPacked.TryUnpack(World, out var targetRoomEntity))
+            if (!TryGetRoomComp(targetRoomEntityPacked, World, 
+                    out var targetRoomEntity, out var targetRoom))
             {
                 continue;
             }
 
-            if (!roomPool.Has(targetRoomEntity))
-            {
-                continue;
-            }
-
-            ref var targetRoom = ref roomPool.Get(targetRoomEntity);
-
-            var newDmgEvent = MechDamageEvent.BuildFromRoom(activeWeapon.WeaponUser, targetRoomEntity,
-                damageComp.DamageAmount, World, GetHitChance(activeWeapon.WeaponUser, World));
-            DamageApplySystem.TryAddDamageEvent(newDmgEvent, targetRoom.MechEntity, World);
+            ApplyDamageToRoom(activeWeapon.WeaponUser, damageComp.DamageAmount, World, 
+                targetRoomEntity, targetRoom.MechEntity);
         }
+    }
+
+    public static bool TryGetRoomComp(EcsPackedEntity targetRoomEntityPacked, EcsWorld world,
+        out int targetRoomEntity, out MechRoomComponent targetRoom)
+    {
+        var roomPool = world.GetPool<MechRoomComponent>();
+        targetRoom = default;
+        if (!targetRoomEntityPacked.TryUnpack(world, out targetRoomEntity))
+        {
+            return false;
+        }
+
+        if (!roomPool.Has(targetRoomEntity))
+        {
+            return false;
+        }
+
+        targetRoom = ref roomPool.Get(targetRoomEntity);
+        return true;
+    }
+
+    public static void ApplyDamageToRoom(EcsPackedEntity weaponUser, int damageAmount, EcsWorld world,
+        int targetRoomEntity, EcsPackedEntity targetMech)
+    {
+        var newDmgEvent = MechDamageEvent.BuildFromRoom(weaponUser, targetRoomEntity,
+            damageAmount, world, GetHitChance(weaponUser, world));
+        DamageApplySystem.TryAddDamageEvent(newDmgEvent, targetMech, world);
     }
 
     public static float GetHitChance(EcsPackedEntity weaponUserPacked, EcsWorld world)

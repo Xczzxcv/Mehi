@@ -27,8 +27,7 @@ public class BattleManager
         _config = config;
 
         _turnsManager = new TurnsManager(new TurnsManager.Config
-        {
-        });
+            { });
 
         _fieldManager = new BattleFieldManager(new BattleFieldManager.Config
         {
@@ -69,6 +68,11 @@ public class BattleManager
         return _mechManager.GetUnitInfo(unitEntity);
     }
 
+    public Vector2Int GetUnitPosition(int unitEntity)
+    {
+        return _mechManager.GetUnitPosition(unitEntity);
+    }
+
     public bool TryGetUnitInPos(Vector2Int pos, out int unitEntity)
     {
         return _mechManager.TryGetUnitInPos(pos, out unitEntity);
@@ -93,5 +97,17 @@ public class BattleManager
     public void BuildRepairSelfOrder(int unitEntity)
     {
         _mechManager.BuildRepairSelfOrder(unitEntity);
+    }
+
+    public bool IsUnitTurnPhase(int unitEntity)
+    {
+        var unitControlledBy = BattleMechManager.GetUnitControl(unitEntity, _config.World);
+        var isUnitTurnPhase =
+            unitControlledBy == BattleMechManager.ControlledBy.Player
+            && TurnPhase == TurnsManager.TurnPhase.PlayerMove
+            || unitControlledBy == BattleMechManager.ControlledBy.AI
+            && TurnPhase == TurnsManager.TurnPhase.AIMove;
+
+        return isUnitTurnPhase;
     }
 }

@@ -72,6 +72,14 @@ public struct InputWeaponTarget
         return result;
     }
 
+    public static InputWeaponTarget BuildNonTargeted()
+    {
+        var result = BuildDefault();
+        result.TargetType = WeaponTargetType.NonTargeted;
+
+        return result;
+    }
+
     private static InputWeaponTarget BuildDefault()
     {
         return new InputWeaponTarget
@@ -90,6 +98,7 @@ public struct InputWeaponTarget
             WeaponTargetType.Rooms => BuildTargetRooms(Enumerable.Empty<int>()),
             WeaponTargetType.Unit => BuildTargetUnits(Enumerable.Empty<int>()),
             WeaponTargetType.BattleFieldTiles => BuildTargetTiles(Enumerable.Empty<Vector2Int>()),
+            WeaponTargetType.NonTargeted => BuildNonTargeted(),
             _ => throw new System.NotImplementedException()
         };
     }

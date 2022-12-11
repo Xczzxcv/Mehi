@@ -39,35 +39,22 @@ public class WeaponPresenter : UIBehaviour
 
     private static string GetWeaponStatsText(ViewInfo viewInfo)
     {
-        const string statPlaceHolder = "—";
+        var statsText = string.Empty;
         var weaponInfo = viewInfo.WeaponInfo;
+        foreach (var (statId, statValue) in weaponInfo.Stats)
+        {
+            var statText = $"{statId}: {statValue}\n";
+            statsText += statText;
+        }
+
         var cdText = weaponInfo.Cooldown.HasValue 
             ? $"CD: {weaponInfo.Cooldown.Value}\n:" 
             : string.Empty;
-        var dmgText = weaponInfo.Damage.HasValue 
-            ? weaponInfo.Damage.Value.ToString() 
-            : statPlaceHolder;
-        var stunText = weaponInfo.StunDuration.HasValue 
-            ? weaponInfo.StunDuration.Value.ToString()
-            : statPlaceHolder;
-        var pushText = weaponInfo.PushDistance.HasValue 
-            ? weaponInfo.PushDistance.Value.ToString() 
-            : statPlaceHolder;
-        return $"{cdText}Stats: dmg {dmgText}, stun {stunText}, push {pushText}";
+        return $"{cdText}Stats:\n{statsText}";
     }
 
     private static bool CanUseWeapon(BattleMechManager.WeaponInfo weaponInfo, bool canUseWeapons)
     {
-        if (!canUseWeapons)
-        {
-            return false;
-        }
-
-        if (!weaponInfo.Cooldown.HasValue)
-        {
-            return true;
-        }
-
-        return weaponInfo.Cooldown.Value <= 0;
+        return weaponInfo.CanUse && canUseWeapons;
     }
 }

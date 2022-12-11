@@ -69,7 +69,7 @@ public class SelectedUnitPresenter : UIBehaviour
                 MaxActionPoints = battleUnitInfo.MaxActionPoints,
                 CurrentActionPoints = battleUnitInfo.ActionPoints,
                 CanMove = battleUnitInfo.CanMove,
-                CanUseWeapons = battleUnitInfo.CanUseWeapon,
+                CanUseWeapons = battleUnitInfo.CanUseWeapons,
                 CanRepairSelf = battleUnitInfo.CanRepairSelf,
                 CanConfirmTargets = false,
                 UnitPosition = battleUnitInfo.Position,

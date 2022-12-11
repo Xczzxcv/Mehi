@@ -40,6 +40,7 @@ public class Graph
             public  int Cost;
         }
 
+        public bool IsEmpty => !Parts.Any();
         public List<Part> Parts;
 
         public static Path Empty()

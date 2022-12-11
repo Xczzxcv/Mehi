@@ -3,7 +3,7 @@
 namespace Ecs.Systems
 {
 public class MechRoomBurningDamageApplySystem : EcsRunSystemBase3<MechRoomComponent, HealthComponent, 
-    BurningComponent>
+    BurningEffectComponent>
 {
     public const int BURNING_DAMAGE = 1;
     
@@ -11,9 +11,9 @@ public class MechRoomBurningDamageApplySystem : EcsRunSystemBase3<MechRoomCompon
     { }
 
     protected override void ProcessComponent(ref MechRoomComponent roomComp, ref HealthComponent hpComp, 
-        ref BurningComponent burningComp, int entity)
+        ref BurningEffectComponent burningEffectComp, int entity)
     {
-        var damageEvent = MechDamageEvent.BuildFromRoom(burningComp.BurningSrc, entity, 
+        var damageEvent = MechDamageEvent.BuildFromRoom(burningEffectComp.EffectSource, entity, 
             BURNING_DAMAGE, World);
         DamageApplySystem.TryAddDamageEvent(damageEvent, roomComp.MechEntity, World);
     }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Ext;
 using UnityEngine;
 
@@ -92,7 +93,8 @@ public class BattleFieldController : MonoBehaviour
         }
 
         var unitController = GetUnitController(unitEntity);
-        if (path.Parts.Count > unitController.UnitInfo.MoveSpeed)
+        if (path.Parts.Count > unitController.UnitInfo.MoveSpeed
+            || path.IsEmpty)
         {
             return;
         }
@@ -154,6 +156,11 @@ public class BattleFieldController : MonoBehaviour
     private void HighlightWeaponDistanceArea(int unitEntity, BattleMechManager.WeaponInfo weaponInfo)
     {
         ClearHighlightedTiles();
+        
+        if (weaponInfo.WeaponTarget.TargetType == WeaponTargetType.NonTargeted)
+        {
+            return;
+        }
         
         var unitController = GetUnitController(unitEntity);
         var weaponPos = unitController.UnitInfo.Position;

@@ -161,8 +161,39 @@ public class UseWeaponManager
 
     public bool CanConfirmWeaponTargets()
     {
-        return _weaponTarget.TargetMechRoomEntities.Any()
-            || _weaponTarget.TargetMechEntities.Any()
-            || _weaponTarget.TargetTiles.Any();
+        return CheckTargetsCount();
+    }
+
+    private bool CheckTargetsCount()
+    {
+        int selectedTargetsCount;
+        int maxTargetsCount;
+        switch (_usedWeaponInfo.WeaponTarget.TargetType)
+        {
+            case WeaponTargetType.Rooms:
+                selectedTargetsCount = _weaponTarget.TargetMechRoomEntities.Count;
+                var roomsSelectionSize = _usedWeaponInfo.WeaponTarget.RoomTargetsSize;
+                maxTargetsCount = roomsSelectionSize.x * roomsSelectionSize.y;
+                break;
+            case WeaponTargetType.Unit:
+                selectedTargetsCount = _weaponTarget.TargetMechEntities.Count;
+                maxTargetsCount = _usedWeaponInfo.WeaponTarget.UnitTargetsCount;
+                break;
+            case WeaponTargetType.BattleFieldTiles:
+                selectedTargetsCount = _weaponTarget.TargetTiles.Count;
+                var tilesSelectionSize = _usedWeaponInfo.WeaponTarget.TileTargetsSize;
+                maxTargetsCount = tilesSelectionSize.x * tilesSelectionSize.y;
+                break;
+            case WeaponTargetType.NonTargeted:
+                return true;
+            default:
+                selectedTargetsCount = 0;
+                maxTargetsCount = 0;
+                Debug.LogError(
+                    $"[{nameof(UseWeaponManager)}] Wrong used weapon target type {_usedWeaponInfo.WeaponTarget.TargetType}");
+                break;
+        }
+
+        return selectedTargetsCount > 0 && selectedTargetsCount <= maxTargetsCount;
     }
 }

@@ -3,5 +3,6 @@
     None,
     Rooms,
     Unit,
-    BattleFieldTiles
+    BattleFieldTiles,
+    NonTargeted
 }

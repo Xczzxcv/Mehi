@@ -55,5 +55,13 @@ public static class LeoEcsExt
 
         return resultEntities;
     }
+    
+    public static ref TComponent GetOrAdd<TComponent>(this EcsPool<TComponent> pool, int entity) 
+        where TComponent : struct
+    {
+        return ref pool.Has(entity)
+            ? ref pool.Get(entity)
+            : ref pool.Add(entity);
+    }
 }
 }

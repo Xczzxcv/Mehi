@@ -12,7 +12,7 @@ public abstract class EcsRunSystemBase : EcsRunSystemBaseInternal
 public abstract class EcsRunSystemBase<TComponent> : EcsRunSystemBaseInternal
     where TComponent : struct
 {
-    private EcsPool<TComponent> _components;
+    protected EcsPool<TComponent> Pool;
 
     protected EcsRunSystemBase(EnvironmentServices services)
         : base(services)
@@ -21,13 +21,13 @@ public abstract class EcsRunSystemBase<TComponent> : EcsRunSystemBaseInternal
     public override void Init(IEcsSystems systems)
     {
         Filter = World.Filter<TComponent>().End();
-        _components = World.GetPool<TComponent>();
+        Pool = World.GetPool<TComponent>();
     }
 
     public override void Run(IEcsSystems systems)
     {
         Profiler.BeginSample(GetType().Name);
-        ProcessComponents(Filter, _components, World);
+        ProcessComponents(Filter, Pool, World);
         Profiler.EndSample();
     }
 
@@ -40,6 +40,6 @@ public abstract class EcsRunSystemBase<TComponent> : EcsRunSystemBaseInternal
         }
     }
 
-    protected abstract void ProcessComponent(ref TComponent creatureComp, int entity);
+    protected abstract void ProcessComponent(ref TComponent comp, int entity);
 }
 }
