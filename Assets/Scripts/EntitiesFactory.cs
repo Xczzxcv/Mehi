@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Ecs.Components;
+using Ecs.Components.Weapon;
 using Ecs.Systems;
 using Ext.LeoEcs;
+using Extension;
 using Leopotam.EcsLite;
 using UnityEngine;
 
@@ -110,10 +111,15 @@ public static class EntitiesFactory
         if (MechSystemComponent.IsWeaponHandlingSystem(mechSystemComp.Type))
         {
             ref var mechWeaponSlot = ref world.AddComponent<MechWeaponSlotComponent>(newMechSystemEntity);
-            mechWeaponSlot.WeaponId = config.WeaponId;
+
+            var containsWeapon = !config.WeaponId.IsNullOrEmpty();
+            if (containsWeapon)
+            {
+                mechWeaponSlot.WeaponId = config.WeaponId;
             
-            var weaponConfig = weaponConfigs[config.WeaponId];
-            BuildWeapon(world, newMechEntityPacked, weaponConfig);
+                var weaponConfig = weaponConfigs[config.WeaponId];
+                BuildWeapon(world, newMechEntityPacked, weaponConfig);
+            }
         }
         
         return world.PackEntity(newMechSystemEntity);
@@ -156,7 +162,15 @@ public static class EntitiesFactory
         weaponMainComp.ProjectileType = weaponConfig.ProjectileType;
         weaponMainComp.GripType = weaponConfig.GripType;
 
-        foreach (var weaponComponent in weaponConfig.WeaponComponents)
+        AddWeaponComponents(world, weaponConfig.WeaponComponents, newWeaponEntity);
+        AddWeaponComponents(world, weaponConfig.WeaponRequirements, newWeaponEntity);
+
+        return world.PackEntity(newWeaponEntity);
+    }
+
+    private static void AddWeaponComponents(EcsWorld world, List<IWeaponComponentBase> weaponComponents, int newWeaponEntity)
+    {
+        foreach (var weaponComponent in weaponComponents)
         {
             var weaponComponentPool = world.GetPoolByType(weaponComponent.GetType());
             if (weaponComponentPool == null)
@@ -164,11 +178,9 @@ public static class EntitiesFactory
                 Debug.LogError($"Can't get pool for type {weaponComponent}");
                 continue;
             }
-            
+
             weaponComponentPool.AddRaw(newWeaponEntity, weaponComponent);
         }
-
-        return world.PackEntity(newWeaponEntity);
     }
 
     public static void BuildMoveOrder(int unitEntity, Graph.Path path, EcsWorld world)

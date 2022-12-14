@@ -79,6 +79,10 @@ public class EcsManager : MonoBehaviour
     {
         _weaponSystems = new EcsSystems(World);
         _weaponSystems
+            .AddGroup("weapon_requirements", true, null, new []
+            {
+                new DistanceWeaponRequirementSystem(_environmentServices)
+            })
             .Add(new DelayUsageWeaponSystem(_environmentServices))
             .Add(new AddShieldToSelfWeaponSystem(_environmentServices))
             .Add(new DamageWeaponSystem(_environmentServices))

@@ -12,6 +12,7 @@ public struct TempShieldComponent : IEcsAutoReset<TempShieldComponent>
 
     public void AutoReset(ref TempShieldComponent c)
     {
+        c.Amount = 0;
         c.InitTurnIndex = DEFAULT_TURN_INDEX;
     }
 }

@@ -1,5 +1,5 @@
 ﻿namespace Ecs.Components.Weapon
 {
-public interface IWeaponComponent
+public interface IWeaponComponent : IWeaponComponentBase
 { }
 }

@@ -9,7 +9,7 @@ public abstract class EcsRunSystemBase : EcsRunSystemBaseInternal
     { }
 }
 
-public abstract class EcsRunSystemBase<TComponent> : EcsRunSystemBaseInternal
+public abstract class EcsRunSystemBase<TComponent> : EcsRunSystemBase
     where TComponent : struct
 {
     protected EcsPool<TComponent> Pool;

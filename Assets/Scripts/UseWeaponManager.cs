@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Ecs.Components;
+using Ecs.Systems.Weapon;
 using UnityEngine;
 
 public class UseWeaponManager
@@ -51,14 +52,14 @@ public class UseWeaponManager
         {
             return false;
         }
-        
-        var attackerInfo = _battleManager.GetBattleUnitInfo(_weaponUserEntity);
-        var distanceToTarget = Vector2Int.Distance(attackerInfo.Position, battleUnitInfo.Position);
-        if (distanceToTarget > _usedWeaponInfo.UseDistance)
+
+        if (!DistanceWeaponRequirementSystem.CheckWeaponDistance(_battleManager, _weaponUserEntity,
+                _usedWeaponInfo.UseDistance, battleUnitInfo.Position))
         {
             return false;
         }
-        
+
+        var attackerInfo = _battleManager.GetBattleUnitInfo(_weaponUserEntity);
         var attackerControl = attackerInfo.ControlledBy;
         var victimControl = battleUnitInfo.ControlledBy;
         return BattleMechManager.CanAttack(attackerControl, victimControl);

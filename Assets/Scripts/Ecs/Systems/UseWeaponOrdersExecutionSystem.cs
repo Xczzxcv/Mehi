@@ -45,15 +45,22 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
             TargetTiles = new List<Vector2Int>(target.TargetTiles),
         };
 
-        var positionPool = World.GetPool<PositionComponent>();
-        ConvertTargetRooms(target, positionPool, ref resultWeaponTarget);
-
         var roomPool = World.GetPool<MechRoomComponent>();
         var rooms = World.Filter<MechRoomComponent>().End();
-        ConvertTargetMechEntities(target, rooms, roomPool, ref resultWeaponTarget);
-
-        ConvertTargetTiles(target, positionPool, rooms, roomPool, ref resultWeaponTarget);
-
+        var positionPool = World.GetPool<PositionComponent>();
+        switch (target.TargetType)
+        {
+            case WeaponTargetType.Rooms:
+                ConvertTargetRooms(target, positionPool, ref resultWeaponTarget);
+                break;
+            case WeaponTargetType.Unit:
+                ConvertTargetMechEntities(target, rooms, roomPool, ref resultWeaponTarget);
+                break;
+            case WeaponTargetType.BattleFieldTiles:
+                ConvertTargetTiles(target, positionPool, rooms, roomPool, ref resultWeaponTarget);
+                break;
+        }
+        
         return resultWeaponTarget;
     }
 
@@ -82,6 +89,9 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         foreach (var targetMechEntity in target.TargetMechEntities)
         {
             AddRandomMechRoom(rooms, roomPool, targetMechEntity, ref resultWeaponTarget);
+            
+            var unitPosition = Services.BattleManager.GetUnitPosition(targetMechEntity);
+            resultWeaponTarget.TargetTiles.Add(unitPosition);
         }
     }
 
@@ -107,6 +117,8 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
             {
                 continue;
             }
+
+            resultWeaponTarget.TargetMechEntities.Add(World.PackEntity(targetMechEntity));
 
             AddRandomMechRoom(rooms, roomPool, targetMechEntity, ref resultWeaponTarget);
         }

@@ -11,6 +11,8 @@ public struct WeaponConfig
     public WeaponTargetConfig WeaponTarget;
     public WeaponProjectileType ProjectileType;
     public WeaponGripType GripType;
-    [SerializeReference, ReferencePicker]
-    public List<IWeaponComponent> WeaponComponents;
+    [SerializeReference, ReferencePicker(typeof(IWeaponComponent))]
+    public List<IWeaponComponentBase> WeaponComponents;
+    [SerializeReference, ReferencePicker(typeof(IWeaponRequirementComponent))]
+    public List<IWeaponComponentBase> WeaponRequirements;
 }
