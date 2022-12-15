@@ -637,7 +637,7 @@ MonoBehaviour:
     BlueStats: 3
     ActionPoints: 2
     MoveSpeed: 10
-  - Control: 2
+  - Control: 1
     Rooms:
     - SystemConfig:
         Type: 1
@@ -751,6 +751,7 @@ MonoBehaviour:
     MoveSpeed: 4
   weaponConfigs:
   - WeaponId: weapon1
+    IsFriendlyFireEnabled: 0
     UseDistance: 3
     WeaponTarget:
       TargetType: 2
@@ -768,6 +769,7 @@ MonoBehaviour:
     WeaponRequirements:
     - rid: 7207661885864542208
   - WeaponId: weapon2
+    IsFriendlyFireEnabled: 0
     UseDistance: 4
     WeaponTarget:
       TargetType: 3
@@ -780,6 +782,7 @@ MonoBehaviour:
     - rid: 9092259981470728194
     WeaponRequirements: []
   - WeaponId: weapon3
+    IsFriendlyFireEnabled: 0
     UseDistance: 1
     WeaponTarget:
       TargetType: 2

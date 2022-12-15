@@ -16,7 +16,7 @@ public class BattleMechManager
         public TurnsManager TurnsManager;
     }
 
-    public enum ControlledBy
+    public enum UnitControl
     {
         None,
         Player,
@@ -25,7 +25,7 @@ public class BattleMechManager
     
     public struct BattleUnitInfo
     {
-        public ControlledBy ControlledBy;
+        public UnitControl UnitControl;
         public int MaxActionPoints;
         public int ActionPoints;
         public Vector2Int Position;
@@ -45,6 +45,7 @@ public class BattleMechManager
     public struct WeaponInfo
     {
         public string WeaponId;
+        public bool IsFriendlyFireEnabled;
         public WeaponTargetConfig WeaponTarget;
         public WeaponProjectileType ProjectileType;
         public WeaponGripType GripType;
@@ -89,7 +90,7 @@ public class BattleMechManager
     {
         return new BattleUnitInfo
         {
-            ControlledBy = GetUnitControl(unitEntity, _config.World),
+            UnitControl = GetUnitControl(unitEntity, _config.World),
             MaxHealth = GetUnitHealth(unitEntity).MaxHealth,
             Health = GetUnitHealth(unitEntity).Health,
             Shield = GetUnitHealth(unitEntity).Shield,
@@ -107,19 +108,19 @@ public class BattleMechManager
         };
     }
 
-    public static ControlledBy GetUnitControl(int unitEntity, EcsWorld world)
+    public static UnitControl GetUnitControl(int unitEntity, EcsWorld world)
     {
         if (world.HasComponent<PlayerControlComponent>(unitEntity))
         {
-            return ControlledBy.Player;
+            return UnitControl.Player;
         }
 
         if (world.HasComponent<AiControlComponent>(unitEntity))
         {
-            return ControlledBy.AI;
+            return UnitControl.AI;
         }
 
-        return ControlledBy.None;
+        return UnitControl.None;
     }
 
     private MechHealthComponent GetUnitHealth(int unitEntity)
@@ -224,8 +225,8 @@ public class BattleMechManager
         var controlledBy = GetUnitControl(unitEntity, _config.World);
         switch (_config.TurnsManager.Phase)
         {
-            case TurnsManager.TurnPhase.PlayerMove when controlledBy == ControlledBy.Player:
-            case TurnsManager.TurnPhase.AIMove when controlledBy == ControlledBy.AI:
+            case TurnsManager.TurnPhase.PlayerMove when controlledBy == UnitControl.Player:
+            case TurnsManager.TurnPhase.AIMove when controlledBy == UnitControl.AI:
                 return true;
             default:
                 return false;
@@ -368,6 +369,7 @@ public class BattleMechManager
         weaponInfo = new WeaponInfo
         {
             WeaponId = weaponId,
+            IsFriendlyFireEnabled = weaponMainComp.IsFriendlyFireEnabled,
             WeaponTarget = weaponMainComp.TargetConfig,
             UseDistance = weaponMainComp.UseDistance,
             ProjectileType = weaponMainComp.ProjectileType,
@@ -485,7 +487,7 @@ public class BattleMechManager
         EntitiesFactory.BuildRepairSelfOrder(unitEntity, _config.World);
     }
 
-    public static bool CanAttack(ControlledBy attackerSide, ControlledBy victimSide)
+    public static bool CanAttack(UnitControl attackerSide, UnitControl victimSide)
     {
         return attackerSide != victimSide;
     }

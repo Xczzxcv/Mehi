@@ -5,6 +5,7 @@ namespace Ecs.Components
 public struct WeaponMainComponent
 {
     public string WeaponId;
+    public bool IsFriendlyFireEnabled;
     public EcsPackedEntity OwnerUnitEntity;
     public WeaponTargetConfig TargetConfig;
     public int UseDistance;

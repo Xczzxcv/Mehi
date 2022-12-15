@@ -33,7 +33,7 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
     private void ProcessDamageEvent(MechDamageEvent mechDamageEvent, 
         ref MechHealthComponent mechHealthComp, int entity)
     {
-        var isHit = mechDamageEvent.HitChance <= Random.value;
+        var isHit = Random.value < mechDamageEvent.HitChance;
         if (!isHit)
         {
             return;
@@ -46,9 +46,9 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
     private void MechDamageApply(MechDamageEvent mechDmgEvent, ref MechHealthComponent mechHpComp,
         int mechEntity)
     {
-        var dmgTempShieldPierce = ProcessTempShield(mechDmgEvent, mechEntity);
+        ProcessTempShield(ref mechDmgEvent, mechEntity);
 
-        var dmgShieldAbsorb = Math.Min(dmgTempShieldPierce, mechHpComp.Shield);
+        var dmgShieldAbsorb = Math.Min(mechDmgEvent.DamageAmount, mechHpComp.Shield);
         mechHpComp.Shield -= dmgShieldAbsorb;
         mechDmgEvent.DamageAmount -= dmgShieldAbsorb;
 
@@ -56,24 +56,20 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
         mechDmgEvent.DamageAmount = 0;
     }
 
-    private int ProcessTempShield(MechDamageEvent mechDmgEvent, int mechEntity)
+    private void ProcessTempShield(ref MechDamageEvent mechDmgEvent, int mechEntity)
     {
         var tempShieldPool = World.GetPool<TempShieldComponent>();
-        int dmgTempShieldPierce;
-        if (tempShieldPool.Has(mechEntity))
+        if (!tempShieldPool.Has(mechEntity))
         {
-            ref var tempShield = ref tempShieldPool.Get(mechEntity);
-            var dmgTempShieldAbsorb = Math.Min(mechDmgEvent.DamageAmount, tempShield.Amount);
-            dmgTempShieldPierce = mechDmgEvent.DamageAmount - dmgTempShieldAbsorb;
-
-            tempShield.Amount -= dmgTempShieldPierce;
-        }
-        else
-        {
-            dmgTempShieldPierce = 0;
+            return;
         }
 
-        return dmgTempShieldPierce;
+        ref var tempShield = ref tempShieldPool.Get(mechEntity);
+        var dmgTempShieldAbsorb = Math.Min(mechDmgEvent.DamageAmount, tempShield.Amount);
+        var dmgTempShieldPierce = mechDmgEvent.DamageAmount - dmgTempShieldAbsorb;
+
+        mechDmgEvent.DamageAmount -= dmgTempShieldAbsorb;
+        tempShield.Amount -= dmgTempShieldPierce;
     }
 
     private void RoomDamageApply(MechDamageEvent mechDamageEvent)

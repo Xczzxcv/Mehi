@@ -13,7 +13,7 @@ public static class EntitiesFactory
     [Serializable]
     public struct MechConfig
     {
-        public BattleMechManager.ControlledBy Control;
+        public BattleMechManager.UnitControl Control;
         public List<MechRoomConfig> Rooms;
         public int Health;
         public int Shield;
@@ -74,14 +74,14 @@ public static class EntitiesFactory
         return newMechEntityPacked;
     }
 
-    private static void SetupControl(EcsWorld world, BattleMechManager.ControlledBy control, int unitEntity)
+    private static void SetupControl(EcsWorld world, BattleMechManager.UnitControl control, int unitEntity)
     {
         switch (control)
         {
-            case BattleMechManager.ControlledBy.Player:
+            case BattleMechManager.UnitControl.Player:
                 world.AddComponent<PlayerControlComponent>(unitEntity);
                 break;
-            case BattleMechManager.ControlledBy.AI:
+            case BattleMechManager.UnitControl.AI:
                 world.AddComponent<AiControlComponent>(unitEntity);
                 break;
         }
@@ -156,6 +156,7 @@ public static class EntitiesFactory
         var weaponPool = world.GetPool<WeaponMainComponent>();
         ref var weaponMainComp = ref weaponPool.Add(newWeaponEntity);
         weaponMainComp.WeaponId = weaponConfig.WeaponId;
+        weaponMainComp.IsFriendlyFireEnabled = weaponConfig.IsFriendlyFireEnabled;
         weaponMainComp.OwnerUnitEntity = weaponOwnerEntity;
         weaponMainComp.TargetConfig = weaponConfig.WeaponTarget;
         weaponMainComp.UseDistance = weaponConfig.UseDistance;

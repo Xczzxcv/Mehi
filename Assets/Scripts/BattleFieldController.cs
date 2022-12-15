@@ -14,7 +14,7 @@ public class BattleFieldController : MonoBehaviour
     [SerializeField] private SerializedDictionary<BattleFieldManager.TileType, Sprite> backgrounds;
     [Space]
     [SerializeField] private BattleUnitController unitPrefab;
-    [SerializeField] private SerializedDictionary<BattleMechManager.ControlledBy, Color> unitControlColors;
+    [SerializeField] private SerializedDictionary<BattleMechManager.UnitControl, Color> unitControlColors;
 
     public struct Config
     {
@@ -268,9 +268,9 @@ public class BattleFieldController : MonoBehaviour
 
     private Color GetUnitColor(BattleMechManager.BattleUnitInfo unitInfo)
     {
-        if (!unitControlColors.TryGetValue(unitInfo.ControlledBy, out var unitColor))
+        if (!unitControlColors.TryGetValue(unitInfo.UnitControl, out var unitColor))
         {
-            Debug.LogError($"Can't find unit color for unit control  {unitInfo.ControlledBy}");
+            Debug.LogError($"Can't find unit color for unit control  {unitInfo.UnitControl}");
             unitColor = Color.magenta;
         }
 

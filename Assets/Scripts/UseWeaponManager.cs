@@ -59,10 +59,15 @@ public class UseWeaponManager
             return false;
         }
 
-        var attackerInfo = _battleManager.GetBattleUnitInfo(_weaponUserEntity);
-        var attackerControl = attackerInfo.ControlledBy;
-        var victimControl = battleUnitInfo.ControlledBy;
-        return BattleMechManager.CanAttack(attackerControl, victimControl);
+        if (!_usedWeaponInfo.IsFriendlyFireEnabled)
+        {
+            var attackerInfo = _battleManager.GetBattleUnitInfo(_weaponUserEntity);
+            var attackerControl = attackerInfo.UnitControl;
+            var victimControl = battleUnitInfo.UnitControl;
+            return BattleMechManager.CanAttack(attackerControl, victimControl);
+        }
+
+        return true;
     }
 
     public bool CanSelectUnitRoomAsTargetForAttack(BattleMechManager.BattleUnitInfo battleUnitInfo)
@@ -116,6 +121,17 @@ public class UseWeaponManager
         if (!CanSelectTargetForAttackBase(WeaponTargetType.BattleFieldTiles))
         {
             return false;
+        }
+
+        if (!_usedWeaponInfo.IsFriendlyFireEnabled 
+            && _battleManager.TryGetUnitInPos(targetTilePos, out var unitEntity))
+        {
+            var attackerControl = _battleManager.GetUnitControl(_weaponUserEntity);
+            var targetControl = _battleManager.GetUnitControl(unitEntity);
+            if (!BattleMechManager.CanAttack(attackerControl, targetControl))
+            {
+                return false;
+            }
         }
 
         var attackerInfo = _battleManager.GetBattleUnitInfo(_weaponUserEntity);

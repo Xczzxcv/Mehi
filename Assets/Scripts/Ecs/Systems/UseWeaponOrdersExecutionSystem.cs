@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Ecs.Components;
 using Ext.LeoEcs;
 using Leopotam.EcsLite;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Ecs.Systems
 {
@@ -23,7 +25,8 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
 
         ref var weaponActivation = ref World.AddComponent<ActiveWeaponComponent>(weaponEntity);
         weaponActivation.WeaponUser = World.PackEntity(entity);
-        weaponActivation.WeaponTarget = GetCompleteWeaponTarget(useWeaponOrder.WeaponTarget);
+        weaponActivation.WeaponTarget = GetCompleteWeaponTarget(useWeaponOrder.WeaponTarget, 
+            weaponEntity, entity);
 
         activeCreature.ActionPoints = 0;
 
@@ -35,7 +38,8 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         // этот компонент ActiveWeaponComponent. В этом случае они выполняют свою смысловую нагрузку над
     }
 
-    private WeaponTarget GetCompleteWeaponTarget(in InputWeaponTarget target)
+    private WeaponTarget GetCompleteWeaponTarget(in InputWeaponTarget target, int weaponEntity, 
+        int weaponUserEntity)
     {
         var resultWeaponTarget = new WeaponTarget
         {
@@ -47,17 +51,19 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
 
         var roomPool = World.GetPool<MechRoomComponent>();
         var rooms = World.Filter<MechRoomComponent>().End();
-        var positionPool = World.GetPool<PositionComponent>();
+        var mainWeaponComp = World.GetComponent<WeaponMainComponent>(weaponEntity);
+        var weaponUserControl = BattleMechManager.GetUnitControl(weaponUserEntity, World);
         switch (target.TargetType)
         {
             case WeaponTargetType.Rooms:
-                ConvertTargetRooms(target, positionPool, ref resultWeaponTarget);
+                var positionPool = World.GetPool<PositionComponent>();
+                ConvertTargetRooms(target, positionPool, mainWeaponComp, weaponUserControl, ref resultWeaponTarget);
                 break;
             case WeaponTargetType.Unit:
-                ConvertTargetMechEntities(target, rooms, roomPool, ref resultWeaponTarget);
+                ConvertTargetMechEntities(target, rooms, roomPool, mainWeaponComp, weaponUserControl, ref resultWeaponTarget);
                 break;
             case WeaponTargetType.BattleFieldTiles:
-                ConvertTargetTiles(target, positionPool, rooms, roomPool, ref resultWeaponTarget);
+                ConvertTargetTiles(target, rooms, roomPool, mainWeaponComp, weaponUserControl, ref resultWeaponTarget);
                 break;
         }
         
@@ -65,10 +71,13 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
     }
 
     private void ConvertTargetRooms(InputWeaponTarget target, EcsPool<PositionComponent> positionPool,
+        WeaponMainComponent weaponMainComp, BattleMechManager.UnitControl weaponUserControl, 
         ref WeaponTarget resultWeaponTarget)
     {
+        var targetMechRoomEntities = GetTargetMechRoomEntities(target, 
+            weaponMainComp, weaponUserControl);
         var mechRoomCompPool = World.GetPool<MechRoomComponent>();
-        foreach (var targetMechRoomEntity in target.TargetMechRoomEntities)
+        foreach (var targetMechRoomEntity in targetMechRoomEntities)
         {
             ref var mechRoomComp = ref mechRoomCompPool.Get(targetMechRoomEntity);
             if (!mechRoomComp.MechEntity.TryUnpack(World, out var mechEntity))
@@ -83,10 +92,40 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         }
     }
 
-    private void ConvertTargetMechEntities(InputWeaponTarget target, EcsFilter rooms,
-        EcsPool<MechRoomComponent> roomPool, ref WeaponTarget resultWeaponTarget)
+    private IEnumerable<int> GetTargetMechRoomEntities(InputWeaponTarget target, WeaponMainComponent weaponMainComp,
+        BattleMechManager.UnitControl weaponUserControl)
     {
-        foreach (var targetMechEntity in target.TargetMechEntities)
+        var targetMechRoomEntities = target.TargetMechRoomEntities;
+        return weaponMainComp.IsFriendlyFireEnabled
+            ? targetMechRoomEntities
+            : targetMechRoomEntities.Where(FilterAllyRooms);
+
+        bool FilterAllyRooms(int mechRoomEntity)
+        {
+            var mechRoomComp = World.GetComponent<MechRoomComponent>(mechRoomEntity);
+            if (!mechRoomComp.MechEntity.TryUnpack(World, out var mechEntity))
+            {
+                return false;
+            }
+
+            return CanAttackMechEntity(weaponUserControl, mechEntity);
+        }
+    }
+
+    private bool CanAttackMechEntity(BattleMechManager.UnitControl weaponUserControl, int mechEntity)
+    {
+        var targetMechControl = BattleMechManager.GetUnitControl(mechEntity, World);
+        return BattleMechManager.CanAttack(weaponUserControl, targetMechControl);
+    }
+
+
+    private void ConvertTargetMechEntities(InputWeaponTarget target, EcsFilter rooms,
+        EcsPool<MechRoomComponent> roomPool, WeaponMainComponent weaponMainComp, 
+        BattleMechManager.UnitControl weaponUserControl, ref WeaponTarget resultWeaponTarget)
+    {
+        var targetMechEntities = GetTargetMechEntities(target, weaponMainComp, 
+            weaponUserControl);
+        foreach (var targetMechEntity in targetMechEntities)
         {
             AddRandomMechRoom(rooms, roomPool, targetMechEntity, ref resultWeaponTarget);
             
@@ -95,25 +134,23 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         }
     }
 
-    private void ConvertTargetTiles(InputWeaponTarget target, EcsPool<PositionComponent> positionPool, 
-        EcsFilter rooms, EcsPool<MechRoomComponent> roomPool, ref WeaponTarget resultWeaponTarget)
+    private IEnumerable<int> GetTargetMechEntities(InputWeaponTarget target, WeaponMainComponent weaponMainComp,
+        BattleMechManager.UnitControl weaponUserControl)
     {
-        var mechPosFilter = World.Filter<MechComponent>().Inc<PositionComponent>().End();
-        foreach (var targetPos in target.TargetTiles)
-        {
-            int targetMechEntity = default;
-            foreach (var mechEntity in mechPosFilter)
-            {
-                var mechPosComp = positionPool.Get(mechEntity);
-                if (mechPosComp.Pos == targetPos)
-                {
-                    targetMechEntity = mechEntity;
-                    break;
-                }
-            }
+        var targetMechEntities = weaponMainComp.IsFriendlyFireEnabled
+            ? target.TargetMechEntities
+            : target.TargetMechEntities.Where(mechEntity => CanAttackMechEntity(weaponUserControl, mechEntity));
+        return targetMechEntities;
+    }
 
-            var noMechOnTargetPos = targetMechEntity == default;
-            if (noMechOnTargetPos)
+    private void ConvertTargetTiles(InputWeaponTarget target, EcsFilter rooms, 
+        EcsPool<MechRoomComponent> roomPool, WeaponMainComponent weaponMainComp,
+        BattleMechManager.UnitControl weaponUserControl, ref WeaponTarget resultWeaponTarget)
+    {
+        var targetTiles = GetTargetTiles(target, weaponMainComp, weaponUserControl);
+        foreach (var targetPos in targetTiles)
+        {
+            if (!Services.BattleManager.TryGetUnitInPos(targetPos, out var targetMechEntity))
             {
                 continue;
             }
@@ -121,6 +158,25 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
             resultWeaponTarget.TargetMechEntities.Add(World.PackEntity(targetMechEntity));
 
             AddRandomMechRoom(rooms, roomPool, targetMechEntity, ref resultWeaponTarget);
+        }
+    }
+
+    private IEnumerable<Vector2Int> GetTargetTiles(InputWeaponTarget target, WeaponMainComponent weaponMainComp,
+        BattleMechManager.UnitControl weaponUserControl)
+    {
+        var targetTiles = weaponMainComp.IsFriendlyFireEnabled
+            ? target.TargetTiles
+            : target.TargetTiles.Where(CanAttackTile);
+        return targetTiles;
+
+        bool CanAttackTile(Vector2Int tilePos)
+        {
+            if (!Services.BattleManager.TryGetUnitInPos(tilePos, out var mechEntity))
+            {
+                return true;
+            }
+
+            return CanAttackMechEntity(weaponUserControl, mechEntity);
         }
     }
 

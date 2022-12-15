@@ -103,11 +103,16 @@ public class BattleManager
     {
         var unitControlledBy = BattleMechManager.GetUnitControl(unitEntity, _config.World);
         var isUnitTurnPhase =
-            unitControlledBy == BattleMechManager.ControlledBy.Player
+            unitControlledBy == BattleMechManager.UnitControl.Player
             && TurnPhase == TurnsManager.TurnPhase.PlayerMove
-            || unitControlledBy == BattleMechManager.ControlledBy.AI
+            || unitControlledBy == BattleMechManager.UnitControl.AI
             && TurnPhase == TurnsManager.TurnPhase.AIMove;
 
         return isUnitTurnPhase;
+    }
+
+    public BattleMechManager.UnitControl GetUnitControl(int unitEntity)
+    {
+        return BattleMechManager.GetUnitControl(unitEntity, _config.World);
     }
 }

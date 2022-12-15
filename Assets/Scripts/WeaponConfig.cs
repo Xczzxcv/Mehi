@@ -7,6 +7,7 @@ using UnityEngine;
 public struct WeaponConfig
 {
     public string WeaponId;
+    public bool IsFriendlyFireEnabled;
     public int UseDistance;
     public WeaponTargetConfig WeaponTarget;
     public WeaponProjectileType ProjectileType;
