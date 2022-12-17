@@ -80,6 +80,12 @@ public class BattleManager
 
     public bool TryGetPath(Vector2Int src, Vector2Int dest, out Graph.Path path)
     {
+        if (_mechManager.TryGetUnitInPos(dest, out _))
+        {
+            path = Graph.Path.Empty();
+            return false;
+        }
+
         return _fieldManager.TryGetPath(src, dest, out path);
     }
 
@@ -103,15 +109,15 @@ public class BattleManager
     {
         var unitControlledBy = BattleMechManager.GetUnitControl(unitEntity, _config.World);
         var isUnitTurnPhase =
-            unitControlledBy == BattleMechManager.UnitControl.Player
+            unitControlledBy == UnitControl.Player
             && TurnPhase == TurnsManager.TurnPhase.PlayerMove
-            || unitControlledBy == BattleMechManager.UnitControl.AI
+            || unitControlledBy == UnitControl.AI
             && TurnPhase == TurnsManager.TurnPhase.AIMove;
 
         return isUnitTurnPhase;
     }
 
-    public BattleMechManager.UnitControl GetUnitControl(int unitEntity)
+    public UnitControl GetUnitControl(int unitEntity)
     {
         return BattleMechManager.GetUnitControl(unitEntity, _config.World);
     }

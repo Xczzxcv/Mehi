@@ -92,7 +92,9 @@ public class PushWeaponSystem : WeaponSystemBase<PushWeaponComponent>
             var tileToCheckPos = targetMechPosition.Pos + pushDirection * i;
             var isValidFieldPos = BattleFieldManager.IsValidFieldPos(tileToCheckPos, Services.BattleManager.FieldSize);
             var noUnitAtPos = !Services.BattleManager.TryGetUnitInPos(tileToCheckPos, out _);
-            if (isValidFieldPos && noUnitAtPos)
+            var tileAtPos = Services.BattleManager.GetFieldTile(tileToCheckPos);
+            var canWalkOnTileAtPos = tileAtPos.Walkable;
+            if (isValidFieldPos && noUnitAtPos && canWalkOnTileAtPos)
             {
                 continue;
             }

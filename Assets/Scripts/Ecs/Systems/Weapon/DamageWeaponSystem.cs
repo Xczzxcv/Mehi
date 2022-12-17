@@ -1,4 +1,5 @@
-﻿using Ecs.Components;
+﻿using System.Linq;
+using Ecs.Components;
 using Ecs.Components.Weapon;
 using Ext.LeoEcs;
 using Leopotam.EcsLite;
@@ -62,8 +63,15 @@ public class DamageWeaponSystem : WeaponSystemBase<DamageWeaponComponent>
             return 0;
         }
 
-        var mechSystemTypes = BattleMechManager.GetMechSystemTypes(weaponUserEntity, world);
-        return mechSystemTypes.Contains(MechSystemType.AimSystem_Head)
+        var mechSystemTypes = BattleMechManager.GetMechSystems(weaponUserEntity, world);
+        var headSystem = mechSystemTypes.FirstOrDefault(mechSystem => mechSystem.Type == MechSystemType.AimSystem_Head);
+        var hasHeadSystem = headSystem.Type == MechSystemType.AimSystem_Head;
+        if (!hasHeadSystem)
+        {
+            return 1f;
+        }
+
+        return headSystem.IsActive
             ? 1f
             : 0.5f;
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Ecs.Components;
 using Ecs.Components.Weapon;
 using Ecs.Systems;
@@ -16,13 +17,6 @@ public class BattleMechManager
         public TurnsManager TurnsManager;
     }
 
-    public enum UnitControl
-    {
-        None,
-        Player,
-        AI,
-    }
-    
     public struct BattleUnitInfo
     {
         public UnitControl UnitControl;
@@ -175,15 +169,15 @@ public class BattleMechManager
             return false;
         }
 
-        var mechSystems = GetMechSystemTypes(unitEntity, _config.World);
-        return MechSystemComponent.CanMechMove(mechSystems);
+        var mechSystems = GetMechSystems(unitEntity, _config.World);
+        return CanMechMove(mechSystems);
     }
 
-    public static List<MechSystemType> GetMechSystemTypes(int unitEntity, EcsWorld world)
+    public static List<MechSystemComponent> GetMechSystems(int unitEntity, EcsWorld world)
     {
         var systemPool = world.GetPool<MechSystemComponent>();
         var systemEntities = GetSystemEntities(unitEntity, world);
-        var mechSystems = new List<MechSystemType>();
+        var mechSystems = new List<MechSystemComponent>();
         foreach (var systemEntity in systemEntities)
         {
             if (!systemPool.Has(systemEntity))
@@ -192,7 +186,7 @@ public class BattleMechManager
             }
 
             var mechSystem = systemPool.Get(systemEntity);
-            mechSystems.Add(mechSystem.Type);
+            mechSystems.Add(mechSystem);
         }
 
         return mechSystems;
@@ -468,8 +462,8 @@ public class BattleMechManager
     {
         var moveSpeed = GetUnitMoveSpeed(unitEntity);
         
-        Debug.Assert(path.Parts.Count <= moveSpeed);
-        while (path.Parts.Count > moveSpeed)
+        Debug.Assert(path.Length <= moveSpeed);
+        while (path.Length > moveSpeed)
         {
             path.Parts.RemoveAt(path.Parts.Count - 1);
         }
@@ -490,5 +484,13 @@ public class BattleMechManager
     public static bool CanAttack(UnitControl attackerSide, UnitControl victimSide)
     {
         return attackerSide != victimSide;
+    }
+
+    public static bool CanMechMove(List<MechSystemComponent> mechSystems)
+    {
+        var leftLegsCount = mechSystems.Count(mechSystem => mechSystem.Type == MechSystemType.LeftLegSystem);
+        var rightLegsCount = mechSystems.Count(mechSystem => mechSystem.Type == MechSystemType.RightLegSystem);
+        
+        return leftLegsCount > 0 && rightLegsCount > 0;
     }
 }

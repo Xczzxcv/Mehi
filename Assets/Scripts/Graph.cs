@@ -41,6 +41,7 @@ public class Graph
         }
 
         public bool IsEmpty => !Parts.Any();
+        public int Length => Parts.Count - 1;
         public List<Part> Parts;
 
         public static Path Empty()

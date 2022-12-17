@@ -13,7 +13,7 @@ public static class EntitiesFactory
     [Serializable]
     public struct MechConfig
     {
-        public BattleMechManager.UnitControl Control;
+        public UnitControl Control;
         public List<MechRoomConfig> Rooms;
         public int Health;
         public int Shield;
@@ -74,14 +74,14 @@ public static class EntitiesFactory
         return newMechEntityPacked;
     }
 
-    private static void SetupControl(EcsWorld world, BattleMechManager.UnitControl control, int unitEntity)
+    private static void SetupControl(EcsWorld world, UnitControl control, int unitEntity)
     {
         switch (control)
         {
-            case BattleMechManager.UnitControl.Player:
+            case UnitControl.Player:
                 world.AddComponent<PlayerControlComponent>(unitEntity);
                 break;
-            case BattleMechManager.UnitControl.AI:
+            case UnitControl.AI:
                 world.AddComponent<AiControlComponent>(unitEntity);
                 break;
         }

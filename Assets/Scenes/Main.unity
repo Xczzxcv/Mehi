@@ -751,7 +751,7 @@ MonoBehaviour:
     MoveSpeed: 4
   weaponConfigs:
   - WeaponId: weapon1
-    IsFriendlyFireEnabled: 0
+    IsFriendlyFireEnabled: 1
     UseDistance: 3
     WeaponTarget:
       TargetType: 2

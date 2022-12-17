@@ -23,7 +23,7 @@ public class SelectedUnitPresenter : UIBehaviour
     public struct ViewInfo
     {
         public int Entity;
-        public BattleMechManager.UnitControl UnitControl;
+        public UnitControl UnitControl;
         public int MaxHp;
         public int CurrentHp;
         public int ShieldAmount;
@@ -52,7 +52,7 @@ public class SelectedUnitPresenter : UIBehaviour
                 CanRepairSelf = false,
                 CanConfirmTargets = false,
                 UnitPosition = Vector2Int.zero,
-                UnitControl = BattleMechManager.UnitControl.None,
+                UnitControl = UnitControl.None,
                 Systems = new List<SystemPresenter.ViewInfo>(),
                 Weapons = new List<WeaponPresenter.ViewInfo>()
             };

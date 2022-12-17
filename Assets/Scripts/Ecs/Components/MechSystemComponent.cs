@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Leopotam.EcsLite;
+﻿using Leopotam.EcsLite;
 
 public struct MechSystemComponent
 {
@@ -19,13 +17,5 @@ public struct MechSystemComponent
             default:
                 return false;
         }
-    }
-
-    public static bool CanMechMove(List<MechSystemType> mechSystems)
-    {
-        var leftLegsCount = mechSystems.Count(systemType => systemType == MechSystemType.LeftLegSystem);
-        var rightLegsCount = mechSystems.Count(systemType => systemType == MechSystemType.RightLegSystem);
-        
-        return leftLegsCount > 0 && rightLegsCount > 0;
     }
 }

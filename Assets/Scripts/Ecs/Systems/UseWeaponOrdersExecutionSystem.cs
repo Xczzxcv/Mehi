@@ -71,7 +71,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
     }
 
     private void ConvertTargetRooms(InputWeaponTarget target, EcsPool<PositionComponent> positionPool,
-        WeaponMainComponent weaponMainComp, BattleMechManager.UnitControl weaponUserControl, 
+        WeaponMainComponent weaponMainComp, UnitControl weaponUserControl, 
         ref WeaponTarget resultWeaponTarget)
     {
         var targetMechRoomEntities = GetTargetMechRoomEntities(target, 
@@ -93,7 +93,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
     }
 
     private IEnumerable<int> GetTargetMechRoomEntities(InputWeaponTarget target, WeaponMainComponent weaponMainComp,
-        BattleMechManager.UnitControl weaponUserControl)
+        UnitControl weaponUserControl)
     {
         var targetMechRoomEntities = target.TargetMechRoomEntities;
         return weaponMainComp.IsFriendlyFireEnabled
@@ -112,7 +112,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
         }
     }
 
-    private bool CanAttackMechEntity(BattleMechManager.UnitControl weaponUserControl, int mechEntity)
+    private bool CanAttackMechEntity(UnitControl weaponUserControl, int mechEntity)
     {
         var targetMechControl = BattleMechManager.GetUnitControl(mechEntity, World);
         return BattleMechManager.CanAttack(weaponUserControl, targetMechControl);
@@ -121,7 +121,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
 
     private void ConvertTargetMechEntities(InputWeaponTarget target, EcsFilter rooms,
         EcsPool<MechRoomComponent> roomPool, WeaponMainComponent weaponMainComp, 
-        BattleMechManager.UnitControl weaponUserControl, ref WeaponTarget resultWeaponTarget)
+        UnitControl weaponUserControl, ref WeaponTarget resultWeaponTarget)
     {
         var targetMechEntities = GetTargetMechEntities(target, weaponMainComp, 
             weaponUserControl);
@@ -135,7 +135,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
     }
 
     private IEnumerable<int> GetTargetMechEntities(InputWeaponTarget target, WeaponMainComponent weaponMainComp,
-        BattleMechManager.UnitControl weaponUserControl)
+        UnitControl weaponUserControl)
     {
         var targetMechEntities = weaponMainComp.IsFriendlyFireEnabled
             ? target.TargetMechEntities
@@ -145,7 +145,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
 
     private void ConvertTargetTiles(InputWeaponTarget target, EcsFilter rooms, 
         EcsPool<MechRoomComponent> roomPool, WeaponMainComponent weaponMainComp,
-        BattleMechManager.UnitControl weaponUserControl, ref WeaponTarget resultWeaponTarget)
+        UnitControl weaponUserControl, ref WeaponTarget resultWeaponTarget)
     {
         var targetTiles = GetTargetTiles(target, weaponMainComp, weaponUserControl);
         foreach (var targetPos in targetTiles)
@@ -162,7 +162,7 @@ public class UseWeaponOrdersExecutionSystem : EcsRunSystemBase2<UseWeaponOrderCo
     }
 
     private IEnumerable<Vector2Int> GetTargetTiles(InputWeaponTarget target, WeaponMainComponent weaponMainComp,
-        BattleMechManager.UnitControl weaponUserControl)
+        UnitControl weaponUserControl)
     {
         var targetTiles = weaponMainComp.IsFriendlyFireEnabled
             ? target.TargetTiles

@@ -14,7 +14,7 @@ public class BattleFieldController : MonoBehaviour
     [SerializeField] private SerializedDictionary<BattleFieldManager.TileType, Sprite> backgrounds;
     [Space]
     [SerializeField] private BattleUnitController unitPrefab;
-    [SerializeField] private SerializedDictionary<BattleMechManager.UnitControl, Color> unitControlColors;
+    [SerializeField] private SerializedDictionary<UnitControl, Color> unitControlColors;
 
     public struct Config
     {
@@ -93,7 +93,7 @@ public class BattleFieldController : MonoBehaviour
         }
 
         var unitController = GetUnitController(unitEntity);
-        if (path.Parts.Count > unitController.UnitInfo.MoveSpeed
+        if (path.Length > unitController.UnitInfo.MoveSpeed
             || path.IsEmpty)
         {
             return;
@@ -322,7 +322,7 @@ public class BattleFieldController : MonoBehaviour
         }
 
         var unitController = GetUnitController(unitEntity);
-        if (path.Parts.Count > unitController.UnitInfo.MoveSpeed)
+        if (path.Length > unitController.UnitInfo.MoveSpeed)
         {
             return;
         }
