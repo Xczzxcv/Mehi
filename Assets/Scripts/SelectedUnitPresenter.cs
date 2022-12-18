@@ -47,6 +47,8 @@ public class SelectedUnitPresenter : UIBehaviour
                 CurrentHp = 0,
                 CurrentActionPoints = 0,
                 MaxActionPoints = 0,
+                ShieldAmount = 0,
+                TempShieldAmount = 0,
                 CanMove = false,
                 CanUseWeapons = false,
                 CanRepairSelf = false,
@@ -54,7 +56,7 @@ public class SelectedUnitPresenter : UIBehaviour
                 UnitPosition = Vector2Int.zero,
                 UnitControl = UnitControl.None,
                 Systems = new List<SystemPresenter.ViewInfo>(),
-                Weapons = new List<WeaponPresenter.ViewInfo>()
+                Weapons = new List<WeaponPresenter.ViewInfo>(),
             };
         }
 

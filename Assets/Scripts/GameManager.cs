@@ -57,6 +57,7 @@ public class GameManager : MonoBehaviour
         battleFieldController.Setup(new BattleFieldController.Config
         {
             BattleManager = BattleManager,
+            World = ecsManager.World
         });
 
         uiManager.Init(BattleManager);

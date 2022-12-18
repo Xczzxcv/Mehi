@@ -1,3 +1,4 @@
+using Leopotam.EcsLite;
 using UnityEngine;
 
 public static partial class GlobalEventManager

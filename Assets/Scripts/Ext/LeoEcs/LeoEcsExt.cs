@@ -78,5 +78,20 @@ public static class LeoEcsExt
             ? ref pool.Get(entity)
             : ref pool.Add(entity);
     }
+
+    private static int[] _entityBuffer = new int[2048];
+    public static bool HasEntity(this EcsWorld world, int entity)
+    {
+        var entitiesCount = world.GetAllEntities(ref _entityBuffer);
+        for (int i = 0; i < entitiesCount; i++)
+        {
+            if (_entityBuffer[i] == entity)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 }

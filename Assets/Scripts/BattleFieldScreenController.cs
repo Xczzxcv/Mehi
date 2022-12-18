@@ -51,6 +51,7 @@ internal class BattleFieldScreenController : MonoBehaviour
     {
         _useWeaponManager.BuildUseWeaponOrder();
         _battleFieldPresenter.UpdateSelectedUnit(SelectedUnitPresenter.ViewInfo.BuildEmpty());
+        _battleFieldPresenter.UpdateRoomsInfo(RoomListPresenter.ViewInfo.BuildEmpty());
     }
 
     private void OnPresenterRepairButtonClick(int unitEntity)

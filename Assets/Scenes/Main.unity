@@ -637,7 +637,7 @@ MonoBehaviour:
     BlueStats: 3
     ActionPoints: 2
     MoveSpeed: 10
-  - Control: 1
+  - Control: 2
     Rooms:
     - SystemConfig:
         Type: 1
@@ -754,7 +754,7 @@ MonoBehaviour:
     IsFriendlyFireEnabled: 1
     UseDistance: 3
     WeaponTarget:
-      TargetType: 2
+      TargetType: 1
       RoomTargetsSize: {x: 1, y: 2}
       UnitTargetsCount: 1
       TileTargetsSize: {x: 0, y: 0}
@@ -815,7 +815,7 @@ MonoBehaviour:
     - rid: 9092259981470728192
       type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:
-        DamageAmount: 2
+        DamageAmount: 4
     - rid: 9092259981470728193
       type: {class: PushWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:

@@ -121,4 +121,15 @@ public class BattleManager
     {
         return BattleMechManager.GetUnitControl(unitEntity, _config.World);
     }
+
+    public void ProcessGeneralDeath(int entity)
+    {
+        _config.World.DelEntity(entity);
+    }
+
+    public void ProcessMechDeath(int mechEntity)
+    {
+        _config.World.DelEntity(mechEntity);
+        GlobalEventManager.BattleField.UnitUpdated.HappenedWith(mechEntity);
+    }
 }

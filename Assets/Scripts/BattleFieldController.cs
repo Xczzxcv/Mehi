@@ -1,6 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
 using Ext;
+using Ext.LeoEcs;
+using Leopotam.EcsLite;
 using UnityEngine;
 
 public class BattleFieldController : MonoBehaviour
@@ -19,6 +20,7 @@ public class BattleFieldController : MonoBehaviour
     public struct Config
     {
         public BattleManager BattleManager;
+        public EcsWorld World;
     }
 
     private readonly Dictionary<Vector2Int, FieldTileController> _tiles = new();
@@ -34,7 +36,7 @@ public class BattleFieldController : MonoBehaviour
         GlobalEventManager.BattleField.GridTileSelected.Event += OnFieldGridTileSelected;
         GlobalEventManager.BattleField.UnitMoveOrderSetActive.Event += OnUnitMoveOrderSetActive;
         GlobalEventManager.BattleField.GridTileHovered.Event += OnFieldGridTileHovered;
-        GlobalEventManager.BattleField.UnitMoved.Event += OnUnitMoved;
+        GlobalEventManager.BattleField.UnitUpdated.Event += OnUnitUpdated;
         GlobalEventManager.BattleField.UseWeaponBtnClicked.Event += OnUseWeaponBtnClicked;
         GlobalEventManager.BattleField.TileSelectedAsWeaponTarget.Event += OnTileSelectedAsWeaponTarget;
         GlobalEventManager.BattleField.UnitSelectedAsWeaponTarget.Event += OnUnitSelectedAsWeaponTarget;
@@ -125,7 +127,7 @@ public class BattleFieldController : MonoBehaviour
         HighlightPath(tilePos);
     }
 
-    private void OnUnitMoved(int unitEntity, Vector2Int srcPos, Vector2Int destPos)
+    private void OnUnitUpdated(int unitEntity)
     {
         UpdateUnit(unitEntity);
     }
@@ -201,13 +203,27 @@ public class BattleFieldController : MonoBehaviour
 
     private void UpdateUnit(int unitEntity)
     {
-        var unitController = GetUnitController(unitEntity);
         var unitInfo = _config.BattleManager.GetBattleUnitInfo(unitEntity);
+        var isUnitAlive = unitInfo.IsAlive;
+        if (!isUnitAlive)
+        {
+            ProcessUnitDeath(unitEntity);
+            return;
+        }
+
+        var unitController = GetUnitController(unitEntity);
         unitController.Setup(unitInfo, GetUnitColor(unitInfo));
 
         var unitPos = unitInfo.Position;
         var unitTile = GetTileController(unitPos);
         unitTile.SetupContent(unitController.transform);
+    }
+
+    private void ProcessUnitDeath(int unitEntity)
+    {
+        var unitController = GetUnitController(unitEntity);
+        DelUnitController(unitEntity);
+        unitController.ProcessDeath();
     }
 
     private void AddTiles()
@@ -264,6 +280,11 @@ public class BattleFieldController : MonoBehaviour
     private BattleUnitController GetUnitController(int unitEntity)
     {
         return _units[unitEntity];
+    }
+
+    private void DelUnitController(int unitEntity)
+    {
+        _units.Remove(unitEntity);
     }
 
     private Color GetUnitColor(BattleMechManager.BattleUnitInfo unitInfo)

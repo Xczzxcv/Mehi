@@ -47,4 +47,9 @@ public class BattleUnitController : MonoBehaviour
     {
         img.color = newColor;
     }
+
+    public void ProcessDeath()
+    {
+        Destroy(gameObject);
+    }
 }

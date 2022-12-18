@@ -19,6 +19,7 @@ public class BattleMechManager
 
     public struct BattleUnitInfo
     {
+        public bool IsAlive;
         public UnitControl UnitControl;
         public int MaxActionPoints;
         public int ActionPoints;
@@ -82,8 +83,17 @@ public class BattleMechManager
 
     public BattleUnitInfo GetUnitInfo(int unitEntity)
     {
+        var isAlive = _config.World.HasEntity(unitEntity);
+        if (!isAlive)
+        {
+            var result = default(BattleUnitInfo);
+            result.IsAlive = false;
+            return result;
+        }
+
         return new BattleUnitInfo
         {
+            IsAlive = true,
             UnitControl = GetUnitControl(unitEntity, _config.World),
             MaxHealth = GetUnitHealth(unitEntity).MaxHealth,
             Health = GetUnitHealth(unitEntity).Health,
