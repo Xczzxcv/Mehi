@@ -1,4 +1,5 @@
 ﻿using System;
+using TMPro;
 using UnityEngine;
 
 public class FieldTileController : MonoBehaviour
@@ -9,6 +10,9 @@ public class FieldTileController : MonoBehaviour
     [SerializeField] private BoxCollider2D tileCollider;
     [SerializeField] private Color highlightedColor;
     [SerializeField] private Color highlightedAsTargetColor;
+    [Space]
+    [SerializeField] private TextMeshPro tilePosText;
+    [SerializeField] private RectTransform tilePosTextRect;
     
     public struct Config
     {
@@ -37,6 +41,8 @@ public class FieldTileController : MonoBehaviour
         _config = config;
         backgroundImage.sprite = _config.Background;
         tileCollider.size = Vector2.one * _config.TileSize;
+        tilePosText.text = _config.TilePosition.ToString();
+        tilePosTextRect.sizeDelta = Vector2.one * _config.TileSize;
     }
 
     public void SetSelected(bool selected)

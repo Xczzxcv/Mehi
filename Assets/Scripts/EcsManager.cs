@@ -3,8 +3,10 @@ using Ecs.Systems;
 using Ecs.Systems.Weapon;
 using Leopotam.EcsLite;
 using Leopotam.EcsLite.ExtendedSystems;
-using Leopotam.EcsLite.UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
+using Leopotam.EcsLite.UnityEditor;
+#endif
 
 public class EcsManager : MonoBehaviour
 {
