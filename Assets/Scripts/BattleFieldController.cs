@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Ext;
 using Ext.LeoEcs;
 using Leopotam.EcsLite;
@@ -167,19 +169,13 @@ public class BattleFieldController : MonoBehaviour
         var unitController = GetUnitController(unitEntity);
         var weaponPos = unitController.UnitInfo.Position;
 
-        var weaponUseDistance = weaponInfo.UseDistance;
         for (int i = -weaponInfo.UseDistance; i <= weaponInfo.UseDistance; i++)
         {
-            for (int j = -weaponUseDistance; j <= weaponUseDistance; j++)
+            for (int j = -weaponInfo.UseDistance; j <= weaponInfo.UseDistance; j++)
             {
                 var posDiff = new Vector2Int(i, j);
                 var posToCheck = weaponPos + posDiff;
-                if (!BattleFieldManager.IsValidFieldPos(posToCheck, _config.BattleManager.FieldSize))
-                {
-                    continue;
-                }
-
-                if (posDiff.magnitude > weaponUseDistance)
+                if (!_config.BattleManager.IsValidTileToAttack(weaponInfo, weaponPos, posToCheck))
                 {
                     continue;
                 }

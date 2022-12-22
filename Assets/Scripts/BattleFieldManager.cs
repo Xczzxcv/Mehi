@@ -127,4 +127,43 @@ public class BattleFieldManager
         var destTile = GetTile(dest);
         return _graphManager.TryGetPath(srcTile.Id, destTile.Id, out path);
     }
+    
+    public bool IsValidTileToAttack(BattleMechManager.WeaponInfo weaponInfo, Vector2Int weaponPos,
+        Vector2Int posToCheck)
+    {
+        if (!IsValidFieldPos(posToCheck, FieldSize))
+        {
+            return false;
+        }
+
+        var posDiff = posToCheck - weaponPos;
+        if (posDiff.magnitude > weaponInfo.UseDistance)
+        {
+            return false;
+        }
+
+        if (weaponInfo.ProjectileType == WeaponProjectileType.Direct
+            && !IsReachableTile(weaponPos, posToCheck))
+        {
+            return false;
+        }
+
+        return true;
+    }
+    
+    public bool IsReachableTile(Vector2Int srcPos, Vector2Int posToCheck)
+    {
+        var intersectedTiles = TilesMathHelper.GetIntersectedTiles(
+            srcPos, posToCheck);
+        foreach (var intersectedTilePos in intersectedTiles)
+        {
+            var intersectedTile = GetTile(intersectedTilePos);
+            if (!intersectedTile.CanShootThrough)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

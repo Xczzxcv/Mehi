@@ -135,8 +135,8 @@ public class UseWeaponManager
         }
 
         var attackerInfo = _battleManager.GetBattleUnitInfo(_weaponUserEntity);
-        var distanceToTarget = Vector2Int.Distance(attackerInfo.Position, targetTilePos);
-        if (distanceToTarget > _usedWeaponInfo.UseDistance)
+        var weaponPos = attackerInfo.Position;
+        if (!_battleManager.IsValidTileToAttack(_usedWeaponInfo, weaponPos, targetTilePos))
         {
             return false;
         }

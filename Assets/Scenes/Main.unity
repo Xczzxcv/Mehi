@@ -524,23 +524,23 @@ MonoBehaviour:
   uiManager: {fileID: 105207176}
   gameConfig:
     BattleFieldSize: 15
-    BattleFieldConfig: '000000120011100
+    BattleFieldConfig: '000020120011100
 
-      010000120111100
+      000000120111100
 
-      010000000111100
-
-      010000120011100
-
-      010000120011100
+      000000000111100
 
       000000120011100
 
-      110000110011100
+      000200120011100
+
+      002000120011100
+
+      210000110011100
 
       000220110011100
 
-      012220110011100
+      011220110011100
 
       010111110011100
 
@@ -752,13 +752,13 @@ MonoBehaviour:
   weaponConfigs:
   - WeaponId: weapon1
     IsFriendlyFireEnabled: 1
-    UseDistance: 3
+    UseDistance: 8
     WeaponTarget:
       TargetType: 1
       RoomTargetsSize: {x: 1, y: 2}
       UnitTargetsCount: 1
       TileTargetsSize: {x: 0, y: 0}
-    ProjectileType: 0
+    ProjectileType: 2
     GripType: 0
     WeaponComponents:
     - rid: 9092259981470728192

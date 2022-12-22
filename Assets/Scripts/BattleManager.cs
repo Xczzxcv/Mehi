@@ -132,4 +132,10 @@ public class BattleManager
         _config.World.DelEntity(mechEntity);
         GlobalEventManager.BattleField.UnitUpdated.HappenedWith(mechEntity);
     }
+
+    public bool IsValidTileToAttack(BattleMechManager.WeaponInfo weaponInfo, Vector2Int weaponPos,
+        Vector2Int posToCheck)
+    {
+        return _fieldManager.IsValidTileToAttack(weaponInfo, weaponPos, posToCheck);
+    }
 }
