@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public partial class GameManager : MonoBehaviour
 {
     [SerializeField] private EcsManager ecsManager;
     [SerializeField] private BattleFieldController battleFieldController;

@@ -296,12 +296,12 @@ public class BattleMechManager
         foreach (var systemEntity in systemsFilter)
         {
             ref var systemComp = ref systemPool.Get(systemEntity);
-            if (!systemComp.MechEntity.TryUnpack(world, out var roomMechEntity))
+            if (!systemComp.MechEntity.TryUnpack(world, out var systemOwnerEntity))
             {
                 continue;
             }
 
-            if (unitEntity != roomMechEntity)
+            if (unitEntity != systemOwnerEntity)
             {
                 continue;
             }

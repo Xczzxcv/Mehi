@@ -524,35 +524,35 @@ MonoBehaviour:
   uiManager: {fileID: 105207176}
   gameConfig:
     BattleFieldSize: 15
-    BattleFieldConfig: '000020120011100
+    BattleFieldConfig: '111111111111111
 
-      000000120111100
+      111111111111111
 
-      000000000111100
+      111111111111111
 
-      000000120011100
+      111111111111111
 
-      000200120011100
+      000000000000000
 
-      002000120011100
+      000020000000000
 
-      210000110011100
+      000000000002000
 
-      000220110011100
+      000002002002000
 
-      011220110011100
+      000000002000000
 
-      010111110011100
+      000200000020000
 
-      010000110011100
+      000000000000000
 
-      000000110011100
+      111111111111111
 
-      000000110011100
+      111111111111111
 
-      000000110011100
+      111111111111111
 
-      000000110011100'
+      111111111111111'
     TileConfigs:
     - Id: 0
       Type: 0
@@ -574,264 +574,371 @@ MonoBehaviour:
         Level: 1
         IsActive: 1
         WeaponId: 
-      Health: 3
+      Health: 4
     - SystemConfig:
         Type: 8
         Level: 2
-        IsActive: 0
-        WeaponId: weapon1
+        IsActive: 1
+        WeaponId: "\u0412\u0435\u0440\u0442\u0438\u043A\u0430\u043B\u044C"
       Health: 4
     - SystemConfig:
         Type: 7
         Level: 2
-        IsActive: 0
-        WeaponId: weapon2
+        IsActive: 1
+        WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 10
         Level: 2
-        IsActive: 0
+        IsActive: 1
         WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 9
         Level: 2
-        IsActive: 0
+        IsActive: 1
         WeaponId: 
       Health: 4
-    - SystemConfig:
-        Type: 3
-        Level: 2
-        IsActive: 0
-        WeaponId: 
-      Health: 4
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-        WeaponId: 
-      Health: 4
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-        WeaponId: 
-      Health: 4
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-        WeaponId: 
-      Health: 4
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-        WeaponId: 
-      Health: 4
-    Health: 5
+    Health: 10
     Shield: 2
-    Position: {x: 0, y: 1}
+    Position: {x: 0, y: 5}
     RedStats: 1
     GreenStats: 2
     BlueStats: 3
     ActionPoints: 2
-    MoveSpeed: 10
+    MoveSpeed: 3
+  - Control: 1
+    Rooms:
+    - SystemConfig:
+        Type: 11
+        Level: 1
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 8
+        Level: 2
+        IsActive: 1
+        WeaponId: "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435"
+      Health: 4
+    - SystemConfig:
+        Type: 7
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 10
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 9
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    Health: 5
+    Shield: 2
+    Position: {x: 1, y: 7}
+    RedStats: 1
+    GreenStats: 2
+    BlueStats: 3
+    ActionPoints: 2
+    MoveSpeed: 3
+  - Control: 1
+    Rooms:
+    - SystemConfig:
+        Type: 11
+        Level: 1
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 8
+        Level: 2
+        IsActive: 1
+        WeaponId: "\u041A\u043B\u0430\u0441\u0441\u0438\u043A\u0430"
+      Health: 4
+    - SystemConfig:
+        Type: 7
+        Level: 2
+        IsActive: 1
+        WeaponId: "\u0413\u0440\u0430\u043D\u0430\u0442\u043E\u043C\u0451\u0442"
+      Health: 4
+    - SystemConfig:
+        Type: 10
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 9
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    Health: 10
+    Shield: 2
+    Position: {x: 0, y: 9}
+    RedStats: 1
+    GreenStats: 2
+    BlueStats: 3
+    ActionPoints: 2
+    MoveSpeed: 3
   - Control: 2
     Rooms:
     - SystemConfig:
-        Type: 1
+        Type: 11
         Level: 1
         IsActive: 1
         WeaponId: 
-      Health: 3
+      Health: 4
+    - SystemConfig:
+        Type: 8
+        Level: 2
+        IsActive: 1
+        WeaponId: "\u0412\u0435\u0440\u0442\u0438\u043A\u0430\u043B\u044C"
+      Health: 4
+    - SystemConfig:
+        Type: 7
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
     - SystemConfig:
         Type: 10
         Level: 2
-        IsActive: 0
-        WeaponId: weapon2
+        IsActive: 1
+        WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 9
         Level: 2
-        IsActive: 0
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    Health: 10
+    Shield: 2
+    Position: {x: 13, y: 5}
+    RedStats: 1
+    GreenStats: 2
+    BlueStats: 3
+    ActionPoints: 2
+    MoveSpeed: 3
+  - Control: 2
+    Rooms:
+    - SystemConfig:
+        Type: 11
+        Level: 1
+        IsActive: 1
         WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 8
         Level: 2
-        IsActive: 0
+        IsActive: 1
+        WeaponId: "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435"
+      Health: 4
+    - SystemConfig:
+        Type: 7
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 10
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 9
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    Health: 5
+    Shield: 2
+    Position: {x: 12, y: 6}
+    RedStats: 1
+    GreenStats: 2
+    BlueStats: 3
+    ActionPoints: 2
+    MoveSpeed: 3
+  - Control: 2
+    Rooms:
+    - SystemConfig:
+        Type: 11
+        Level: 1
+        IsActive: 1
         WeaponId: 
       Health: 4
     - SystemConfig:
         Type: 8
         Level: 2
-        IsActive: 0
-        WeaponId: 
+        IsActive: 1
+        WeaponId: "\u041A\u043B\u0430\u0441\u0441\u0438\u043A\u0430"
       Health: 4
     - SystemConfig:
-        Type: 8
+        Type: 7
         Level: 2
-        IsActive: 0
-        WeaponId: 
+        IsActive: 1
+        WeaponId: "\u0413\u0440\u0430\u043D\u0430\u0442\u043E\u043C\u0451\u0442"
       Health: 4
-    Health: 5
-    Shield: 2
-    Position: {x: 2, y: 3}
-    RedStats: 1
-    GreenStats: 2
-    BlueStats: 3
-    ActionPoints: 2
-    MoveSpeed: 4
-  - Control: 0
-    Rooms:
     - SystemConfig:
-        Type: 1
-        Level: 1
+        Type: 10
+        Level: 2
         IsActive: 1
         WeaponId: 
-      Health: 3
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-        WeaponId: 
       Health: 4
-    Health: 5
-    Shield: 2
-    Position: {x: 4, y: 3}
-    RedStats: 1
-    GreenStats: 2
-    BlueStats: 3
-    ActionPoints: 2
-    MoveSpeed: 4
-  - Control: 0
-    Rooms:
     - SystemConfig:
-        Type: 1
-        Level: 1
+        Type: 9
+        Level: 2
         IsActive: 1
         WeaponId: 
-      Health: 3
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-        WeaponId: 
       Health: 4
-    Health: 5
+    Health: 10
     Shield: 2
-    Position: {x: 8, y: 3}
+    Position: {x: 13, y: 7}
     RedStats: 1
     GreenStats: 2
     BlueStats: 3
     ActionPoints: 2
-    MoveSpeed: 4
-  - Control: 0
-    Rooms:
-    - SystemConfig:
-        Type: 1
-        Level: 1
-        IsActive: 1
-        WeaponId: 
-      Health: 3
-    - SystemConfig:
-        Type: 2
-        Level: 2
-        IsActive: 0
-        WeaponId: 
-      Health: 4
-    Health: 5
-    Shield: 2
-    Position: {x: 5, y: 3}
-    RedStats: 1
-    GreenStats: 2
-    BlueStats: 3
-    ActionPoints: 2
-    MoveSpeed: 4
+    MoveSpeed: 3
   weaponConfigs:
-  - WeaponId: weapon1
-    IsFriendlyFireEnabled: 1
-    UseDistance: 8
+  - WeaponId: "\u041A\u043B\u0430\u0441\u0441\u0438\u043A\u0430"
+    IsFriendlyFireEnabled: 0
+    UseDistance: 2
     WeaponTarget:
       TargetType: 1
-      RoomTargetsSize: {x: 1, y: 2}
-      UnitTargetsCount: 1
+      RoomTargetsSize: {x: 1, y: 1}
+      UnitTargetsCount: 0
       TileTargetsSize: {x: 0, y: 0}
     ProjectileType: 2
-    GripType: 0
+    GripType: 1
     WeaponComponents:
-    - rid: 9092259981470728192
-    - rid: 9092259981470728193
-    - rid: 7207661684300185600
-    - rid: 7207661824468058112
-    - rid: 7207661824468058113
-    WeaponRequirements:
-    - rid: 7207661885864542208
-  - WeaponId: weapon2
-    IsFriendlyFireEnabled: 0
-    UseDistance: 4
-    WeaponTarget:
-      TargetType: 3
-      RoomTargetsSize: {x: 0, y: 0}
-      UnitTargetsCount: 0
-      TileTargetsSize: {x: 2, y: 2}
-    ProjectileType: 0
-    GripType: 0
-    WeaponComponents:
-    - rid: 9092259981470728194
+    - rid: 7207662088975286272
     WeaponRequirements: []
-  - WeaponId: weapon3
+  - WeaponId: "\u041A\u043B\u0430\u0441\u0441\u0438\u043A\u0430 2.0"
+    IsFriendlyFireEnabled: 0
+    UseDistance: 3
+    WeaponTarget:
+      TargetType: 1
+      RoomTargetsSize: {x: 1, y: 1}
+      UnitTargetsCount: 0
+      TileTargetsSize: {x: 0, y: 0}
+    ProjectileType: 2
+    GripType: 2
+    WeaponComponents:
+    - rid: 7207662088975286272
+    WeaponRequirements: []
+  - WeaponId: "\u0412\u0435\u0440\u0442\u0438\u043A\u0430\u043B\u044C"
     IsFriendlyFireEnabled: 0
     UseDistance: 1
     WeaponTarget:
-      TargetType: 2
-      RoomTargetsSize: {x: 0, y: 0}
+      TargetType: 1
+      RoomTargetsSize: {x: 1, y: 4}
       UnitTargetsCount: 0
       TileTargetsSize: {x: 0, y: 0}
-    ProjectileType: 0
-    GripType: 0
+    ProjectileType: 2
+    GripType: 2
     WeaponComponents:
-    - rid: 9092259984142761984
-    - rid: 9092259984142761985
+    - rid: 7207662088975286272
+    WeaponRequirements: []
+  - WeaponId: "\u041E\u0436\u0438\u0434\u0430\u043D\u0438\u0435"
+    IsFriendlyFireEnabled: 0
+    UseDistance: 5
+    WeaponTarget:
+      TargetType: 1
+      RoomTargetsSize: {x: 1, y: 4}
+      UnitTargetsCount: 0
+      TileTargetsSize: {x: 0, y: 0}
+    ProjectileType: 2
+    GripType: 2
+    WeaponComponents:
+    - rid: 7207662088975286272
+    - rid: 7207662088975286273
+    WeaponRequirements:
+    - rid: 7207662088975286274
+  - WeaponId: "\u0413\u0430\u0443\u0441\u0441 \u043F\u0443\u0448\u043A\u0430"
+    IsFriendlyFireEnabled: 1
+    UseDistance: 5
+    WeaponTarget:
+      TargetType: 3
+      RoomTargetsSize: {x: 1, y: 4}
+      UnitTargetsCount: 0
+      TileTargetsSize: {x: 3, y: 5}
+    ProjectileType: 2
+    GripType: 2
+    WeaponComponents:
+    - rid: 7207662088975286272
+    WeaponRequirements: []
+  - WeaponId: "\u0410\u0432\u0430\u043D\u0433\u0430\u0440\u0434"
+    IsFriendlyFireEnabled: 0
+    UseDistance: 1
+    WeaponTarget:
+      TargetType: 0
+      RoomTargetsSize: {x: 1, y: 4}
+      UnitTargetsCount: 0
+      TileTargetsSize: {x: 0, y: 0}
+    ProjectileType: 2
+    GripType: 1
+    WeaponComponents:
+    - rid: 7207662088975286275
+    WeaponRequirements: []
+  - WeaponId: "\u041D\u0430\u0442\u044F\u0436\u0435\u043D\u0438\u0435"
+    IsFriendlyFireEnabled: 0
+    UseDistance: 5
+    WeaponTarget:
+      TargetType: 1
+      RoomTargetsSize: {x: 1, y: 1}
+      UnitTargetsCount: 0
+      TileTargetsSize: {x: 0, y: 0}
+    ProjectileType: 2
+    GripType: 2
+    WeaponComponents:
+    - rid: 7207662088975286276
+    WeaponRequirements: []
+  - WeaponId: "\u0413\u0440\u0430\u043D\u0430\u0442\u043E\u043C\u0451\u0442"
+    IsFriendlyFireEnabled: 1
+    UseDistance: 4
+    WeaponTarget:
+      TargetType: 3
+      RoomTargetsSize: {x: 1, y: 1}
+      UnitTargetsCount: 0
+      TileTargetsSize: {x: 3, y: 3}
+    ProjectileType: 1
+    GripType: 2
+    WeaponComponents:
+    - rid: 7207662088975286277
     WeaponRequirements: []
   references:
     version: 2
     RefIds:
-    - rid: 7207661684300185600
+    - rid: 7207662088975286272
+      type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+      data:
+        DamageAmount: 2
+    - rid: 7207662088975286273
       type: {class: DelayUsageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:
         DelayAmount: 1
-    - rid: 7207661824468058112
+    - rid: 7207662088975286274
+      type: {class: DistanceWeaponRequirementComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+    - rid: 7207662088975286275
       type: {class: AddShieldToSelfWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:
         ShieldAmount: 5
-    - rid: 7207661824468058113
-      type: {class: StunWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+    - rid: 7207662088975286276
+      type: {class: DamageByDistanceComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:
-        StunDuration: 3
-    - rid: 7207661885864542208
-      type: {class: DistanceWeaponRequirementComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
-    - rid: 9092259981470728192
+        InitialDamageAmount: 5
+    - rid: 7207662088975286277
       type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:
-        DamageAmount: 4
-    - rid: 9092259981470728193
-      type: {class: PushWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
-      data:
-        PushDistance: 3
-    - rid: 9092259981470728194
-      type: {class: PushWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
-      data:
-        PushDistance: 1
-    - rid: 9092259984142761984
-      type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
-      data:
-        DamageAmount: 4
-    - rid: 9092259984142761985
-      type: {class: PushWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
-      data:
-        PushDistance: 2
+        DamageAmount: 2
 --- !u!4 &547186784
 Transform:
   m_ObjectHideFlags: 0

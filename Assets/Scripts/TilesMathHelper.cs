@@ -4,27 +4,47 @@ using UnityEngine;
 
 public static class TilesMathHelper
 {
-    private readonly struct LineInfo
+    public readonly struct LineInfo
     {
+        public Vector2 NormalVector => new((float) _a, (float) _b);
+        
         private readonly double _a;
         private readonly double _b;
         private readonly double _c;
 
-        public LineInfo(Vector2 dot1, Vector2 dot2)
+        public static LineInfo BuildFromTwoPoints(Vector2 point1, Vector2 point2)
         {
-            var diffX = dot2.x - dot1.x;
-            var diffY = dot2.y - dot1.y;
+            return new LineInfo(point1, point2, ' ');
+        }
+
+        public static LineInfo BuildFromNormalAndPoint(Vector2 normalVector, Vector2 point)
+        {
+            return new LineInfo(normalVector, point, 0);
+        }
+
+        private LineInfo(Vector2 normalVector, Vector2 point, int _)
+        : this(normalVector.x, normalVector.y, point)
+        { }
+
+        public LineInfo(Vector2 point1, Vector2 point2, char _) : this(
+            point2.x - point1.x,
+            point2.y - point1.y,
+            point1)
+        { }
+
+        private LineInfo(double diffX, double diffY, Vector2 point)
+        {
             if (diffX == 0)
             {
                 _a = 1;
                 _b = 0;
-                _c = -dot1.x;
+                _c = -point.x;
             }
             else
             {
-                _a = diffY;
-                _b = -diffX;
-                _c = -dot1.x * dot2.y + dot2.x * dot1.y;
+                _a = Math.Round(diffY, 6);
+                _b = Math.Round(-diffX, 6);
+                _c = Math.Round(-diffY * point.x + diffX * point.y, 6);
             }
         }
 
@@ -52,7 +72,9 @@ public static class TilesMathHelper
 
         public bool IsParallel(in LineInfo other)
         {
-            return _a == other._a && _b == other._b;
+            var aCft = _a / other._a;
+            var bCft = _b / other._b;
+            return Math.Abs(aCft - bCft) < 0.00001;
         }
 
         public override string ToString()
@@ -62,30 +84,92 @@ public static class TilesMathHelper
     }
 
     private static readonly List<Vector2Int> ResultBuffer = new(100);
-    public static IReadOnlyList<Vector2Int> GetIntersectedTiles(Vector2Int startPos, Vector2Int endPos)
+    public static IReadOnlyList<Vector2Int> GetIntersectedTiles(Vector2Int startPos, Vector2Int endPos,
+        int lineWidth = 0)
     {
         ResultBuffer.Clear();
 
         var diff = endPos - startPos;
-        var line = new LineInfo(startPos, endPos);
+        var line = LineInfo.BuildFromTwoPoints(startPos, endPos);
 
         var stepX = (int)Mathf.Sign(diff.x);
         var stepY = (int)Mathf.Sign(diff.y);
         var borderX = diff.x + stepX;
         var borderY = diff.y + stepY;
+        var lines = GetLinesToProcess(startPos, endPos, lineWidth, line);
+        var processInfo = new ProcessInfo(
+            lines
+        );
         for (int i = 0; i != borderY; i += stepY)
         {
             for (int j = 0; j != borderX; j += stepX)
             {
                 var posToCheck = startPos + new Vector2Int(j, i);
-                if (IsTileIntersected(posToCheck, in line))
-                {
-                    ResultBuffer.Add(posToCheck);
-                }
+                ProcessPosition(processInfo, posToCheck);
             }
         }
 
         return ResultBuffer;
+    }
+
+    private static List<LineInfo> GetLinesToProcess(Vector2Int startPos, Vector2Int endPos, int lineWidth, LineInfo line)
+    {
+        var lines = new List<LineInfo>(lineWidth * 2);
+        if (lineWidth == 0)
+        {
+            lines.Add(line);
+        }
+        else
+        {
+            lines.Add(line);
+            var normalVector = line.NormalVector.normalized;
+
+            const double lenStep = 0.5d;
+            for (var normalLen = lenStep; normalLen <= lineWidth / 2d; normalLen += lenStep)
+            {
+                var currNormalVec = normalVector * (float) normalLen;
+                var lineInfo = GetShiftedLine(startPos, endPos, currNormalVec);
+                lines.Add(lineInfo);
+
+                currNormalVec = normalVector * (float) -normalLen;
+                lineInfo = GetShiftedLine(startPos, endPos, currNormalVec);
+                lines.Add(lineInfo);
+            }
+        }
+
+        return lines;
+    }
+
+    private static LineInfo GetShiftedLine(Vector2Int startPos, Vector2Int endPos, Vector2 shift)
+    {
+        var newStartPos = startPos + shift;
+        var newEndPos = endPos + shift;
+        var lineInfo = LineInfo.BuildFromTwoPoints(newStartPos, newEndPos);
+        return lineInfo;
+    }
+
+    private readonly ref struct ProcessInfo
+    {
+        public readonly List<LineInfo> Lines;
+
+        public ProcessInfo(
+            List<LineInfo> lines
+        )
+        {
+            Lines = lines;
+        }
+    }
+
+    private static void ProcessPosition(in ProcessInfo processInfo, Vector2Int posToCheck)
+    {
+        foreach (var lineInfo in processInfo.Lines)
+        {
+            if (IsTileIntersected(posToCheck, in lineInfo))
+            {
+                ResultBuffer.Add(posToCheck);
+                break;
+            }
+        }
     }
 
     private static bool IsTileIntersected(Vector2Int tilePos, in LineInfo line)
@@ -102,7 +186,7 @@ public static class TilesMathHelper
 
     private static bool IsSegmentIntersected(Vector2 startPos, Vector2 endPos, in LineInfo line)
     {
-        var segmentLine = new LineInfo(startPos, endPos);
+        var segmentLine = LineInfo.BuildFromTwoPoints(startPos, endPos);
         if (!line.TryGetIntersectPoint(segmentLine, out var intersectPoint))
         {
             return false;

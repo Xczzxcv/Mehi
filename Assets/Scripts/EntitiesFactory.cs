@@ -63,11 +63,12 @@ public static class EntitiesFactory
         {
             var roomConfig = mechRoomConfig;
             roomConfig.MechEntity = newMechEntityPacked;
-            BuildMechRoomEntity(world, roomConfig);
+            var newRoomEntity = BuildMechRoomEntity(world, roomConfig);
 
             if (roomConfig.SystemConfig.Type != MechSystemType.None)
             {
-                BuildMechSystemEntity(world, newMechEntityPacked, roomConfig.SystemConfig, weaponConfigs);
+                AddSystemToRoomEntity(newRoomEntity, world, newMechEntityPacked, 
+                    roomConfig.SystemConfig, weaponConfigs);
             }
         }
 
@@ -97,20 +98,19 @@ public static class EntitiesFactory
         public string WeaponId;
     }
 
-    public static EcsPackedEntity BuildMechSystemEntity(EcsWorld world, EcsPackedEntity newMechEntityPacked,
-        MechSystemConfig config, Dictionary<string, WeaponConfig> weaponConfigs)
+    public static void AddSystemToRoomEntity(int mechRoomEntity, EcsWorld world,
+        EcsPackedEntity mechEntityPacked, MechSystemConfig config,
+        Dictionary<string, WeaponConfig> weaponConfigs)
     {
-        var newMechSystemEntity = world.NewEntity();
-        
-        ref var mechSystemComp = ref world.AddComponent<MechSystemComponent>(newMechSystemEntity);
+        ref var mechSystemComp = ref world.AddComponent<MechSystemComponent>(mechRoomEntity);
         mechSystemComp.Type = config.Type;
         mechSystemComp.Level = config.Level;
         mechSystemComp.IsActive = config.IsActive;
-        mechSystemComp.MechEntity = newMechEntityPacked;
+        mechSystemComp.MechEntity = mechEntityPacked;
 
         if (MechSystemComponent.IsWeaponHandlingSystem(mechSystemComp.Type))
         {
-            ref var mechWeaponSlot = ref world.AddComponent<MechWeaponSlotComponent>(newMechSystemEntity);
+            ref var mechWeaponSlot = ref world.AddComponent<MechWeaponSlotComponent>(mechRoomEntity);
 
             var containsWeapon = !config.WeaponId.IsNullOrEmpty();
             if (containsWeapon)
@@ -118,11 +118,9 @@ public static class EntitiesFactory
                 mechWeaponSlot.WeaponId = config.WeaponId;
             
                 var weaponConfig = weaponConfigs[config.WeaponId];
-                BuildWeapon(world, newMechEntityPacked, weaponConfig);
+                BuildWeapon(world, mechEntityPacked, weaponConfig);
             }
         }
-        
-        return world.PackEntity(newMechSystemEntity);
     }
 
     [Serializable]
@@ -133,7 +131,7 @@ public static class EntitiesFactory
         public int Health;
     }
     
-    public static EcsPackedEntity BuildMechRoomEntity(EcsWorld world, MechRoomConfig config)
+    public static int BuildMechRoomEntity(EcsWorld world, MechRoomConfig config)
     {
         var newMechRoomEntity = world.NewEntity();
         
@@ -145,7 +143,7 @@ public static class EntitiesFactory
         healthComp.Health = config.Health;
         healthComp.MaxHealth = config.Health;
 
-        return world.PackEntity(newMechRoomEntity);
+        return newMechRoomEntity;
     }
 
     public static EcsPackedEntity BuildWeapon(EcsWorld world, EcsPackedEntity weaponOwnerEntity, 
