@@ -14,6 +14,11 @@ public class DetectGeneralDeathSystem : EcsRunSystemBase<HealthComponent>
             return;
         }
 
+        if (healthComp.StayAfterDeath)
+        {
+            return;
+        }
+
         Services.BattleManager.ProcessGeneralDeath(entity);
     }
 }

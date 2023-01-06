@@ -913,10 +913,15 @@ MonoBehaviour:
     GripType: 2
     WeaponComponents:
     - rid: 7207662088975286277
+    - rid: 3219130502309216256
     WeaponRequirements: []
   references:
     version: 2
     RefIds:
+    - rid: 3219130502309216256
+      type: {class: StunWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+      data:
+        StunDuration: 1
     - rid: 7207662088975286272
       type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:

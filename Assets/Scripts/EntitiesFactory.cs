@@ -142,6 +142,7 @@ public static class EntitiesFactory
         ref var healthComp = ref world.AddComponent<HealthComponent>(newMechRoomEntity);
         healthComp.Health = config.Health;
         healthComp.MaxHealth = config.Health;
+        healthComp.StayAfterDeath = true;
 
         return newMechRoomEntity;
     }
