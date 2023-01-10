@@ -14,7 +14,7 @@ public class StunEffectUpdateSystem : EcsRunSystemBase<StunEffectComponent>
             return;
         }
 
-        if (!Services.BattleManager.IsUnitTurnPhase(entity))
+        if (!Services.BattleManager.IsEnemyUnitTurnPhase(entity))
         {
             return;
         }

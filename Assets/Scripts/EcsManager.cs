@@ -88,6 +88,7 @@ public class EcsManager : MonoBehaviour
                 new DistanceWeaponRequirementSystem(_environmentServices)
             })
             .Add(new DelayUsageWeaponSystem(_environmentServices))
+            .Add(new VerifyWeaponUsageWeaponSystem(_environmentServices))
             .Add(new AddShieldToSelfWeaponSystem(_environmentServices))
             .Add(new DamageWeaponSystem(_environmentServices))
             .Add(new DamageByDistanceWeaponSystem(_environmentServices))

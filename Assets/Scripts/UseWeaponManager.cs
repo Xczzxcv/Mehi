@@ -138,6 +138,7 @@ public class UseWeaponManager
         var weaponPos = attackerInfo.Position;
         if (!_battleManager.IsValidTileToAttack(_usedWeaponInfo, weaponPos, targetTilePos))
         {
+            Reset();
             return false;
         }
 

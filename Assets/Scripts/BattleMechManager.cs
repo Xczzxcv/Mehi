@@ -325,7 +325,7 @@ public class BattleMechManager
         var unitWeaponIds = GetUnitWeaponIds(unitEntity, _config.World);
         foreach (var weaponId in unitWeaponIds)
         {
-            if (TryGetWeaponInfo(unitEntity, weaponId, _config.World, out var weaponInfo))
+            if (TryGetWeaponInfo(unitEntity, weaponId, out var weaponInfo))
             {
                 weapons.Add(weaponInfo);
             }
@@ -358,8 +358,7 @@ public class BattleMechManager
         return unitWeaponIds;
     }
 
-    private bool TryGetWeaponInfo(int unitEntity, string weaponId, EcsWorld world,
-        out WeaponInfo weaponInfo)
+    private bool TryGetWeaponInfo(int unitEntity, string weaponId, out WeaponInfo weaponInfo)
     {
         if (!UseWeaponOrdersExecutionSystem.TryGetWeaponEntity(weaponId, unitEntity, _config.World,
                 out var weaponEntity))
@@ -369,29 +368,34 @@ public class BattleMechManager
             return false;
         }
 
-        var weaponMainComp = world.GetComponent<WeaponMainComponent>(weaponEntity);
-        weaponInfo = new WeaponInfo
+        weaponInfo = GetWeaponInfo(weaponEntity);
+        return true;
+    }
+
+    public WeaponInfo GetWeaponInfo(int weaponEntity)
+    {
+        var weaponMainComp = _config.World.GetComponent<WeaponMainComponent>(weaponEntity);
+        var weaponInfo = new WeaponInfo
         {
-            WeaponId = weaponId,
+            WeaponId = weaponMainComp.WeaponId,
             IsFriendlyFireEnabled = weaponMainComp.IsFriendlyFireEnabled,
             WeaponTarget = weaponMainComp.TargetConfig,
             UseDistance = weaponMainComp.UseDistance,
             ProjectileType = weaponMainComp.ProjectileType,
             GripType = weaponMainComp.GripType,
-            Cooldown = TryGetWeaponCooldown(weaponEntity, out var cd) 
-                ? cd 
+            Cooldown = TryGetWeaponCooldown(weaponEntity, out var cd)
+                ? cd
                 : null,
-            
+
             Stats = new Dictionary<string, object>()
         };
         weaponInfo.CanUse = GetCanUseWeapon(weaponInfo, weaponEntity);
-        
+
         AddDamageInfo(ref weaponInfo, weaponEntity);
         AddPushInfo(ref weaponInfo, weaponEntity);
         AddStunInfo(ref weaponInfo, weaponEntity);
         AddDelayInfo(ref weaponInfo, weaponEntity);
-        
-        return true;
+        return weaponInfo;
     }
 
     private bool TryGetWeaponCooldown(int weaponEntity, out int cd)

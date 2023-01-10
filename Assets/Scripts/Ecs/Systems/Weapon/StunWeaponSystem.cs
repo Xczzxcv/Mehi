@@ -21,7 +21,9 @@ public class StunWeaponSystem : WeaponSystemBase<StunWeaponComponent>
             }
 
             ref var stunEffectComp = ref stunPool.GetOrAdd(targetMechEntity);
+            stunEffectComp.EffectSource = activeWeapon.WeaponUser;
             stunEffectComp.Duration += stunWeapon.StunDuration;
+            stunEffectComp.AlreadyUpdated = true;
         }
     }
 }

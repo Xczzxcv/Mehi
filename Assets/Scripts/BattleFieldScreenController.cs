@@ -106,14 +106,14 @@ internal class BattleFieldScreenController : MonoBehaviour
                 return;
             }
             
+            selectedUnitViewInfo = SelectedUnitPresenter.ViewInfo.BuildFromBattleInfo(battleUnitInfo);
             if (_useWeaponManager.CanSelectUnitRoomAsTargetForAttack(battleUnitInfo))
             {
-                selectedUnitViewInfo = SelectedUnitPresenter.ViewInfo.BuildEmpty();
+                selectedUnitViewInfo.AsTarget();
                 roomViews = RoomListPresenter.ViewInfo.BuildFromBattleInfo(battleUnitInfo, true);
             }
             else
             {
-                selectedUnitViewInfo = SelectedUnitPresenter.ViewInfo.BuildFromBattleInfo(battleUnitInfo);
                 roomViews = RoomListPresenter.ViewInfo.BuildFromBattleInfo(battleUnitInfo, false);
             }
         }

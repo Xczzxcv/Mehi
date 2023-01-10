@@ -39,8 +39,26 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
             return;
         }
         
+        ModifyDamage(ref mechDamageEvent);
+        
         RoomDamageApply(mechDamageEvent);
         MechDamageApply(mechDamageEvent, ref mechHealthComp, entity);
+    }
+
+    private void ModifyDamage(ref MechDamageEvent mechDamageEvent)
+    {
+        if (mechDamageEvent.DamageTargetRoom.TryUnpack(World, out var mechRoomEntity))
+        {
+            ref var roomHpComp = ref World.GetComponent<HealthComponent>(mechRoomEntity);
+            if (roomHpComp.Health <= 0)
+            {
+                mechDamageEvent.DamageAmount *= 2;
+            }
+        }
+        else
+        {
+            mechDamageEvent.DamageAmount = 0;
+        }
     }
 
     private void MechDamageApply(MechDamageEvent mechDmgEvent, ref MechHealthComponent mechHpComp,

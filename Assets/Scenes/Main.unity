@@ -599,7 +599,7 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
-    Health: 10
+    Health: 8
     Shield: 2
     Position: {x: 0, y: 5}
     RedStats: 1
@@ -639,7 +639,7 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
-    Health: 5
+    Health: 8
     Shield: 2
     Position: {x: 1, y: 7}
     RedStats: 1
@@ -679,7 +679,7 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
-    Health: 10
+    Health: 8
     Shield: 2
     Position: {x: 0, y: 9}
     RedStats: 1
@@ -719,7 +719,7 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
-    Health: 10
+    Health: 8
     Shield: 2
     Position: {x: 13, y: 5}
     RedStats: 1
@@ -759,7 +759,7 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
-    Health: 5
+    Health: 8
     Shield: 2
     Position: {x: 12, y: 6}
     RedStats: 1
@@ -799,7 +799,7 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
-    Health: 10
+    Health: 8
     Shield: 2
     Position: {x: 13, y: 7}
     RedStats: 1

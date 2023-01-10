@@ -102,6 +102,14 @@ public class SelectedUnitPresenter : UIBehaviour
         {
             return new List<SystemPresenter.ViewInfo>();
         }
+
+        public void AsTarget()
+        {
+            CanMove = false;
+            CanUseWeapons = false;
+            CanRepairSelf = false;
+            CanConfirmTargets = true;
+        }
     }
 
     public event Action<int> RepairBtnClick;

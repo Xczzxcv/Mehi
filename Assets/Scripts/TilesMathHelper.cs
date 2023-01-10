@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 public static class TilesMathHelper
@@ -72,14 +73,68 @@ public static class TilesMathHelper
 
         public bool IsParallel(in LineInfo other)
         {
-            var aCft = _a / other._a;
-            var bCft = _b / other._b;
-            return Math.Abs(aCft - bCft) < 0.00001;
+            double? aCft;
+            if (other._a == 0)
+            {
+                if (_a == 0)
+                {
+                    aCft = null;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                aCft = _a / other._a;
+            }
+
+            double? bCft;
+            if (other._b == 0)
+            {
+                if (_b == 0)
+                {
+                    bCft = null;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                bCft = _b / other._b;
+            }
+            
+            double diffValue;
+            if (aCft.HasValue && bCft.HasValue)
+            {
+                diffValue = aCft.Value - bCft.Value;
+            }
+            else if (aCft.HasValue && !bCft.HasValue)
+            {
+                diffValue = aCft.Value - 1;
+            }
+            else if (!aCft.HasValue && bCft.HasValue)
+            {
+                diffValue = bCft.Value - 1;
+            }
+            else
+            {
+                return true;
+            }
+
+            const double tolerance = 0.00001;
+            return Math.Abs(diffValue) < tolerance;
         }
 
         public override string ToString()
         {
-            return $"{_a}x + {_b}y + {_c} = 0";
+            return $"{_a.ToString(CultureInfo.InvariantCulture)}x " +
+                   $"+ {_b.ToString(CultureInfo.InvariantCulture)}y " +
+                   $"+ {_c.ToString(CultureInfo.InvariantCulture)} " +
+                   $"= 0";
         }
     }
 

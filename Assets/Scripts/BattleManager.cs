@@ -108,13 +108,27 @@ public class BattleManager
     public bool IsUnitTurnPhase(int unitEntity)
     {
         var unitControlledBy = BattleMechManager.GetUnitControl(unitEntity, _config.World);
-        var isUnitTurnPhase =
-            unitControlledBy == UnitControl.Player
-            && TurnPhase == TurnsManager.TurnPhase.PlayerMove
-            || unitControlledBy == UnitControl.AI
-            && TurnPhase == TurnsManager.TurnPhase.AIMove;
-
-        return isUnitTurnPhase;
+        switch (unitControlledBy)
+        {
+            case UnitControl.Player when TurnPhase == TurnsManager.TurnPhase.PlayerMove:
+            case UnitControl.AI when TurnPhase == TurnsManager.TurnPhase.AIMove:
+                return true;
+            default:
+                return false;
+        }
+    }
+    
+    public bool IsEnemyUnitTurnPhase(int unitEntity)
+    {
+        var unitControlledBy = BattleMechManager.GetUnitControl(unitEntity, _config.World);
+        switch (unitControlledBy)
+        {
+            case UnitControl.Player when TurnPhase == TurnsManager.TurnPhase.AIMove:
+            case UnitControl.AI when TurnPhase == TurnsManager.TurnPhase.PlayerMove:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public UnitControl GetUnitControl(int unitEntity)
@@ -137,5 +151,10 @@ public class BattleManager
         Vector2Int posToCheck)
     {
         return _fieldManager.IsValidTileToAttack(weaponInfo, weaponPos, posToCheck);
+    }
+
+    public BattleMechManager.WeaponInfo GetWeaponInfo(int weaponEntity)
+    {
+        return _mechManager.GetWeaponInfo(weaponEntity);
     }
 }
