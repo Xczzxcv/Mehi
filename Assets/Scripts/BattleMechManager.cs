@@ -183,6 +183,33 @@ public class BattleMechManager
         return CanMechMove(mechSystems);
     }
 
+    private static MechSystemComponent _defaultValue;
+    public static ref MechSystemComponent TryGetFirstMechSystemOfType(int unitEntity, 
+        MechSystemType systemType, EcsWorld world, out bool result)
+    {
+        var systemPool = world.GetPool<MechSystemComponent>();
+        var systemEntities = GetSystemEntities(unitEntity, world);
+        foreach (var systemEntity in systemEntities)
+        {
+            if (!systemPool.Has(systemEntity))
+            {
+                continue;
+            }
+
+            ref var mechSystem = ref systemPool.Get(systemEntity);
+            if (mechSystem.Type != systemType)
+            {
+                continue;
+            }
+
+            result = true;
+            return ref mechSystem;
+        }
+
+        result = false;
+        return ref _defaultValue;
+    }
+
     public static List<MechSystemComponent> GetMechSystems(int unitEntity, EcsWorld world)
     {
         var systemPool = world.GetPool<MechSystemComponent>();
@@ -389,7 +416,7 @@ public class BattleMechManager
 
             Stats = new Dictionary<string, object>()
         };
-        weaponInfo.CanUse = GetCanUseWeapon(weaponInfo, weaponEntity);
+        weaponInfo.CanUse = GetCanUseWeapon(weaponInfo);
 
         AddDamageInfo(ref weaponInfo, weaponEntity);
         AddPushInfo(ref weaponInfo, weaponEntity);
@@ -400,20 +427,19 @@ public class BattleMechManager
 
     private bool TryGetWeaponCooldown(int weaponEntity, out int cd)
     {
-        var cooldownPool = _config.World.GetPool<HasCooldownComponent>();
+        var cooldownPool = _config.World.GetPool<CooldownComponent>();
         if (!cooldownPool.Has(weaponEntity))
         {
             cd = default;
             return false;
         }
 
-        var weaponCdComp = cooldownPool.Get(weaponEntity);
-        var cooldownLastUntilTurn = weaponCdComp.LastUseTurn + weaponCdComp.Cooldown;
-        cd = Math.Max(0, _config.TurnsManager.TurnIndex - cooldownLastUntilTurn);
+        var cdComponent = cooldownPool.Get(weaponEntity);
+        cd = Math.Max(0, cdComponent.LastsUntilTurn - 1 - _config.TurnsManager.TurnIndex);
         return true;
     }
 
-    private bool GetCanUseWeapon(WeaponInfo weaponInfo, int weaponEntity)
+    private bool GetCanUseWeapon(WeaponInfo weaponInfo)
     {
         return !weaponInfo.Cooldown.HasValue || weaponInfo.Cooldown.Value <= 0;
     }
@@ -502,9 +528,12 @@ public class BattleMechManager
 
     public static bool CanMechMove(List<MechSystemComponent> mechSystems)
     {
-        var leftLegsCount = mechSystems.Count(mechSystem => mechSystem.Type == MechSystemType.LeftLegSystem);
-        var rightLegsCount = mechSystems.Count(mechSystem => mechSystem.Type == MechSystemType.RightLegSystem);
-        
-        return leftLegsCount > 0 && rightLegsCount > 0;
+        var leftLegs = mechSystems.Where(
+            mechSystem => mechSystem.Type == MechSystemType.LeftLegSystem);
+        var rightLegs = mechSystems.Where(
+            mechSystem => mechSystem.Type == MechSystemType.RightLegSystem);
+
+        return leftLegs.Any(legComponent => legComponent.IsActive)
+               && rightLegs.Any(legComponent => legComponent.IsActive);
     }
 }

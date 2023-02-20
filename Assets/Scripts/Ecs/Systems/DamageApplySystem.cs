@@ -42,6 +42,7 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
         ModifyDamage(ref mechDamageEvent);
         
         RoomDamageApply(mechDamageEvent);
+        UpdateRoomSystem(mechDamageEvent);
         MechDamageApply(mechDamageEvent, ref mechHealthComp, entity);
     }
 
@@ -59,6 +60,45 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
         {
             mechDamageEvent.DamageAmount = 0;
         }
+    }
+
+    private void RoomDamageApply(MechDamageEvent mechDamageEvent)
+    {
+        if (!mechDamageEvent.DamageTargetRoom.TryUnpack(World, out var mechRoomEntity))
+        {
+            Debug.LogError("Has no room already");
+            return;
+        }
+
+        ref var roomHealthComp = ref World.GetComponent<HealthComponent>(mechRoomEntity);
+        roomHealthComp.Health = Math.Max(roomHealthComp.Health - mechDamageEvent.DamageAmount, 0);
+    }
+
+    private void UpdateRoomSystem(MechDamageEvent mechDamageEvent)
+    {
+        if (!mechDamageEvent.DamageTargetRoom.TryUnpack(World, out var mechRoomEntity))
+        {
+            Debug.LogError("Has no room already");
+            return;
+        }
+
+        ref var roomMechComp = ref World.GetComponent<MechRoomComponent>(mechRoomEntity);
+        if (!roomMechComp.MechEntity.TryUnpack(World, out var mechEntity))
+        {
+            Debug.LogError("Has no mech entity already");
+            return;
+        }
+
+        ref var mechSystem = ref BattleMechManager.TryGetFirstMechSystemOfType(mechEntity,
+            roomMechComp.SystemType, World, out var result);
+        if (!result)
+        {
+            Debug.LogError($"Mech {mechEntity} has no such system as {roomMechComp.SystemType}");
+            return;
+        }
+        
+        ref var roomHealthComp = ref World.GetComponent<HealthComponent>(mechRoomEntity);
+        mechSystem.IsActive = roomHealthComp.Health > 0;
     }
 
     private void MechDamageApply(MechDamageEvent mechDmgEvent, ref MechHealthComponent mechHpComp,
@@ -88,19 +128,6 @@ public class DamageApplySystem : EcsRunSystemBase2<MechHealthComponent, MechDama
 
         mechDmgEvent.DamageAmount -= dmgTempShieldAbsorb;
         tempShield.Amount -= dmgTempShieldPierce;
-    }
-
-    private void RoomDamageApply(MechDamageEvent mechDamageEvent)
-    {
-        if (mechDamageEvent.DamageTargetRoom.TryUnpack(World, out var mechRoomEntity))
-        {
-            ref var roomHpComp = ref World.GetComponent<HealthComponent>(mechRoomEntity);
-            roomHpComp.Health = Math.Max(roomHpComp.Health - mechDamageEvent.DamageAmount, 0);
-        }
-        else
-        {
-            Debug.LogError("Has no room already");
-        }
     }
 
     public static bool TryAddDamageEvent(MechDamageEvent damageEvent, EcsPackedEntity mechEntityPacked,

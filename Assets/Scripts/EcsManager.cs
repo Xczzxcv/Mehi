@@ -50,6 +50,7 @@ public class EcsManager : MonoBehaviour
             .Add(new RefreshActionPointsSystem(_environmentServices))
             .Add(new MechRoomBurningDamageApplySystem(_environmentServices))
             .Add(new StunEffectResetUpdateSystem(_environmentServices))
+            .Add(new CooldownUpdateSystem(_environmentServices))
 #if UNITY_EDITOR
             .Add(new EcsWorldDebugSystem())
 #endif
@@ -94,6 +95,7 @@ public class EcsManager : MonoBehaviour
             .Add(new DamageByDistanceWeaponSystem(_environmentServices))
             .Add(new PushWeaponSystem(_environmentServices))
             .Add(new StunWeaponSystem(_environmentServices))
+            .Add(new SetupCooldownWeaponSystem(_environmentServices))
             .DelHere<ActiveWeaponComponent>()
             .Add(new DamageApplySystem(_environmentServices))
             .Add(new DetectMechDeathSystem(_environmentServices))

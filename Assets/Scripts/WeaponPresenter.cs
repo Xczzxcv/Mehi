@@ -48,7 +48,7 @@ public class WeaponPresenter : UIBehaviour
         }
 
         var cdText = weaponInfo.Cooldown.HasValue 
-            ? $"CD: {weaponInfo.Cooldown.Value}\n:" 
+            ? $"CD: {weaponInfo.Cooldown.Value}\n" 
             : string.Empty;
         return $"{cdText}Stats:\n{statsText}";
     }

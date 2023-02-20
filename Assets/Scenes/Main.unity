@@ -599,6 +599,18 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 0
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
     Health: 8
     Shield: 2
     Position: {x: 0, y: 5}
@@ -635,6 +647,18 @@ MonoBehaviour:
       Health: 4
     - SystemConfig:
         Type: 9
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 0
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
         Level: 2
         IsActive: 1
         WeaponId: 
@@ -679,6 +703,18 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 0
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
     Health: 8
     Shield: 2
     Position: {x: 0, y: 9}
@@ -715,6 +751,18 @@ MonoBehaviour:
       Health: 4
     - SystemConfig:
         Type: 9
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 0
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
         Level: 2
         IsActive: 1
         WeaponId: 
@@ -759,6 +807,18 @@ MonoBehaviour:
         IsActive: 1
         WeaponId: 
       Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 0
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
     Health: 8
     Shield: 2
     Position: {x: 12, y: 6}
@@ -795,6 +855,18 @@ MonoBehaviour:
       Health: 4
     - SystemConfig:
         Type: 9
+        Level: 2
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
+        Level: 0
+        IsActive: 1
+        WeaponId: 
+      Health: 4
+    - SystemConfig:
+        Type: 0
         Level: 2
         IsActive: 1
         WeaponId: 
@@ -914,6 +986,7 @@ MonoBehaviour:
     WeaponComponents:
     - rid: 7207662088975286277
     - rid: 3219130502309216256
+    - rid: 8293451742806540289
     WeaponRequirements: []
   references:
     version: 2
@@ -944,6 +1017,10 @@ MonoBehaviour:
       type: {class: DamageWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
       data:
         DamageAmount: 2
+    - rid: 8293451742806540289
+      type: {class: CooldownWeaponComponent, ns: Ecs.Components.Weapon, asm: Assembly-CSharp}
+      data:
+        Cooldown: 2
 --- !u!4 &547186784
 Transform:
   m_ObjectHideFlags: 0

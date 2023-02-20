@@ -4,8 +4,7 @@ using Ext.LeoEcs;
 
 namespace Ecs.Systems.Weapon
 {
-public abstract class WeaponSystemBase :
-    EcsRunSystemBase<ActiveWeaponComponent>, IWeaponSystem
+public abstract class WeaponSystemBase : EcsRunSystemBase<ActiveWeaponComponent>, IWeaponSystem
 {
     protected WeaponSystemBase(EnvironmentServices services) : base(services)
     { }
