@@ -167,14 +167,12 @@ public class BattleMechManager
 
     private bool GetUnitCanMove(int unitEntity)
     {
-        var unitActionPoints = GetUnitActionPoints(unitEntity);
-        if (unitActionPoints < MoveOrdersExecutionSystem.MOVE_UNIT_ACTION_COST 
-            || !IsUnitTurnNow(unitEntity))
+        if (!CanDoAnyAction(unitEntity))
         {
             return false;
         }
 
-        if (_config.World.HasComponent<StunEffectComponent>(unitEntity))
+        if (!CheckUnitActionPoints(unitEntity, Constants.ActionCosts.MOVE_UNIT_ACTION_COST))
         {
             return false;
         }
@@ -210,11 +208,13 @@ public class BattleMechManager
         return ref _defaultValue;
     }
 
-    public static List<MechSystemComponent> GetMechSystems(int unitEntity, EcsWorld world)
+    
+    private static readonly List<MechSystemComponent> MechSystemsCache = new();
+    public static IReadOnlyCollection<MechSystemComponent> GetMechSystems(int unitEntity, EcsWorld world)
     {
         var systemPool = world.GetPool<MechSystemComponent>();
         var systemEntities = GetSystemEntities(unitEntity, world);
-        var mechSystems = new List<MechSystemComponent>();
+        MechSystemsCache.Clear();
         foreach (var systemEntity in systemEntities)
         {
             if (!systemPool.Has(systemEntity))
@@ -223,32 +223,62 @@ public class BattleMechManager
             }
 
             var mechSystem = systemPool.Get(systemEntity);
-            mechSystems.Add(mechSystem);
+            MechSystemsCache.Add(mechSystem);
         }
 
-        return mechSystems;
+        return MechSystemsCache;
     }
 
     private bool GetUnitCanUseWeapons(int unitEntity)
     {
-        if (_config.World.HasComponent<StunEffectComponent>(unitEntity))
+        if (!CanDoAnyAction(unitEntity))
         {
             return false;
         }
 
-        var unitActionPoints = GetUnitActionPoints(unitEntity);
-        return unitActionPoints >= UseWeaponOrdersExecutionSystem.USE_WEAPON_ACTION_COST && IsUnitTurnNow(unitEntity);
+        if (!CheckUnitActionPoints(unitEntity, Constants.ActionCosts.USE_WEAPON_ACTION_COST))
+        {
+            return false;
+        }
+
+
+        return true;
     }
 
     private bool GetUnitCanRepairSelf(int unitEntity)
     {
+        if (!CanDoAnyAction(unitEntity))
+        {
+            return false;
+        }
+
+        if (!CheckUnitActionPoints(unitEntity, Constants.ActionCosts.REPAIR_ALL_ROOMS_ACTION_COST))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool CanDoAnyAction(int unitEntity)
+    {
+        if (!IsUnitTurnNow(unitEntity))
+        {
+            return false;
+        }
+
         if (_config.World.HasComponent<StunEffectComponent>(unitEntity))
         {
             return false;
         }
-        
+
+        return true;
+    }
+
+    private bool CheckUnitActionPoints(int unitEntity, int actionCost)
+    {
         var unitActionPoints = GetUnitActionPoints(unitEntity);
-        return unitActionPoints >= RepairSelfOrderExecutionSystem.REPAIR_ALL_ROOMS_ACTION_COST && IsUnitTurnNow(unitEntity);
+        return unitActionPoints >= actionCost;
     }
 
     private bool IsUnitTurnNow(int unitEntity)
@@ -314,12 +344,13 @@ public class BattleMechManager
 
         return roomEntities;
     }
-    
-    public static List<int> GetSystemEntities(int unitEntity, EcsWorld world)
+
+    private static readonly List<int> SystemEntitiesCache = new();
+    public static IReadOnlyCollection<int> GetSystemEntities(int unitEntity, EcsWorld world)
     {
         var systemsFilter = world.Filter<MechSystemComponent>().End();
         var systemPool = world.GetPool<MechSystemComponent>();
-        var systemEntities = new List<int>();
+        SystemEntitiesCache.Clear();        
         foreach (var systemEntity in systemsFilter)
         {
             ref var systemComp = ref systemPool.Get(systemEntity);
@@ -333,10 +364,10 @@ public class BattleMechManager
                 continue;
             }
 
-            systemEntities.Add(systemEntity);
+            SystemEntitiesCache.Add(systemEntity);
         }
 
-        return systemEntities;
+        return SystemEntitiesCache;
     }
 
     private List<WeaponInfo> GetUnitWeapons(int unitEntity)
@@ -416,7 +447,7 @@ public class BattleMechManager
 
             Stats = new Dictionary<string, object>()
         };
-        weaponInfo.CanUse = GetCanUseWeapon(weaponInfo);
+        weaponInfo.CanUse = GetCanUseWeapon(weaponInfo, weaponEntity);
 
         AddDamageInfo(ref weaponInfo, weaponEntity);
         AddPushInfo(ref weaponInfo, weaponEntity);
@@ -439,9 +470,25 @@ public class BattleMechManager
         return true;
     }
 
-    private bool GetCanUseWeapon(WeaponInfo weaponInfo)
+    private bool GetCanUseWeapon(WeaponInfo weaponInfo, int weaponEntity)
     {
-        return !weaponInfo.Cooldown.HasValue || weaponInfo.Cooldown.Value <= 0;
+        if (weaponInfo.Cooldown.HasValue && weaponInfo.Cooldown.Value > 0)
+        {
+            return false;
+        }
+        
+        if (!TryGetWeaponOwner(weaponEntity, out var weaponOwnerEntity))
+        {
+            return false;
+        }
+
+        var mechSystems = GetMechSystems(weaponOwnerEntity, _config.World);
+        return weaponInfo.GripType switch
+        {
+            WeaponGripType.OneHanded => CanMechUseOneHandedWeapon(mechSystems),
+            WeaponGripType.TwoHanded => CanMechUseTwoHandedWeapon(mechSystems),
+            _ => throw new ArgumentException($"Unknown grip type for '{weaponInfo.WeaponId}'"),
+        };
     }
 
     private void AddDamageInfo(ref WeaponInfo weaponInfo, int weaponEntity)
@@ -498,6 +545,12 @@ public class BattleMechManager
         return false;
     }
 
+    public bool TryGetWeaponOwner(int weaponEntity, out int weaponOwnerEntity)
+    {
+        ref var weaponMainComp = ref _config.World.GetComponent<WeaponMainComponent>(weaponEntity);
+        return weaponMainComp.OwnerUnitEntity.TryUnpack(_config.World, out weaponOwnerEntity);
+    }
+
     public void BuildMoveOrder(int unitEntity, Graph.Path path)
     {
         var moveSpeed = GetUnitMoveSpeed(unitEntity);
@@ -526,7 +579,7 @@ public class BattleMechManager
         return attackerSide != victimSide;
     }
 
-    public static bool CanMechMove(List<MechSystemComponent> mechSystems)
+    public static bool CanMechMove(IReadOnlyCollection<MechSystemComponent> mechSystems)
     {
         var leftLegs = mechSystems.Where(
             mechSystem => mechSystem.Type == MechSystemType.LeftLegSystem);
@@ -535,5 +588,24 @@ public class BattleMechManager
 
         return leftLegs.Any(legComponent => legComponent.IsActive)
                && rightLegs.Any(legComponent => legComponent.IsActive);
+    }
+
+    public static bool CanMechUseOneHandedWeapon(IReadOnlyCollection<MechSystemComponent> mechSystems)
+    {
+        var hands = mechSystems.Where(mechSystem =>
+            MechSystemComponent.IsWeaponHandlingSystem(mechSystem.Type));
+
+        return hands.Any(handComponent => handComponent.IsActive);
+    }
+
+    public static bool CanMechUseTwoHandedWeapon(IReadOnlyCollection<MechSystemComponent> mechSystems)
+    {
+        var leftHands = mechSystems.Where(
+            mechSystem => mechSystem.Type == MechSystemType.LeftHandSystem);
+        var rightHands = mechSystems.Where(
+            mechSystem => mechSystem.Type == MechSystemType.RightHandSystem);
+
+        return leftHands.Any(legComponent => legComponent.IsActive)
+               && rightHands.Any(legComponent => legComponent.IsActive);
     }
 }

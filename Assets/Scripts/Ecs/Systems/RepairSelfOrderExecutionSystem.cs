@@ -5,8 +5,6 @@ namespace Ecs.Systems
 {
 public class RepairSelfOrderExecutionSystem : EcsRunSystemBase2<RepairSelfOrderComponent, ActiveCreatureComponent>
 {
-    public const int REPAIR_ALL_ROOMS_ACTION_COST = 1;
-
     public RepairSelfOrderExecutionSystem(EnvironmentServices services) : base(services)
     { }
 
@@ -22,7 +20,7 @@ public class RepairSelfOrderExecutionSystem : EcsRunSystemBase2<RepairSelfOrderC
             roomHp.Health = roomHp.MaxHealth;
         }
 
-        activeCreature.ActionPoints -= REPAIR_ALL_ROOMS_ACTION_COST;
+        activeCreature.ActionPoints -= Constants.ActionCosts.REPAIR_ALL_ROOMS_ACTION_COST;
         GlobalEventManager.BattleField.UnitUpdated.HappenedWith(entity);
     }
 }

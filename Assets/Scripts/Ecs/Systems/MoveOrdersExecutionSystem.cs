@@ -9,8 +9,6 @@ namespace Ecs.Systems
 public class MoveOrdersExecutionSystem : EcsRunSystemBase4<MoveOrderComponent, MoveCreatureComponent, 
     PositionComponent, ActiveCreatureComponent>
 {
-    public const int MOVE_UNIT_ACTION_COST = 1;
-
     public MoveOrdersExecutionSystem(EnvironmentServices services) : base(services)
     { }
 
@@ -37,7 +35,7 @@ public class MoveOrdersExecutionSystem : EcsRunSystemBase4<MoveOrderComponent, M
             moveCreatureComp.Path.Enqueue(moveCreaturePathPart);
         }
 
-        activeCreatureComp.ActionPoints -= MOVE_UNIT_ACTION_COST;
+        activeCreatureComp.ActionPoints -= Constants.ActionCosts.MOVE_UNIT_ACTION_COST;
     }
 }
 }
