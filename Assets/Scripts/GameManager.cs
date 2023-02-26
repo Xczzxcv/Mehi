@@ -9,9 +9,7 @@ public partial class GameManager : MonoBehaviour
     [SerializeField] private BattleFieldController battleFieldController;
     [SerializeField] private UIManager uiManager;
     [Space]
-    [SerializeField] private GameConfig gameConfig;
-    [SerializeField] private List<EntitiesFactory.MechConfig> mechConfigs;
-    [SerializeField] private List<WeaponConfig> weaponConfigs;
+    [SerializeField] private GameSetup gameSetup;
 
     [Serializable]
     public class GameConfig
@@ -22,7 +20,7 @@ public partial class GameManager : MonoBehaviour
     }
 
     public BattleManager BattleManager { get; private set; }
-    public GameConfig Config => gameConfig;
+    public GameConfig Config => gameSetup.gameConfig;
     public readonly Dictionary<string, WeaponConfig> WeaponConfigs = new();
 
     private void Start()
@@ -30,9 +28,9 @@ public partial class GameManager : MonoBehaviour
         BattleManager = new BattleManager(new BattleManager.Config
         {
             World = ecsManager.World,
-            FieldSize = gameConfig.BattleFieldSize,
-            FieldConfig = gameConfig.BattleFieldConfig,
-            TileConfigs = gameConfig.TileConfigs,
+            FieldSize = gameSetup.gameConfig.BattleFieldSize,
+            FieldConfig = gameSetup.gameConfig.BattleFieldConfig,
+            TileConfigs = gameSetup.gameConfig.TileConfigs,
         });
 
         battleFieldController.Init();
@@ -46,7 +44,7 @@ public partial class GameManager : MonoBehaviour
             : string.Empty;
         Debug.Log($"hasPath: {hasPath} path: {pathString}");
         
-        foreach (var weaponConfig in weaponConfigs)
+        foreach (var weaponConfig in gameSetup.weaponConfigs)
         {
             WeaponConfigs.Add(weaponConfig.WeaponId, weaponConfig);
         }
@@ -65,7 +63,7 @@ public partial class GameManager : MonoBehaviour
 
     private void BuildEcsEntities()
     {
-        foreach (var mechConfig in mechConfigs)
+        foreach (var mechConfig in gameSetup.mechConfigs)
         {
             EntitiesFactory.BuildMechEntity(ecsManager.World, mechConfig, WeaponConfigs);
         }
